@@ -94,7 +94,23 @@ export default function QuestPage() {
     localStorage.setItem(`quest_${id}_code`, value);
   };
 
-  const handleRunQuery = async () => {
+  // ACTION 1: Just run the code to see what it outputs (No grading)
+  const handleRunCode = async () => {
+    if (!db || !quest) return;
+    setQueryError(null);
+    setQueryResult(null);
+    setIsPassed(false);
+
+    try {
+      const result = await db.query(userCode);
+      setQueryResult(result.rows as DBRow[]);
+    } catch (err: unknown) {
+      if (err instanceof Error) setQueryError(err.message);
+    }
+  };
+
+  // ACTION 2: Run the code AND grade it against the expected output
+  const handleSubmitAnswer = async () => {
     if (!db || !quest) return;
     setQueryError(null);
     setQueryResult(null);
@@ -104,13 +120,33 @@ export default function QuestPage() {
       const result = await db.query(userCode);
       setQueryResult(result.rows as DBRow[]);
 
-      const expected = typeof quest.expected_output === 'string' 
+      // Strictly type the expected array as DBRow[]
+      const expected = (typeof quest.expected_output === 'string' 
         ? JSON.parse(quest.expected_output) 
-        : quest.expected_output;
+        : quest.expected_output) as DBRow[];
 
-      if (JSON.stringify(result.rows) === JSON.stringify(expected)) {
+      // 1. Instantly fail if row counts don't match
+      if (result.rows.length !== expected.length) {
+        setQueryError(`Row count mismatch: Expected ${expected.length} rows, but got ${result.rows.length}.`);
+        return;
+      }
+
+      // 2. Normalize arrays (Strictly using DBRow instead of 'any')
+      const normalize = (arr: DBRow[]) => arr.map(row => 
+        Object.keys(row).sort().reduce((obj, key) => {
+          obj[key] = row[key];
+          return obj;
+        }, {} as DBRow)
+      ).map(row => JSON.stringify(row)).sort();
+
+      const actualNormalized = normalize(result.rows as DBRow[]);
+      const expectedNormalized = normalize(expected);
+
+      // 3. Compare the normalized data
+      if (JSON.stringify(actualNormalized) === JSON.stringify(expectedNormalized)) {
         setIsPassed(true);
         setAlreadySolved(true);
+        
         const { data: authData } = await supabase.auth.getSession();
         if (authData.session) {
           await supabase.from('user_progress').upsert({
@@ -119,6 +155,10 @@ export default function QuestPage() {
             is_completed: true
           }, { onConflict: 'user_id, quest_id' });
         }
+      } else {
+        setQueryError("Output does not match the expected result. Look closely at the required columns and rows!");
+        console.log("Expected Data:", expectedNormalized);
+        console.log("Actual Data:", actualNormalized);
       }
     } catch (err: unknown) {
       if (err instanceof Error) setQueryError(err.message);
@@ -166,7 +206,20 @@ export default function QuestPage() {
           <div className="bg-[#141620] border border-slate-800 rounded-xl overflow-hidden h-[350px] flex flex-col">
             <div className="bg-slate-800/50 px-4 py-3 flex justify-between items-center border-b border-slate-800">
               <span className="text-xs font-bold text-slate-400 uppercase">Editor</span>
-              <button onClick={handleRunQuery} className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-bold px-5 py-2 rounded-md transition-all">Run Code</button>
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleRunCode} 
+                  className="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-4 py-2 rounded-md transition-all"
+                >
+                  Run Code
+                </button>
+                <button 
+                  onClick={handleSubmitAnswer} 
+                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-bold px-5 py-2 rounded-md transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                >
+                  Submit Answer
+                </button>
+              </div>
             </div>
             <CodeMirror value={userCode} height="100%" theme="dark" extensions={[sql()]} onChange={handleCodeChange} className="text-sm font-mono flex-1" />
           </div>
@@ -175,15 +228,15 @@ export default function QuestPage() {
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xs font-bold text-slate-500 uppercase">Output</h2>
               {isPassed && (
-                <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/30 px-4 py-2 rounded-lg">
+                <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/30 px-4 py-2 rounded-lg z-10">
                   <span className="text-emerald-400 font-black">QUEST COMPLETE</span>
                   <button onClick={() => navigate('/home')} className="bg-emerald-500 text-slate-900 text-xs font-bold px-4 py-2 rounded">Map ➔</button>
                 </div>
               )}
             </div>
             <div className="flex-1 overflow-auto">
-              {queryError && <div className="text-red-400 font-mono text-sm">ERROR: {queryError}</div>}
-              {queryResult && !queryError && (
+              {queryError && <div className="text-red-400 font-mono text-sm mb-4">ERROR: {queryError}</div>}
+              {queryResult && (
                 <table className="w-full text-left text-xs border border-slate-700/50">
                   <thead className="bg-slate-900/80 text-slate-500">
                     <tr>{queryResult.length > 0 && Object.keys(queryResult[0]).map(c => <th key={c} className="px-4 py-2">{c}</th>)}</tr>
@@ -192,6 +245,9 @@ export default function QuestPage() {
                     {queryResult.map((r, i) => <tr key={i}>{Object.values(r).map((v, j) => <td key={j} className="px-4 py-2 text-slate-300 font-mono">{String(v)}</td>)}</tr>)}
                   </tbody>
                 </table>
+              )}
+              {queryResult && queryResult.length === 0 && !queryError && (
+                 <div className="text-slate-500 italic text-sm mt-4">Query executed successfully, but returned 0 rows.</div>
               )}
             </div>
           </div>
