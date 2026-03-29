@@ -14,8 +14,11 @@ interface Quest {
   expected_output: string | Record<string, unknown>[]; 
 }
 
-type DBRow = Record<string, string | number | boolean | null>;
+// Break out the allowed values into their own type
+type DBValue = string | number | boolean | null;
 
+// Use that type for your rows
+type DBRow = Record<string, DBValue>;
 export default function QuestPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -94,6 +97,41 @@ export default function QuestPage() {
     localStorage.setItem(`quest_${id}_code`, value);
   };
 
+  // 🌟 NEW HELPER: Executes query in array mode and safely renames duplicate columns
+  // 🌟 NEW HELPER: Executes query in array mode and safely renames duplicate columns
+  const executeAndDeduplicate = async (query: string): Promise<DBRow[]> => {
+    if (!db) throw new Error("Database not initialized");
+    
+    // Request arrays instead of objects to prevent JS key collisions
+    const result = await db.query(query, [], { rowMode: 'array' });
+    
+    const safeColumnNames: string[] = [];
+    const nameCounts: Record<string, number> = {};
+
+    // Track column names and append _2, _3 to duplicates
+    result.fields.forEach(field => {
+      let name = field.name;
+      if (nameCounts[name]) {
+        nameCounts[name]++;
+        name = `${name}_${nameCounts[name]}`;
+      } else {
+        nameCounts[name] = 1;
+      }
+      safeColumnNames.push(name);
+    });
+
+    // 🌟 THE FIX: Replaced 'any[][]' with 'DBValue[][]'
+    const safeRows = (result.rows as DBValue[][]).map(rowArray => {
+      const rowObject: DBRow = {};
+      rowArray.forEach((val, index) => {
+        rowObject[safeColumnNames[index]] = val;
+      });
+      return rowObject;
+    });
+
+    return safeRows;
+  };
+
   // ACTION 1: Just run the code to see what it outputs (No grading)
   const handleRunCode = async () => {
     if (!db || !quest) return;
@@ -102,8 +140,8 @@ export default function QuestPage() {
     setIsPassed(false);
 
     try {
-      const result = await db.query(userCode);
-      setQueryResult(result.rows as DBRow[]);
+      const actualRows = await executeAndDeduplicate(userCode);
+      setQueryResult(actualRows);
     } catch (err: unknown) {
       if (err instanceof Error) setQueryError(err.message);
     }
@@ -117,8 +155,8 @@ export default function QuestPage() {
     setIsPassed(false);
 
     try {
-      const result = await db.query(userCode);
-      setQueryResult(result.rows as DBRow[]);
+      const actualRows = await executeAndDeduplicate(userCode);
+      setQueryResult(actualRows);
 
       // Strictly type the expected array as DBRow[]
       const expected = (typeof quest.expected_output === 'string' 
@@ -126,21 +164,28 @@ export default function QuestPage() {
         : quest.expected_output) as DBRow[];
 
       // 1. Instantly fail if row counts don't match
-      if (result.rows.length !== expected.length) {
-        setQueryError(`Row count mismatch: Expected ${expected.length} rows, but got ${result.rows.length}.`);
+      if (actualRows.length !== expected.length) {
+        setQueryError(`Row count mismatch: Expected ${expected.length} rows, but got ${actualRows.length}.`);
         return;
       }
 
-      // 2. Normalize arrays (Strictly using DBRow instead of 'any')
-      const normalize = (arr: DBRow[]) => arr.map(row => 
+      // 2. Normalize and Clean (Convert numeric strings to numbers for comparison)
+      const normalizeAndClean = (arr: DBRow[]) => arr.map(row => 
         Object.keys(row).sort().reduce((obj, key) => {
-          obj[key] = row[key];
+          const val = row[key];
+          
+          if (typeof val === 'string' && !isNaN(Number(val)) && val.trim() !== "") {
+            obj[key] = Number(val);
+          } else {
+            obj[key] = val;
+          }
+          
           return obj;
         }, {} as DBRow)
       ).map(row => JSON.stringify(row)).sort();
 
-      const actualNormalized = normalize(result.rows as DBRow[]);
-      const expectedNormalized = normalize(expected);
+      const actualNormalized = normalizeAndClean(actualRows);
+      const expectedNormalized = normalizeAndClean(expected);
 
       // 3. Compare the normalized data
       if (JSON.stringify(actualNormalized) === JSON.stringify(expectedNormalized)) {
@@ -157,8 +202,8 @@ export default function QuestPage() {
         }
       } else {
         setQueryError("Output does not match the expected result. Look closely at the required columns and rows!");
-        console.log("Expected Data:", expectedNormalized);
-        console.log("Actual Data:", actualNormalized);
+        console.log("Expected (Normalized):", expectedNormalized);
+        console.log("Actual (Normalized):", actualNormalized);
       }
     } catch (err: unknown) {
       if (err instanceof Error) setQueryError(err.message);
