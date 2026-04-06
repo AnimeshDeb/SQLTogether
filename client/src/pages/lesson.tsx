@@ -5,7 +5,7 @@ import {
   type NavigateFunction,
 } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ==========================================
 // 1. STRICT TYPESCRIPT INTERFACES
@@ -130,7 +130,8 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
               <strong className="text-amber-400 font-mono text-base">
                 customers
               </strong>{' '}
-              table by clicking on the column in the table and then clicking 'Submit Query.'
+              table by clicking on the column in the table and then clicking
+              'Submit Query.'
             </p>
             <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
               <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
@@ -3037,181 +3038,184 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
   );
 };
 
-
-
-
 // ==========================================
 // MODULE 6: THE "INNER JOIN" LESSON
 // ==========================================
 const INNER_JOIN_EXAMPLES = [
   {
-    title: "Customers and Food Orders",
-    prompt: "Let's connect our customers to their food orders. This time, use an INNER JOIN. Notice what happens to customers who haven't ordered anything!",
-    selectText: "*",
+    title: 'Customers and Food Orders',
+    prompt:
+      "Let's connect our customers to their food orders. This time, use an INNER JOIN. Notice what happens to customers who haven't ordered anything!",
+    selectText: '*',
     leftTable: {
-      name: "customers",
-      columns: ["customer_id", "name"],
+      name: 'customers',
+      columns: ['customer_id', 'name'],
       data: [
         { customer_id: 1, name: 'Alice' },
         { customer_id: 2, name: 'Bob' },
-        { customer_id: 3, name: 'Charlie' }
-      ]
+        { customer_id: 3, name: 'Charlie' },
+      ],
     },
     rightTable: {
-      name: "orders",
-      columns: ["order_id", "customer_id", "food"],
+      name: 'orders',
+      columns: ['order_id', 'customer_id', 'food'],
       data: [
         { order_id: 101, customer_id: 1, food: 'Pizza' },
-        { order_id: 102, customer_id: 3, food: 'Burger' }
-      ]
+        { order_id: 102, customer_id: 3, food: 'Burger' },
+      ],
     },
-    expectedLeft: "customer_id",
-    expectedRight: "customer_id",
+    expectedLeft: 'customer_id',
+    expectedRight: 'customer_id',
     outputData: [
       { customer_id: 1, name: 'Alice', order_id: 101, food: 'Pizza' },
-      { customer_id: 3, name: 'Charlie', order_id: 102, food: 'Burger' }
-    ]
+      { customer_id: 3, name: 'Charlie', order_id: 102, food: 'Burger' },
+    ],
   },
   {
-    title: "Employees and Departments",
-    prompt: "Connect the employees to their departments. With an INNER JOIN, only new hires with a department will be shown.",
-    selectText: "*",
+    title: 'Employees and Departments',
+    prompt:
+      'Connect the employees to their departments. With an INNER JOIN, only new hires with a department will be shown.',
+    selectText: '*',
     leftTable: {
-      name: "employees",
-      columns: ["emp_id", "name"],
+      name: 'employees',
+      columns: ['emp_id', 'name'],
       data: [
         { emp_id: 1, name: 'Sarah' },
         { emp_id: 2, name: 'John' },
-        { emp_id: 3, name: 'David' }
-      ]
+        { emp_id: 3, name: 'David' },
+      ],
     },
     rightTable: {
-      name: "departments",
-      columns: ["dept_id", "emp_id", "dept_name"],
+      name: 'departments',
+      columns: ['dept_id', 'emp_id', 'dept_name'],
       data: [
         { dept_id: 80, emp_id: 1, dept_name: 'Sales' },
-        { dept_id: 81, emp_id: 3, dept_name: 'Engineering' }
-      ]
+        { dept_id: 81, emp_id: 3, dept_name: 'Engineering' },
+      ],
     },
-    expectedLeft: "emp_id",
-    expectedRight: "emp_id",
+    expectedLeft: 'emp_id',
+    expectedRight: 'emp_id',
     outputData: [
       { emp_id: 1, name: 'Sarah', dept_id: 80, dept_name: 'Sales' },
-      { emp_id: 3, name: 'David', dept_id: 81, dept_name: 'Engineering' }
-    ]
+      { emp_id: 3, name: 'David', dept_id: 81, dept_name: 'Engineering' },
+    ],
   },
   {
-    title: "Products and Reviews",
-    prompt: "Link the products to their reviews. Products with no reviews will be destroyed from the output.",
-    selectText: "*",
+    title: 'Products and Reviews',
+    prompt:
+      'Link the products to their reviews. Products with no reviews will be destroyed from the output.',
+    selectText: '*',
     leftTable: {
-      name: "products",
-      columns: ["product_id", "product_name"],
+      name: 'products',
+      columns: ['product_id', 'product_name'],
       data: [
         { product_id: 1, product_name: 'Laptop' },
         { product_id: 2, product_name: 'Monitor' },
-        { product_id: 3, product_name: 'Keyboard' }
-      ]
+        { product_id: 3, product_name: 'Keyboard' },
+      ],
     },
     rightTable: {
-      name: "reviews",
-      columns: ["review_id", "product_id", "rating"],
+      name: 'reviews',
+      columns: ['review_id', 'product_id', 'rating'],
       data: [
         { review_id: 901, product_id: 1, rating: 5 },
-        { review_id: 902, product_id: 3, rating: 4 }
-      ]
+        { review_id: 902, product_id: 3, rating: 4 },
+      ],
     },
-    expectedLeft: "product_id",
-    expectedRight: "product_id",
+    expectedLeft: 'product_id',
+    expectedRight: 'product_id',
     outputData: [
       { product_id: 1, product_name: 'Laptop', review_id: 901, rating: 5 },
-      { product_id: 3, product_name: 'Keyboard', review_id: 902, rating: 4 }
-    ]
+      { product_id: 3, product_name: 'Keyboard', review_id: 902, rating: 4 },
+    ],
   },
   {
-    title: "Library Books (Specific Columns)",
-    prompt: "Instead of SELECT *, let's just get the book title and its due date using an INNER JOIN. Books that don't have a checkout disappear!",
-    selectText: "books.title, checkouts.due_date",
+    title: 'Library Books (Specific Columns)',
+    prompt:
+      "Instead of SELECT *, let's just get the book title and its due date using an INNER JOIN. Books that don't have a checkout disappear!",
+    selectText: 'books.title, checkouts.due_date',
     leftTable: {
-      name: "books",
-      columns: ["book_id", "title"],
+      name: 'books',
+      columns: ['book_id', 'title'],
       data: [
         { book_id: 1, title: 'Dune' },
         { book_id: 2, title: '1984' },
-        { book_id: 3, title: 'Foundation' }
-      ]
+        { book_id: 3, title: 'Foundation' },
+      ],
     },
     rightTable: {
-      name: "checkouts",
-      columns: ["checkout_id", "book_id", "due_date"],
+      name: 'checkouts',
+      columns: ['checkout_id', 'book_id', 'due_date'],
       data: [
         { checkout_id: 55, book_id: 1, due_date: 'Oct 12' },
-        { checkout_id: 56, book_id: 3, due_date: 'Oct 15' }
-      ]
+        { checkout_id: 56, book_id: 3, due_date: 'Oct 15' },
+      ],
     },
-    expectedLeft: "book_id",
-    expectedRight: "book_id",
+    expectedLeft: 'book_id',
+    expectedRight: 'book_id',
     outputData: [
       { title: 'Dune', due_date: 'Oct 12' },
-      { title: 'Foundation', due_date: 'Oct 15' }
-    ]
+      { title: 'Foundation', due_date: 'Oct 15' },
+    ],
   },
   {
-    title: "Clinic Schedule (Specific Columns)",
-    prompt: "We just want the doctor's name and the patient they are seeing. Doctors with empty schedules should not be on this report.",
-    selectText: "doctors.doc_name, appointments.patient",
+    title: 'Clinic Schedule (Specific Columns)',
+    prompt:
+      "We just want the doctor's name and the patient they are seeing. Doctors with empty schedules should not be on this report.",
+    selectText: 'doctors.doc_name, appointments.patient',
     leftTable: {
-      name: "doctors",
-      columns: ["doc_id", "doc_name"],
+      name: 'doctors',
+      columns: ['doc_id', 'doc_name'],
       data: [
         { doc_id: 1, doc_name: 'Dr. House' },
         { doc_id: 2, doc_name: 'Dr. Grey' },
-        { doc_id: 3, doc_name: 'Dr. Carter' }
-      ]
+        { doc_id: 3, doc_name: 'Dr. Carter' },
+      ],
     },
     rightTable: {
-      name: "appointments",
-      columns: ["appt_id", "doc_id", "patient"],
+      name: 'appointments',
+      columns: ['appt_id', 'doc_id', 'patient'],
       data: [
         { appt_id: 88, doc_id: 2, patient: "O'Malley" },
-        { appt_id: 89, doc_id: 3, patient: 'Benton' }
-      ]
+        { appt_id: 89, doc_id: 3, patient: 'Benton' },
+      ],
     },
-    expectedLeft: "doc_id",
-    expectedRight: "doc_id",
+    expectedLeft: 'doc_id',
+    expectedRight: 'doc_id',
     outputData: [
       { doc_name: 'Dr. Grey', patient: "O'Malley" },
-      { doc_name: 'Dr. Carter', patient: 'Benton' }
-    ]
+      { doc_name: 'Dr. Carter', patient: 'Benton' },
+    ],
   },
   {
-    title: "IT Helpdesk (Specific Columns)",
-    prompt: "We need a list of IT support staff and their active issues. Use an INNER JOIN so agents without tickets don't clutter the active work report.",
-    selectText: "agents.name, tickets.issue",
+    title: 'IT Helpdesk (Specific Columns)',
+    prompt:
+      "We need a list of IT support staff and their active issues. Use an INNER JOIN so agents without tickets don't clutter the active work report.",
+    selectText: 'agents.name, tickets.issue',
     leftTable: {
-      name: "agents",
-      columns: ["agent_id", "name"],
+      name: 'agents',
+      columns: ['agent_id', 'name'],
       data: [
         { agent_id: 1, name: 'Roy' },
         { agent_id: 2, name: 'Moss' },
-        { agent_id: 3, name: 'Jen' }
-      ]
+        { agent_id: 3, name: 'Jen' },
+      ],
     },
     rightTable: {
-      name: "tickets",
-      columns: ["ticket_id", "agent_id", "issue"],
+      name: 'tickets',
+      columns: ['ticket_id', 'agent_id', 'issue'],
       data: [
         { ticket_id: 404, agent_id: 1, issue: 'Server down' },
-        { ticket_id: 405, agent_id: 3, issue: 'Locked out' }
-      ]
+        { ticket_id: 405, agent_id: 3, issue: 'Locked out' },
+      ],
     },
-    expectedLeft: "agent_id",
-    expectedRight: "agent_id",
+    expectedLeft: 'agent_id',
+    expectedRight: 'agent_id',
     outputData: [
       { name: 'Roy', issue: 'Server down' },
-      { name: 'Jen', issue: 'Locked out' }
-    ]
-  }
+      { name: 'Jen', issue: 'Locked out' },
+    ],
+  },
 ];
 
 const InteractiveInnerJoinExample = ({
@@ -3227,7 +3231,9 @@ const InteractiveInnerJoinExample = ({
 }) => {
   const [leftCol, setLeftCol] = useState('');
   const [rightCol, setRightCol] = useState('');
-  const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>('idle');
+  const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>(
+    'idle',
+  );
 
   const handleSubmit = () => {
     if (leftCol === step.expectedLeft && rightCol === step.expectedRight) {
@@ -3241,35 +3247,54 @@ const InteractiveInnerJoinExample = ({
   return (
     <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
       <div className="w-full xl:w-1/3 flex flex-col gap-6">
-        <div className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl transition-all`}>
+        <div
+          className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl transition-all`}
+        >
           <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
-            <span className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}>
+            <span
+              className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}
+            >
               {isCompleted ? '✓' : index + 1}
-            </span> 
+            </span>
             {step.title}
           </h2>
-          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">{step.prompt}</p>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">
+            {step.prompt}
+          </p>
 
           <div className="flex flex-col gap-5">
             {/* RAW LEFT TABLE */}
             <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
-              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Left: {step.leftTable.name}</div>
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                Left: {step.leftTable.name}
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-base">
                   <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
                     <tr>
-                      {step.leftTable.columns.map(c => (
-                        <th key={c} className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      {step.leftTable.columns.map((c) => (
+                        <th
+                          key={c}
+                          className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap"
+                        >
                           {c}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}>
+                  <tbody
+                    className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
+                  >
                     {step.leftTable.data.map((row, i) => (
-                      <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
-                        {step.leftTable.columns.map(c => (
-                          <td key={c} className="px-4 py-3 font-mono text-base text-zinc-300">
+                      <tr
+                        key={i}
+                        className="hover:bg-zinc-800/30 transition-colors"
+                      >
+                        {step.leftTable.columns.map((c) => (
+                          <td
+                            key={c}
+                            className="px-4 py-3 font-mono text-base text-zinc-300"
+                          >
                             {String(row[c as keyof typeof row])}
                           </td>
                         ))}
@@ -3281,28 +3306,43 @@ const InteractiveInnerJoinExample = ({
             </div>
 
             <div className="flex justify-center -my-2 z-10">
-              <div className="bg-zinc-800 border border-zinc-700 text-indigo-400 rounded-full w-8 h-8 flex items-center justify-center font-black shadow-xl">↓</div>
+              <div className="bg-zinc-800 border border-zinc-700 text-indigo-400 rounded-full w-8 h-8 flex items-center justify-center font-black shadow-xl">
+                ↓
+              </div>
             </div>
 
             {/* RAW RIGHT TABLE */}
             <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
-              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Right: {step.rightTable.name}</div>
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                Right: {step.rightTable.name}
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-base">
                   <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
                     <tr>
-                      {step.rightTable.columns.map(c => (
-                        <th key={c} className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      {step.rightTable.columns.map((c) => (
+                        <th
+                          key={c}
+                          className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap"
+                        >
                           {c}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}>
+                  <tbody
+                    className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
+                  >
                     {step.rightTable.data.map((row, i) => (
-                      <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
-                        {step.rightTable.columns.map(c => (
-                          <td key={c} className="px-4 py-3 font-mono text-base text-zinc-300">
+                      <tr
+                        key={i}
+                        className="hover:bg-zinc-800/30 transition-colors"
+                      >
+                        {step.rightTable.columns.map((c) => (
+                          <td
+                            key={c}
+                            className="px-4 py-3 font-mono text-base text-zinc-300"
+                          >
                             {String(row[c as keyof typeof row])}
                           </td>
                         ))}
@@ -3318,14 +3358,19 @@ const InteractiveInnerJoinExample = ({
         {/* DYNAMIC OUTPUT */}
         {feedback === 'correct' && (
           <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
-            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">SQL Output Result</h3>
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
+              SQL Output Result
+            </h3>
             <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-base">
                   <thead className="bg-black/60 border-b border-emerald-500/20">
                     <tr>
-                      {Object.keys(step.outputData[0]).map(col => (
-                        <th key={col} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">
+                      {Object.keys(step.outputData[0]).map((col) => (
+                        <th
+                          key={col}
+                          className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap"
+                        >
                           {col}
                         </th>
                       ))}
@@ -3335,7 +3380,10 @@ const InteractiveInnerJoinExample = ({
                     {step.outputData.map((row, i) => (
                       <tr key={i}>
                         {Object.values(row).map((val, j) => (
-                          <td key={j} className={`px-4 py-3 font-mono text-base font-bold whitespace-nowrap ${val === 'NULL' ? 'text-zinc-600 italic' : 'text-zinc-200'}`}>
+                          <td
+                            key={j}
+                            className={`px-4 py-3 font-mono text-base font-bold whitespace-nowrap ${val === 'NULL' ? 'text-zinc-600 italic' : 'text-zinc-200'}`}
+                          >
                             {String(val)}
                           </td>
                         ))}
@@ -3351,39 +3399,108 @@ const InteractiveInnerJoinExample = ({
 
       {/* 🌟 RIGHT COLUMN: Expanded Editor 🌟 */}
       <div className="w-full xl:w-2/3 flex flex-col">
-        <div className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}>
+        <div
+          className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
+        >
           <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
-            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Query Builder</span>
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+              Query Builder
+            </span>
           </div>
-          
+
           <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
-            
-            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">{step.selectText}</span></div>
-            
-            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">{step.leftTable.name}</span></div>
-            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">{step.rightTable.name}</span></div>
-            
-            <div className="flex flex-wrap items-center gap-3 mt-2 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
-              <span className="text-indigo-400 font-bold">ON</span>
-              <span className="text-amber-400 font-mono">{step.leftTable.name}.</span>
-              <select value={leftCol} onChange={(e) => {setLeftCol(e.target.value); setFeedback('idle');}} className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                <option value="" disabled>column</option>
-                {step.leftTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <span className="text-pink-400 font-black">=</span>
-              <span className="text-amber-400 font-mono">{step.rightTable.name}.</span>
-              <select value={rightCol} onChange={(e) => {setRightCol(e.target.value); setFeedback('idle');}} className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                <option value="" disabled>column</option>
-                {step.rightTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+            <div className="text-indigo-400 font-bold">
+              SELECT{' '}
+              <span className="text-white font-normal">{step.selectText}</span>
             </div>
 
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">
+                {step.leftTable.name}
+              </span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              INNER JOIN{' '}
+              <span className="text-amber-400 font-normal">
+                {step.rightTable.name}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 mt-2 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+              <span className="text-indigo-400 font-bold">ON</span>
+              <span className="text-amber-400 font-mono">
+                {step.leftTable.name}.
+              </span>
+              <select
+                value={leftCol}
+                onChange={(e) => {
+                  setLeftCol(e.target.value);
+                  setFeedback('idle');
+                }}
+                className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base"
+              >
+                <option value="" disabled>
+                  column
+                </option>
+                {step.leftTable.columns.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <span className="text-pink-400 font-black">=</span>
+              <span className="text-amber-400 font-mono">
+                {step.rightTable.name}.
+              </span>
+              <select
+                value={rightCol}
+                onChange={(e) => {
+                  setRightCol(e.target.value);
+                  setFeedback('idle');
+                }}
+                className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base"
+              >
+                <option value="" disabled>
+                  column
+                </option>
+                {step.rightTable.columns.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
-            {feedback === 'idle' && <button onClick={handleSubmit} disabled={!leftCol || !rightCol} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Execute Join</button>}
-            {feedback === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Incorrect link. Find the column they share!</div><button onClick={() => setFeedback('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
-            {feedback === 'correct' && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">Link Established! Notice how unmatched rows are deleted.</div>}
+            {feedback === 'idle' && (
+              <button
+                onClick={handleSubmit}
+                disabled={!leftCol || !rightCol}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
+              >
+                Execute Join
+              </button>
+            )}
+            {feedback === 'wrong' && (
+              <div className="flex flex-col gap-4">
+                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
+                  Incorrect link. Find the column they share!
+                </div>
+                <button
+                  onClick={() => setFeedback('idle')}
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+            {feedback === 'correct' && (
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
+                Link Established! Notice how unmatched rows are deleted.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -3415,7 +3532,8 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
           Interactive Lesson
         </span>
         <h1 className="text-4xl font-black text-white mt-2 mb-6">
-          Combining Tables: <span className="text-indigo-400 font-bold">INNER JOIN</span>
+          Combining Tables:{' '}
+          <span className="text-indigo-400 font-bold">INNER JOIN</span>
         </h1>
       </div>
 
@@ -3423,15 +3541,34 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
       <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
         <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
-            In the last lesson, we used a <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">LEFT JOIN</code> to combine our customers and orders tables. It kept <em>everyone</em> on the list. Even Bob, who had never ordered food, stayed on the list with blank <code className="bg-zinc-950 border border-zinc-800 text-zinc-500 italic px-2 py-0.5 rounded font-mono text-base">NULL</code> values.
+            In the last lesson, we used a{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              LEFT JOIN
+            </code>{' '}
+            to combine our customers and orders tables. It kept{' '}
+            <em>everyone</em> on the list. Even Bob, who had never ordered food,
+            stayed on the list with blank{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-zinc-500 italic px-2 py-0.5 rounded font-mono text-base">
+              NULL
+            </code>{' '}
+            values.
           </p>
 
           <p>
-            But what if Finance ONLY wants a list of customers who <em>actually bought something?</em> They don't care about window shoppers. They just want the real buyers.
+            But what if Finance ONLY wants a list of customers who{' '}
+            <em>actually bought something?</em> They don't care about window
+            shoppers. They just want the real buyers.
           </p>
-          
+
           <p>
-            That is where <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">INNER JOIN</code> comes in. We only want customers who have an order. It is brutally honest and strict. If a row in Table A does not have a matching order in Table B, it is <strong>completely deleted</strong> from the final result.
+            That is where{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              INNER JOIN
+            </code>{' '}
+            comes in. We only want customers who have an order. It is brutally
+            honest and strict. If a row in Table A does not have a matching
+            order in Table B, it is <strong>completely deleted</strong> from the
+            final result.
           </p>
 
           {/* 🌟 THE VISUAL TABLES 🌟 */}
@@ -3445,22 +3582,38 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
                 <table className="w-full text-left text-base">
                   <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
                     <tr>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">name</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        customer_id
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        name
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/50">
                     <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">1</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Alice</td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        1
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Alice
+                      </td>
                     </tr>
                     <tr className="hover:bg-red-900/30 bg-red-950/20 transition-colors opacity-50">
-                      <td className="px-4 py-3 font-mono text-base text-red-400">2</td>
-                      <td className="px-4 py-3 font-mono text-base text-red-400">Bob</td>
+                      <td className="px-4 py-3 font-mono text-base text-red-400">
+                        2
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-red-400">
+                        Bob
+                      </td>
                     </tr>
                     <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">3</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Charlie</td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        3
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Charlie
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -3468,7 +3621,9 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
             </div>
 
             {/* Connection Indicator */}
-            <div className="hidden sm:flex text-zinc-600 font-black text-2xl">➕</div>
+            <div className="hidden sm:flex text-zinc-600 font-black text-2xl">
+              ➕
+            </div>
 
             {/* Table B: Orders */}
             <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md w-full sm:w-1/2">
@@ -3479,21 +3634,39 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
                 <table className="w-full text-left text-base">
                   <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
                     <tr>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">order_id</th>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">food</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        order_id
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        customer_id
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        food
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-800/50">
                     <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-zinc-400">101</td>
-                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">1</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Pizza</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-400">
+                        101
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        1
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Pizza
+                      </td>
                     </tr>
                     <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-zinc-400">102</td>
-                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">3</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Burger</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-400">
+                        102
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        3
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Burger
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -3506,15 +3679,35 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
           </h3>
 
           <p>
-            When we use <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">INNER JOIN</code>, the database looks for a perfect match on the <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">ON</code> clause.
+            When we use{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              INNER JOIN
+            </code>
+            , the database looks for a perfect match on the{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              ON
+            </code>{' '}
+            clause.
           </p>
 
           <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 my-8 font-mono text-base shadow-inner flex flex-col gap-1">
-            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
-            <div className="text-indigo-400 font-bold">FROM <span className="text-white font-normal">customers</span></div>
-            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-white font-normal">orders</span></div>
             <div className="text-indigo-400 font-bold">
-              ON <span className="text-white font-normal">customers.customer_id <span className="text-pink-400 font-bold">=</span> orders.customer_id</span>;
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM <span className="text-white font-normal">customers</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              INNER JOIN <span className="text-white font-normal">orders</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ON{' '}
+              <span className="text-white font-normal">
+                customers.customer_id{' '}
+                <span className="text-pink-400 font-bold">=</span>{' '}
+                orders.customer_id
+              </span>
+              ;
             </div>
           </div>
 
@@ -3526,51 +3719,91 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
           <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-xl mb-6">
             <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-800/50 flex justify-between items-center">
               <span>Query Result</span>
-              <span className="bg-indigo-500/20 px-2 py-1 rounded text-indigo-300">2 Rows Returned</span>
+              <span className="bg-indigo-500/20 px-2 py-1 rounded text-indigo-300">
+                2 Rows Returned
+              </span>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full text-left text-base">
                 <thead>
                   <tr>
-                    <th colSpan={2} className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-r border-zinc-800/50">
+                    <th
+                      colSpan={2}
+                      className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-r border-zinc-800/50"
+                    >
                       Table A: Customers
                     </th>
-                    <th colSpan={3} className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-zinc-800/50">
+                    <th
+                      colSpan={3}
+                      className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-zinc-800/50"
+                    >
                       Table B: Orders
                     </th>
                   </tr>
                   <tr className="border-b border-zinc-800/50 bg-zinc-900/30">
-                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
-                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap border-r border-zinc-800/50">name</th>
-                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">order_id</th>
-                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
-                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">food</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      customer_id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap border-r border-zinc-800/50">
+                      name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      order_id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      customer_id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      food
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-800/50">
                   <tr className="hover:bg-zinc-800/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-base text-white">1</td>
-                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">Alice</td>
-                    <td className="px-4 py-3 font-mono text-base text-white">101</td>
-                    <td className="px-4 py-3 font-mono text-base text-white">1</td>
-                    <td className="px-4 py-3 font-mono text-base text-white">Pizza</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      1
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      101
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      1
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      Pizza
+                    </td>
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-base text-white">3</td>
-                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">Charlie</td>
-                    <td className="px-4 py-3 font-mono text-base text-white">102</td>
-                    <td className="px-4 py-3 font-mono text-base text-white">3</td>
-                    <td className="px-4 py-3 font-mono text-base text-white">Burger</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      3
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      102
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      3
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      Burger
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-          
+
           <div className="mt-4 space-y-4">
             <p className="text-base text-zinc-400 text-left">
-              Because Bob had no matching orders in Table B, he was <strong>completely dropped</strong> from the result. Alice and Charlie are the only ones left!
+              Because Bob had no matching orders in Table B, he was{' '}
+              <strong>completely dropped</strong> from the result. Alice and
+              Charlie are the only ones left!
             </p>
           </div>
         </div>
@@ -3584,28 +3817,64 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
         <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-6">
           {/* Example 1: Select All */}
           <div>
-            <div className="text-zinc-500 italic mb-1">-- Select all columns</div>
-            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
-            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">table_A</span></div>
-            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">table_B</span></div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Select all columns
+            </div>
             <div className="text-indigo-400 font-bold">
-              ON <span className="text-amber-400 font-normal">table_A.column_name</span> <span className="text-pink-400 font-bold">=</span> <span className="text-amber-400 font-normal">table_B.column_name</span>;
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM <span className="text-amber-400 font-normal">table_A</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              INNER JOIN{' '}
+              <span className="text-amber-400 font-normal">table_B</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ON{' '}
+              <span className="text-amber-400 font-normal">
+                table_A.column_name
+              </span>{' '}
+              <span className="text-pink-400 font-bold">=</span>{' '}
+              <span className="text-amber-400 font-normal">
+                table_B.column_name
+              </span>
+              ;
             </div>
           </div>
 
           {/* Example 2: Select Specific Columns */}
           <div>
-            <div className="text-zinc-500 italic mb-1">-- Select specific columns</div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Select specific columns
+            </div>
             <div className="text-indigo-400 font-bold">
               SELECT{' '}
-              <span className="text-amber-400 font-normal">table_A.column1</span>
+              <span className="text-amber-400 font-normal">
+                table_A.column1
+              </span>
               <span className="text-zinc-500 font-bold">, </span>
-              <span className="text-amber-400 font-normal">table_B.column2</span>
+              <span className="text-amber-400 font-normal">
+                table_B.column2
+              </span>
             </div>
-            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">table_A</span></div>
-            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">table_B</span></div>
             <div className="text-indigo-400 font-bold">
-              ON <span className="text-amber-400 font-normal">table_A.column_name</span> <span className="text-pink-400 font-bold">=</span> <span className="text-amber-400 font-normal">table_B.column_name</span>;
+              FROM <span className="text-amber-400 font-normal">table_A</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              INNER JOIN{' '}
+              <span className="text-amber-400 font-normal">table_B</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ON{' '}
+              <span className="text-amber-400 font-normal">
+                table_A.column_name
+              </span>{' '}
+              <span className="text-pink-400 font-bold">=</span>{' '}
+              <span className="text-amber-400 font-normal">
+                table_B.column_name
+              </span>
+              ;
             </div>
           </div>
         </div>
@@ -3645,206 +3914,116 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
   );
 };
 
-
 // ==========================================
 // MODULE 7: THE "CTE" LESSON
 // ==========================================
 // ==========================================
 // MODULE 7: THE "CTE" LESSON
+// ==========================================
+// ==========================================
+// 1. STRICT TYPESCRIPT INTERFACES
 // ==========================================
 interface CteStepData {
+  id: 1 | 2 | 3;
   title: string;
   prompt1: string;
   prompt2: string;
+  prompt3?: string;
   rawTable: { name: string; columns: string[]; data: Record<string, string | number>[] };
-  cteExpected: { agg: string; col: string; group: string };
-  mainExpected: { filterCol: string; filterOp: string; filterVal: string };
-  cteOutput: { name: string; columns: string[]; data: Record<string, string | number>[] };
-  finalOutput: Record<string, string | number>[];
+  cteName: string;
+  expectedCols: string[];
+  expectedFilter?: { col: string; op: string; val: string; location: 'main' | 'cte' };
+  cteOutput: Record<string, string | number>[];
+  finalOutput?: Record<string, string | number>[];
 }
 
+// ==========================================
+// THE 3 SIMPLIFIED CTE EXAMPLES
+// ==========================================
 const CTE_EXAMPLES: CteStepData[] = [
   {
-    title: "High Performing Baristas",
-    prompt1: "Step 1: Let's build our 'Mini-Table'. We need to know how many total drinks each barista made. Create a CTE named 'barista_totals' that counts the drinks grouped by the barista.",
-    prompt2: "Step 2: Now that our Mini-Table exists in memory, let's query it! Write the main query to select baristas from 'barista_totals' who made strictly MORE than 2 drinks.",
+    id: 1,
+    title: "Slimming Down a Table",
+    prompt1: "Step 1: This table has too much noise. Let's create a CTE named 'staff_list' that only selects the 'name', 'department', and 'salary' columns.",
+    prompt2: "Step 2: Now let's peek inside! Write the main query outside the CTE to SELECT * from your new 'staff_list' mini-table.",
     rawTable: {
-      name: "coffee_sales",
-      columns: ["transaction_id", "drink", "barista"],
+      name: "employees",
+      columns: ["emp_id", "name", "department", "salary", "office_num"],
       data: [
-        { transaction_id: 101, drink: 'Latte', barista: 'Alice' },
-        { transaction_id: 102, drink: 'Cold Brew', barista: 'Bob' },
-        { transaction_id: 103, drink: 'Green Tea', barista: 'Alice' },
-        { transaction_id: 104, drink: 'Mocha', barista: 'Charlie' },
-        { transaction_id: 105, drink: 'Drip', barista: 'Alice' },
-        { transaction_id: 106, drink: 'Espresso', barista: 'Charlie' },
+        { emp_id: 101, name: 'Alice', department: 'Sales', salary: 60000, office_num: '4A' },
+        { emp_id: 102, name: 'Bob', department: 'IT', salary: 75000, office_num: '2B' },
+        { emp_id: 103, name: 'Charlie', department: 'Sales', salary: 55000, office_num: '4B' },
       ]
     },
-    cteExpected: { agg: "COUNT", col: "drink", group: "barista" },
-    mainExpected: { filterCol: "total_drinks", filterOp: ">", filterVal: "2" },
-    cteOutput: {
-      name: "barista_totals",
-      columns: ["barista", "total_drinks"],
-      data: [
-        { barista: 'Alice', total_drinks: 3 },
-        { barista: 'Bob', total_drinks: 1 },
-        { barista: 'Charlie', total_drinks: 2 }
-      ]
-    },
-    finalOutput: [
-      { barista: 'Alice', total_drinks: 3 }
+    cteName: 'staff_list',
+    expectedCols: ['name', 'department', 'salary'],
+    cteOutput: [
+      { name: 'Alice', department: 'Sales', salary: 60000 },
+      { name: 'Bob', department: 'IT', salary: 75000 },
+      { name: 'Charlie', department: 'Sales', salary: 55000 },
     ]
   },
   {
-    title: "Expensive Apartment Types",
-    prompt1: "Step 1: What is the average rent for each bedroom count? Create a CTE named 'avg_rents' that calculates the average rent grouped by bedrooms.",
-    prompt2: "Step 2: Let's filter that mini-table! Select the bedroom types from 'avg_rents' where the average rent is 3000 or greater.",
+    id: 2,
+    title: "Filtering the Main Query",
+    prompt1: "Step 1: Create a CTE named 'staff_list' that selects the 'name', 'department', and 'salary' columns from the employees table.",
+    prompt2: "Step 2: Let's see the mini-table. Write the main query to SELECT * from 'staff_list'.",
+    prompt3: "Step 3: Now let's filter our output! Modify the main query outside the CTE to only show employees where the salary is strictly greater than 55000.",
     rawTable: {
-      name: "apartments",
-      columns: ["unit", "rent", "bedrooms"],
+      name: "employees",
+      columns: ["emp_id", "name", "department", "salary", "office_num"],
       data: [
-        { unit: '1A', rent: 2500, bedrooms: 1 },
-        { unit: '2B', rent: 3200, bedrooms: 2 },
-        { unit: '3C', rent: 2800, bedrooms: 2 },
-        { unit: '4D', rent: 4500, bedrooms: 3 },
-        { unit: '5E', rent: 3000, bedrooms: 1 },
+        { emp_id: 101, name: 'Alice', department: 'Sales', salary: 60000, office_num: '4A' },
+        { emp_id: 102, name: 'Bob', department: 'IT', salary: 75000, office_num: '2B' },
+        { emp_id: 103, name: 'Charlie', department: 'Sales', salary: 55000, office_num: '4B' },
       ]
     },
-    cteExpected: { agg: "AVG", col: "rent", group: "bedrooms" },
-    mainExpected: { filterCol: "avg_rent", filterOp: ">=", filterVal: "3000" },
-    cteOutput: {
-      name: "avg_rents",
-      columns: ["bedrooms", "avg_rent"],
-      data: [
-        { bedrooms: 1, avg_rent: 2750 },
-        { bedrooms: 2, avg_rent: 3000 },
-        { bedrooms: 3, avg_rent: 4500 }
-      ]
-    },
+    cteName: 'staff_list',
+    expectedCols: ['name', 'department', 'salary'],
+    expectedFilter: { col: 'salary', op: '>', val: '55000', location: 'main' },
+    cteOutput: [
+      { name: 'Alice', department: 'Sales', salary: 60000 },
+      { name: 'Bob', department: 'IT', salary: 75000 },
+      { name: 'Charlie', department: 'Sales', salary: 55000 },
+    ],
     finalOutput: [
-      { bedrooms: 2, avg_rent: 3000 },
-      { bedrooms: 3, avg_rent: 4500 }
+      { name: 'Alice', department: 'Sales', salary: 60000 },
+      { name: 'Bob', department: 'IT', salary: 75000 },
     ]
   },
   {
-    title: "Overworked IT Agents",
-    prompt1: "Step 1: We need to see who is handling the most tickets. Build a CTE named 'agent_workload' that counts the ticket_id grouped by agent_id.",
-    prompt2: "Step 2: Let's find the overworked staff. Query the 'agent_workload' CTE to find agents who have exactly 2 tickets.",
+    id: 3,
+    title: "Filtering INSIDE the CTE",
+    prompt1: "Step 1: Create a CTE named 'sales_team' that selects the 'name', 'department', and 'salary' columns.",
+    prompt2: "Step 2: Let's peek at the CTE by running SELECT * from 'sales_team'.",
+    prompt3: "Step 3: This time, let's filter INSIDE the CTE! Move the WHERE clause into the CTE declaration so it only grabs rows where the department equals 'Sales'. Notice how you can filter and clean data while you are creating the mini-table, making it super clean before the main query even runs!",
     rawTable: {
-      name: "tickets",
-      columns: ["ticket_id", "agent_id", "issue"],
+      name: "employees",
+      columns: ["emp_id", "name", "department", "salary", "office_num"],
       data: [
-        { ticket_id: 404, agent_id: 1, issue: 'Server down' },
-        { ticket_id: 405, agent_id: 3, issue: 'Locked out' },
-        { ticket_id: 406, agent_id: 1, issue: 'Email broken' },
-        { ticket_id: 407, agent_id: 2, issue: 'Mouse broken' },
+        { emp_id: 101, name: 'Alice', department: 'Sales', salary: 60000, office_num: '4A' },
+        { emp_id: 102, name: 'Bob', department: 'IT', salary: 75000, office_num: '2B' },
+        { emp_id: 103, name: 'Charlie', department: 'Sales', salary: 55000, office_num: '4B' },
       ]
     },
-    cteExpected: { agg: "COUNT", col: "ticket_id", group: "agent_id" },
-    mainExpected: { filterCol: "total_tickets", filterOp: "=", filterVal: "2" },
-    cteOutput: {
-      name: "agent_workload",
-      columns: ["agent_id", "total_tickets"],
-      data: [
-        { agent_id: 1, total_tickets: 2 },
-        { agent_id: 2, total_tickets: 1 },
-        { agent_id: 3, total_tickets: 1 }
-      ]
-    },
+    cteName: 'sales_team',
+    expectedCols: ['name', 'department', 'salary'],
+    expectedFilter: { col: 'department', op: '=', val: "'Sales'", location: 'cte' },
+    cteOutput: [
+      { name: 'Alice', department: 'Sales', salary: 60000 },
+      { name: 'Bob', department: 'IT', salary: 75000 },
+      { name: 'Charlie', department: 'Sales', salary: 55000 },
+    ],
     finalOutput: [
-      { agent_id: 1, total_tickets: 2 }
-    ]
-  },
-  {
-    title: "Top Spending Customers",
-    prompt1: "Step 1: Create a CTE named 'customer_totals' that calculates the SUM of the amount column grouped by cust_id.",
-    prompt2: "Step 2: Reward our best clients! Query the 'customer_totals' CTE to find customers whose total_spent is greater than 4000.",
-    rawTable: {
-      name: "invoices",
-      columns: ["inv_id", "cust_id", "amount"],
-      data: [
-        { inv_id: 101, cust_id: 1, amount: 3000 },
-        { inv_id: 102, cust_id: 1, amount: 2500 },
-        { inv_id: 103, cust_id: 2, amount: 1000 },
-        { inv_id: 104, cust_id: 3, amount: 6000 },
-      ]
-    },
-    cteExpected: { agg: "SUM", col: "amount", group: "cust_id" },
-    mainExpected: { filterCol: "total_spent", filterOp: ">", filterVal: "4000" },
-    cteOutput: {
-      name: "customer_totals",
-      columns: ["cust_id", "total_spent"],
-      data: [
-        { cust_id: 1, total_spent: 5500 },
-        { cust_id: 2, total_spent: 1000 },
-        { cust_id: 3, total_spent: 6000 }
-      ]
-    },
-    finalOutput: [
-      { cust_id: 1, total_spent: 5500 },
-      { cust_id: 3, total_spent: 6000 }
-    ]
-  },
-  {
-    title: "Flagging Bad Products",
-    prompt1: "Step 1: We need the average rating for every product. Build a CTE named 'product_ratings' that finds the AVG rating grouped by product_id.",
-    prompt2: "Step 2: Flag products that need review. Query the 'product_ratings' CTE to find products with an avg_rating less than 4.",
-    rawTable: {
-      name: "reviews",
-      columns: ["rev_id", "product_id", "rating"],
-      data: [
-        { rev_id: 101, product_id: 1, rating: 5 },
-        { rev_id: 102, product_id: 1, rating: 5 },
-        { rev_id: 103, product_id: 2, rating: 2 },
-        { rev_id: 104, product_id: 3, rating: 4 },
-      ]
-    },
-    cteExpected: { agg: "AVG", col: "rating", group: "product_id" },
-    mainExpected: { filterCol: "avg_rating", filterOp: "<", filterVal: "4" },
-    cteOutput: {
-      name: "product_ratings",
-      columns: ["product_id", "avg_rating"],
-      data: [
-        { product_id: 1, avg_rating: 5 },
-        { product_id: 2, avg_rating: 2 },
-        { product_id: 3, avg_rating: 4 }
-      ]
-    },
-    finalOutput: [
-      { product_id: 2, avg_rating: 2 }
-    ]
-  },
-  {
-    title: "Large Animal Rescues",
-    prompt1: "Step 1: Create a CTE named 'max_teams' that finds the MAX team_size grouped by the type of animal.",
-    prompt2: "Step 2: Query the 'max_teams' CTE to find animal types that required a max_size of 5.",
-    rawTable: {
-      name: "rescues",
-      columns: ["id", "type", "team_size"],
-      data: [
-        { id: 'R01', type: 'Raccoon', team_size: 2 },
-        { id: 'R02', type: 'Hawk', team_size: 3 },
-        { id: 'R03', type: 'Deer', team_size: 5 },
-        { id: 'R04', type: 'Deer', team_size: 4 },
-      ]
-    },
-    cteExpected: { agg: "MAX", col: "team_size", group: "type" },
-    mainExpected: { filterCol: "max_size", filterOp: "=", filterVal: "5" },
-    cteOutput: {
-      name: "max_teams",
-      columns: ["type", "max_size"],
-      data: [
-        { type: 'Raccoon', max_size: 2 },
-        { type: 'Hawk', max_size: 3 },
-        { type: 'Deer', max_size: 5 }
-      ]
-    },
-    finalOutput: [
-      { type: 'Deer', max_size: 5 }
+      { name: 'Alice', department: 'Sales', salary: 60000 },
+      { name: 'Charlie', department: 'Sales', salary: 55000 },
     ]
   }
 ];
 
+// ==========================================
+// THE DYNAMIC INTERACTIVE COMPONENT
+// ==========================================
 const InteractiveCteExample = ({
   step,
   index,
@@ -3856,38 +4035,52 @@ const InteractiveCteExample = ({
   onPass: () => void;
   isCompleted: boolean;
 }) => {
-  // Step 1 State (CTE)
-  const [agg, setAgg] = useState('');
-  const [col, setCol] = useState('');
-  const [group, setGroup] = useState('');
-  const [step1Status, setStep1Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
+  // Part 1: Build CTE
+  const [col1, setCol1] = useState('');
+  const [col2, setCol2] = useState('');
+  const [col3, setCol3] = useState('');
+  const [part1Status, setPart1Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
-  // Step 2 State (Main Query)
+  // Part 2: View CTE
+  const [mainSelect, setMainSelect] = useState('');
+  const [mainFrom, setMainFrom] = useState('');
+  const [part2Status, setPart2Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
+
+  // Part 3: Filter (Main for Ex 2, CTE for Ex 3)
   const [filterCol, setFilterCol] = useState('');
   const [filterOp, setFilterOp] = useState('');
   const [filterVal, setFilterVal] = useState('');
-  const [step2Status, setStep2Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
+  const [part3Status, setPart3Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
 
-  const handleStep1Submit = () => {
-    if (agg === step.cteExpected.agg && col === step.cteExpected.col && group === step.cteExpected.group) {
-      setStep1Status('correct');
+  const handlePart1Submit = () => {
+    if (col1 === step.expectedCols[0] && col2 === step.expectedCols[1] && col3 === step.expectedCols[2]) {
+      setPart1Status('correct');
+      if (step.id === 1) onPass(); 
     } else {
-      setStep1Status('wrong');
+      setPart1Status('wrong');
     }
   };
 
-  const handleStep2Submit = () => {
-    if (filterCol === step.mainExpected.filterCol && filterOp === step.mainExpected.filterOp && filterVal === step.mainExpected.filterVal) {
-      setStep2Status('correct');
+  const handlePart2Submit = () => {
+    if (mainSelect === '*' && mainFrom === step.cteName) {
+      setPart2Status('correct');
+    } else {
+      setPart2Status('wrong');
+    }
+  };
+
+  const handlePart3Submit = () => {
+    if (step.expectedFilter && filterCol === step.expectedFilter.col && filterOp === step.expectedFilter.op && filterVal === step.expectedFilter.val) {
+      setPart3Status('correct');
       onPass();
     } else {
-      setStep2Status('wrong');
+      setPart3Status('wrong');
     }
   };
 
   return (
     <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
-      {/* 🌟 LEFT COLUMN: Tables and Explanations 🌟 */}
+      {/* 🌟 LEFT COLUMN: Instructions and Outputs 🌟 */}
       <div className="w-full xl:w-1/3 flex flex-col gap-6">
         <div className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl transition-all`}>
           <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
@@ -3898,14 +4091,16 @@ const InteractiveCteExample = ({
           </h2>
           
           <div className="space-y-6">
+            
+            {/* PART 1 INSTRUCTION */}
             <div>
-              <p className={`text-lg leading-relaxed ${step1Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
+              <p className={`text-lg leading-relaxed ${part1Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
                 {step.prompt1}
               </p>
             </div>
 
-            {/* RAW TABLE (Hidden once CTE is built to save space) */}
-            {step1Status !== 'correct' && (
+            {/* RAW TABLE */}
+            {part1Status !== 'correct' && (
               <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
                 <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Raw Table: {step.rawTable.name}</div>
                 <div className="overflow-x-auto">
@@ -3927,25 +4122,32 @@ const InteractiveCteExample = ({
               </div>
             )}
             
-            {/* STEP 1 OUTPUT: THE MINI-TABLE */}
-            {step1Status === 'correct' && (
+            {/* PART 2 INSTRUCTION */}
+            {part1Status === 'correct' && (
+               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                 <hr className="border-zinc-800/50 my-6" />
+                 <p className={`text-lg leading-relaxed ${part2Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
+                  {step.prompt2}
+                 </p>
+               </motion.div>
+            )}
+
+            {/* PART 2 OUTPUT (CTE View) */}
+            {part2Status === 'correct' && (step.id === 1 || part3Status !== 'correct') && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                <p className="text-lg leading-relaxed text-emerald-400 font-bold mb-4">
-                  Mini-Table Created! 👇
-                </p>
-                <div className="border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md">
-                  <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">CTE: {step.cteOutput.name}</div>
+                <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md mt-4">
+                  <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">OUTPUT: {step.cteName}</div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-base">
-                      <thead className="bg-black/40 border-b border-emerald-500/20">
+                      <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
                         <tr>
-                          {step.cteOutput.columns.map(c => <th key={c} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">{c}</th>)}
+                          {step.expectedCols.map(c => <th key={c} className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight whitespace-nowrap">{c}</th>)}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-emerald-500/10">
-                        {step.cteOutput.data.map((row, i) => (
-                          <tr key={i}>
-                            {step.cteOutput.columns.map(c => <td key={c} className="px-4 py-3 font-mono text-base font-bold text-zinc-200 whitespace-nowrap">{String(row[c])}</td>)}
+                      <tbody className="divide-y divide-indigo-500/10">
+                        {step.cteOutput.map((row, i) => (
+                          <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                            {step.expectedCols.map(c => <td key={c} className="px-4 py-3 font-mono text-base text-zinc-300">{String(row[c])}</td>)}
                           </tr>
                         ))}
                       </tbody>
@@ -3955,147 +4157,180 @@ const InteractiveCteExample = ({
               </motion.div>
             )}
 
-            {step1Status === 'correct' && (
-               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            {/* PART 3 INSTRUCTION */}
+            {part2Status === 'correct' && step.id !== 1 && step.prompt3 && (
+               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                  <hr className="border-zinc-800/50 my-6" />
-                 <p className={`text-lg leading-relaxed ${step2Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
-                  {step.prompt2}
+                 <p className={`text-lg leading-relaxed ${part3Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
+                  {step.prompt3}
                  </p>
                </motion.div>
             )}
+
+            {/* PART 3 OUTPUT (Final Filtered View) */}
+            {part3Status === 'correct' && step.finalOutput && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <div className="border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md mt-4">
+                  <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">FINAL FILTERED OUTPUT</div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-base">
+                      <thead className="bg-black/40 border-b border-emerald-500/20">
+                        <tr>
+                          {step.expectedCols.map(c => <th key={c} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">{c}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-emerald-500/10">
+                        {step.finalOutput.map((row, i) => (
+                          <tr key={i}>
+                            {step.expectedCols.map(c => <td key={c} className="px-4 py-3 font-mono text-base font-bold text-white">{String(row[c])}</td>)}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
           </div>
         </div>
-
-        {/* FINAL OUTPUT */}
-        {step2Status === 'correct' && (
-          <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
-            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">Final SQL Output</h3>
-            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-base">
-                  <thead className="bg-black/60 border-b border-emerald-500/20">
-                    <tr>
-                      {Object.keys(step.finalOutput[0]).map(col => (
-                        <th key={col} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">{col}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-emerald-500/10">
-                    {step.finalOutput.map((row, i) => (
-                      <tr key={i}>
-                        {Object.values(row).map((val, j) => (
-                          <td key={j} className="px-4 py-3 font-mono text-base font-bold text-white whitespace-nowrap">{String(val)}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* 🌟 RIGHT COLUMN: Two-Step Query Builder 🌟 */}
+      {/* 🌟 RIGHT COLUMN: Three-Step Query Builder 🌟 */}
       <div className="w-full xl:w-2/3 flex flex-col">
-        <div className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${step2Status === 'correct' ? 'border-emerald-500' : 'border-zinc-800/50'}`}>
+        <div className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${isCompleted ? 'border-emerald-500' : 'border-zinc-800/50'}`}>
           <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
             <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Query Builder</span>
           </div>
           
           <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col gap-6">
             
-            {/* STEP 1: CTE DEFINITION */}
-            <div className={`transition-opacity duration-500 ${step1Status === 'correct' ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+            {/* CTE DECLARATION BLOCK */}
+            <div className={`transition-opacity duration-500 ${part1Status === 'correct' && part3Status !== 'correct' && step.id === 3 ? 'opacity-100' : part1Status === 'correct' ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
               <div className="text-zinc-500 italic mb-2">-- Step 1: Create the Mini-Table</div>
-              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">{step.cteOutput.name}</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">{step.cteName}</span> AS <span className="text-zinc-500 font-bold">(</span></div>
               
               <div className="pl-4 md:pl-8 mt-3 flex flex-col gap-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-indigo-400 font-bold">SELECT</span>
-                  <span className="text-amber-400">{group || 'column'}</span>
-                  <span className="text-zinc-500 font-bold">,</span>
-                  
-                  <select value={agg} onChange={(e) => {setAgg(e.target.value); setStep1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                    <option value="" disabled>AGG</option>
-                    <option value="COUNT">COUNT</option>
-                    <option value="SUM">SUM</option>
-                    <option value="AVG">AVG</option>
-                    <option value="MAX">MAX</option>
-                    <option value="MIN">MIN</option>
-                  </select>
-                  <span className="text-zinc-500 font-bold">(</span>
-                  <select value={col} onChange={(e) => {setCol(e.target.value); setStep1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                    <option value="" disabled>column</option>
+                  <select value={col1} onChange={(e) => {setCol1(e.target.value); setPart1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>col 1</option>
                     {step.rawTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <span className="text-zinc-500 font-bold">)</span>
-                  <span className="text-indigo-400 font-bold">AS</span>
-                  <span className="text-amber-400">{step.cteOutput.columns[1]}</span>
+                  <span className="text-zinc-500 font-bold">,</span>
+                  <select value={col2} onChange={(e) => {setCol2(e.target.value); setPart1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>col 2</option>
+                    {step.rawTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <span className="text-zinc-500 font-bold">,</span>
+                  <select value={col3} onChange={(e) => {setCol3(e.target.value); setPart1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>col 3</option>
+                    {step.rawTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
                 
                 <div>
                   <span className="text-indigo-400 font-bold">FROM</span> <span className="text-amber-400 font-normal">{step.rawTable.name}</span>
                 </div>
-                
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-indigo-400 font-bold">GROUP BY</span>
-                  <select value={group} onChange={(e) => {setGroup(e.target.value); setStep1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                    <option value="" disabled>column</option>
-                    {step.rawTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
+
+                {/* Ex 3: Filter inside CTE */}
+                {step.id === 3 && part2Status === 'correct' && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center gap-3 bg-zinc-900 border border-zinc-800/50 p-4 rounded-xl shadow-inner mt-2">
+                    <span className="text-indigo-400 font-bold">WHERE</span>
+                    <select value={filterCol} onChange={(e) => {setFilterCol(e.target.value); setPart3Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                      <option value="" disabled>column</option>
+                      {step.expectedCols.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select value={filterOp} onChange={(e) => {setFilterOp(e.target.value); setPart3Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-pink-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                      <option value="" disabled>op</option>
+                      <option value="=">=</option>
+                      <option value=">">&gt;</option>
+                      <option value="<">&lt;</option>
+                    </select>
+                    <select value={filterVal} onChange={(e) => {setFilterVal(e.target.value); setPart3Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                      <option value="" disabled>value</option>
+                      <option value="55000">55000</option>
+                      <option value="60000">60000</option>
+                      <option value="'Sales'">'Sales'</option>
+                      <option value="'IT'">'IT'</option>
+                    </select>
+                  </motion.div>
+                )}
               </div>
               <div className="text-zinc-500 font-bold mt-3">)</div>
             </div>
 
-            {/* STEP 2: MAIN QUERY */}
-            {step1Status === 'correct' && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 pt-6 border-t border-zinc-800/50">
+            {/* MAIN QUERY BLOCK */}
+            {part1Status === 'correct' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`mt-4 pt-6 border-t border-zinc-800/50 transition-opacity duration-500 ${part2Status === 'correct' && step.id === 2 && part3Status !== 'correct' ? 'opacity-100' : part2Status === 'correct' && step.id !== 1 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
                 <div className="text-zinc-500 italic mb-2">-- Step 2: Query the Mini-Table</div>
-                <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
-                <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">{step.cteOutput.name}</span></div>
                 
-                <div className="flex flex-wrap items-center gap-3 mt-4 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
-                  <span className="text-indigo-400 font-bold">WHERE</span>
-                  <select value={filterCol} onChange={(e) => {setFilterCol(e.target.value); setStep2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                    <option value="" disabled>column</option>
-                    {step.cteOutput.columns.map(c => <option key={c} value={c}>{c}</option>)}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-indigo-400 font-bold">SELECT</span>
+                  <select value={mainSelect} onChange={(e) => {setMainSelect(e.target.value); setPart2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-white rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>select</option>
+                    <option value="*">*</option>
+                    <option value="name">name</option>
                   </select>
-                  <select value={filterOp} onChange={(e) => {setFilterOp(e.target.value); setStep2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-pink-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                    <option value="" disabled>op</option>
-                    <option value="=">=</option>
-                    <option value=">">&gt;</option>
-                    <option value="<">&lt;</option>
-                    <option value=">=">&gt;=</option>
-                  </select>
-                  <select value={filterVal} onChange={(e) => {setFilterVal(e.target.value); setStep2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
-                    <option value="" disabled>value</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="3000">3000</option>
-                    <option value="4000">4000</option>
-                  </select>
-                  <span className="text-white font-bold">;</span>
                 </div>
+                <div className="flex flex-wrap items-center gap-2 mt-3">
+                  <span className="text-indigo-400 font-bold">FROM</span>
+                  <select value={mainFrom} onChange={(e) => {setMainFrom(e.target.value); setPart2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>table</option>
+                    <option value={step.rawTable.name}>{step.rawTable.name}</option>
+                    <option value={step.cteName}>{step.cteName}</option>
+                  </select>
+                </div>
+                
+                {/* Ex 2: Filter in Main Query */}
+                {step.id === 2 && part2Status === 'correct' && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center gap-3 mt-4 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+                    <span className="text-indigo-400 font-bold">WHERE</span>
+                    <select value={filterCol} onChange={(e) => {setFilterCol(e.target.value); setPart3Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                      <option value="" disabled>column</option>
+                      {step.expectedCols.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <select value={filterOp} onChange={(e) => {setFilterOp(e.target.value); setPart3Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-pink-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                      <option value="" disabled>op</option>
+                      <option value="=">=</option>
+                      <option value=">">&gt;</option>
+                      <option value="<">&lt;</option>
+                    </select>
+                    <select value={filterVal} onChange={(e) => {setFilterVal(e.target.value); setPart3Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                      <option value="" disabled>value</option>
+                      <option value="55000">55000</option>
+                      <option value="60000">60000</option>
+                      <option value="'Sales'">'Sales'</option>
+                    </select>
+                  </motion.div>
+                )}
+                
+                {(!step.expectedFilter || (step.id === 3 && part2Status !== 'correct')) && (
+                  <div className="text-white font-bold mt-2">;</div>
+                )}
               </motion.div>
             )}
 
           </div>
 
           <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
-            {step1Status !== 'correct' ? (
+            {part1Status !== 'correct' ? (
               <>
-                {step1Status === 'idle' && <button onClick={handleStep1Submit} disabled={!agg || !col || !group} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Build Mini-Table</button>}
-                {step1Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Incorrect CTE definition. Try again!</div><button onClick={() => setStep1Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
+                {part1Status === 'idle' && <button onClick={handlePart1Submit} disabled={!col1 || !col2 || !col3} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Build Mini-Table</button>}
+                {part1Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Incorrect CTE columns. Try again!</div><button onClick={() => setPart1Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
               </>
+            ) : part2Status !== 'correct' ? (
+              <>
+                {part2Status === 'idle' && <button onClick={handlePart2Submit} disabled={!mainSelect || !mainFrom} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Peek Inside CTE</button>}
+                {part2Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Incorrect Main Query. Check the hints!</div><button onClick={() => setPart2Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
+              </>
+            ) : step.id === 1 ? (
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">CTE Executed Successfully!</div>
             ) : (
               <>
-                {step2Status === 'idle' && <button onClick={handleStep2Submit} disabled={!filterCol || !filterOp || !filterVal} className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Execute Main Query</button>}
-                {step2Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Filter logic incorrect. Check the mini-table!</div><button onClick={() => setStep2Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
-                {step2Status === 'correct' && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">CTE Executed Successfully!</div>}
+                {part3Status === 'idle' && <button onClick={handlePart3Submit} disabled={!filterCol || !filterOp || !filterVal} className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Apply Filter</button>}
+                {part3Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Filter logic incorrect!</div><button onClick={() => setPart3Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
+                {part3Status === 'correct' && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">Filter Applied Successfully!</div>}
               </>
             )}
           </div>
@@ -4128,162 +4363,238 @@ const CteLesson: React.FC<LessonModuleProps> = ({
           Interactive Lesson
         </span>
         <h1 className="text-4xl font-black text-white mt-2 mb-6">
-          Common Table Expressions: <span className="text-indigo-400 font-bold">CTE</span>
+          Common Table Expressions:{' '}
+          <span className="text-indigo-400 font-bold">CTE</span>
         </h1>
       </div>
 
       <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
         <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
-            So far we have been exploring writing queries using SELECT, WHERE, FROM, ORDER BY, GROUP BY, LEFT JOIN, and INNER JOIN. And all of these instances involved you writing a query in one 'code block', we didn't 
-            really divide our logic. But in the real world this will be an issue. As an analyst you will be dealing with queries that expand hundreds of lines sometimes and if you write all that logic within a single 'code block'
-            it's going to get messy real quick!
+            So far we have been exploring writing queries using SELECT, WHERE,
+            FROM, ORDER BY, GROUP BY, LEFT JOIN, and INNER JOIN. And all of
+            these instances involved you writing a query in one 'code block', we
+            didn't really divide our logic. But in the real world this will be
+            an issue. As an analyst you will be dealing with queries that expand
+            hundreds of lines sometimes and if you write all that logic within a
+            single 'code block' it's going to get messy real quick!
           </p>
           <p>
-            A <strong>Common Table Expression (CTE)</strong> solves this problem really easily by allowing your code to be readable and reusable (and also allows you to break down logic and structure really efficiently).
+            A <strong>Common Table Expression (CTE)</strong> solves this problem
+            really easily by allowing your code to be readable and reusable (and
+            also allows you to break down logic and structure really
+            efficiently).
           </p>
-          
+
           <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-6 mt-6 shadow-md">
-            <h3 className="text-white font-bold mb-4">Why professionals use CTEs:</h3>
+            <h3 className="text-white font-bold mb-4">
+              Why professionals use CTEs:
+            </h3>
             <ul className="space-y-4 text-base">
               <li className="flex items-start gap-4">
                 <span className="text-indigo-400 text-xl font-black">1</span>
                 <div>
-                  <strong className="text-white block mb-1">Readability (Top-Down Logic)</strong>
-                  Because CTEs sit at the top of your script, another analyst reading your code can read it naturally from top to bottom and immediately understand your logic steps.
+                  <strong className="text-white block mb-1">
+                    Readability (Top-Down Logic)
+                  </strong>
+                  Because CTEs sit at the top of your script, another analyst
+                  reading your code can read it naturally from top to bottom and
+                  immediately understand your logic steps.
                 </div>
               </li>
               <li className="flex items-start gap-4">
                 <span className="text-indigo-400 text-xl font-black">2</span>
                 <div>
-                  <strong className="text-white block mb-1">Breaking Down Complexity</strong>
-                  Instead of writing one massive, terrifying query, you can break a huge problem down into 3 or 4 small, easily testable mini-tables.
+                  <strong className="text-white block mb-1">
+                    Breaking Down Complexity
+                  </strong>
+                  Instead of writing one massive, terrifying query, you can
+                  break a huge problem down into 3 or 4 small, easily testable
+                  mini-tables.
                 </div>
               </li>
               <li className="flex items-start gap-4">
                 <span className="text-indigo-400 text-xl font-black">3</span>
                 <div>
                   <strong className="text-white block mb-1">Reusability</strong>
-                  Once you define a CTE at the top of your page, you can reference it as many times as you want in your main query!
+                  Once you define a CTE at the top of your page, you can
+                  reference it as many times as you want in your main query!
                 </div>
               </li>
             </ul>
           </div>
 
-          <p className="pt-4">You can think of a CTE as allowing you to create <strong>'mini tables'</strong>.</p>
+          <p className="pt-4">
+            You can think of a CTE as allowing you to create{' '}
+            <strong>'mini tables'</strong>.
+          </p>
         </div>
-        <div className="max-w-5xl mt-4 space-y-8">
+         <div className="max-w-5xl mt-4 space-y-8">
         <h4 className="text-3xl font-black text-white mb-6">Let's work through an example:</h4>
         
         <p className="text-lg text-zinc-300">
-          Imagine your boss gives you the raw <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">coffee_sales</code> table below and says: <em>"Find me all the Espresso drinks we sell!"</em> 
+          Imagine your boss gives you the raw <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">coffee_sales</code> master table below and says: <em>"Find me all the Espresso drinks we sell! I only want to see the drink name, category, and price."</em> 
         </p>
 
-        <div className="bg-zinc-950/50 border-l-4 border-indigo-500 p-6 md:p-8 rounded-r-2xl shadow-lg">
-          <h5 className="text-indigo-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 1: Build the Mini-Table</h5>
-          <p className="text-lg text-zinc-300 mb-6">
-            First, we use the <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">WITH</code> keyword to name our mini-table, and then we wrap our logic inside parentheses to just grab the specific columns we want. Let's name our mini-table <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">drink_list</code>.
-          </p>
-          
-          <div className="flex flex-col xl:flex-row gap-8 items-start">
-            {/* Step 1 Code */}
-            <div className="w-full xl:w-1/2 bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
-              <div className="text-zinc-500 italic mb-1">-- Step 1: Declare the CTE</div>
-              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
-              <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-amber-400 font-normal">drink</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">category</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">price</span></div>
-              <div className="pl-8 text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">coffee_sales</span></div>
-              <div className="text-zinc-500 font-bold">)</div>
-              
-              <div className="text-zinc-500 italic mt-6 mb-1">-- Let's run a quick SELECT to see our Mini-Table:</div>
-              <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
-              <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">drink_list</span>;</div>
-            </div>
-
-            {/* Step 1 Output Table */}
-            <div className="w-full xl:w-1/2 border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md">
-              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">CTE OUTPUT: drink_list</div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-base">
-                  <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
-                    <tr>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">drink</th>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">category</th>
-                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-indigo-500/10">
-                    <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Latte</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">5</td>
-                    </tr>
-                    <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Cold Brew</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Coffee</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
-                    </tr>
-                    <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Mocha</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
-                      <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
+        {/* 🌟 NEW: THE RAW MASTER TABLE 🌟 */}
+        <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg">
+          <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+            Raw Master Table: coffee_sales
           </div>
-          <p>Notice how the drink_list cte is only returning the drink, category, and price columns from the larger coffee_sales table. Then we have a SELECT 
-            statement outside the paranthesis that returns all the columns from the drink_list cte. So you get drink, category, and price columns outputted.
-          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-base">
+              <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                <tr>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">transaction_id</th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">drink</th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">category</th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">price</th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">barista</th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">time</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                <tr className="hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">101</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">Latte</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">5</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">Alice</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">08:00 AM</td>
+                </tr>
+                <tr className="hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">102</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">Cold Brew</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">Coffee</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">Bob</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">08:15 AM</td>
+                </tr>
+                <tr className="hover:bg-zinc-800/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">103</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">Mocha</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">Charlie</td>
+                  <td className="px-4 py-3 font-mono text-base text-zinc-500">08:30 AM</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="bg-zinc-950/50 border-l-4 border-emerald-500 p-6 md:p-8 rounded-r-2xl shadow-lg mt-8">
-          <h5 className="text-emerald-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 2: Filter the Mini-Table</h5>
+        {/* STEP 1 */}
+        <div className="bg-zinc-950/50 border-l-4 border-indigo-500 p-6 md:p-8 rounded-r-2xl shadow-lg mt-8">
+          <h5 className="text-indigo-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 1: Build the Mini-Table</h5>
           <p className="text-lg text-zinc-300 mb-6">
-            Now that our <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">drink_list</code> mini-table exists in memory, we can treat it just like a real database table! We write our main query right underneath it and apply our <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">WHERE</code> clause to find the Espresso.
+            First, we have to use the <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">WITH</code> keyword to create a CTE named <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">drink_list</code>. Inside the parentheses, we write a standard query to select just the 3 columns we need, leaving the rest of the noise behind.
           </p>
           
-          <div className="flex flex-col xl:flex-row gap-8 items-start">
-            {/* Step 2 Code */}
-            <div className="w-full xl:w-1/2 bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
-              <div className="text-zinc-500 italic mb-2">-- Our CTE from Step 1 is still up here...</div>
-              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
-              <div className="pl-8 text-zinc-500 italic">...</div>
-              <div className="text-zinc-500 font-bold mb-6">)</div>
-              
-              <div className="text-zinc-500 italic mb-1">-- Step 2: The Main Query</div>
-              <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
-              <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">drink_list</span></div>
-              <div className="text-indigo-400 font-bold">WHERE <span className="text-amber-400 font-normal">category</span> <span className="text-pink-400 font-bold">=</span> <span className="text-emerald-400 font-normal">'Espresso'</span>;</div>
-            </div>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+            <div className="text-zinc-500 italic mb-1">-- Step 1: Declare the CTE</div>
+            <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+            <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-amber-400 font-normal">drink</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">category</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">price</span></div>
+            <div className="pl-8 text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">coffee_sales</span></div>
+            <div className="text-zinc-500 font-bold">)</div>
+          </div>
+        </div>
 
-            {/* Step 2 Output Table */}
-            <div className="w-full xl:w-1/2 border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md">
-              <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">Final Output Result</div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-base">
-                  <thead className="bg-black/40 border-b border-emerald-500/20">
-                    <tr>
-                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">drink</th>
-                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">category</th>
-                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">price</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-emerald-500/10">
-                    <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Latte</td>
-                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Espresso</td>
-                      <td className="px-4 py-3 font-mono text-base font-bold text-white">5</td>
-                    </tr>
-                    <tr className="hover:bg-zinc-800/30 transition-colors">
-                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Mocha</td>
-                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Espresso</td>
-                      <td className="px-4 py-3 font-mono text-base font-bold text-white">6</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+        {/* STEP 2 */}
+        <div className="bg-zinc-950/50 border-l-4 border-indigo-500 p-6 md:p-8 rounded-r-2xl shadow-lg mt-8">
+          <h5 className="text-indigo-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 2: Peek Inside the Mini-Table</h5>
+          <p className="text-lg text-zinc-300 mb-6">
+            Now we need to show the data within the CTE! Right below the closing parenthesis, we write a main query to <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">SELECT *</code> from our new mini-table so we can see what we built. After writing the main sql query outside the CTE, we can run the code to see the output of the CTE.
+          </p>
+          
+          {/* Code Block */}
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
+            <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+            <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-amber-400 font-normal">drink</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">category</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">price</span></div>
+            <div className="pl-8 text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">coffee_sales</span></div>
+            <div className="text-zinc-500 font-bold">)</div>
+            <div className="text-zinc-500 italic mt-4 mb-1">-- Run a quick SELECT to see our Mini-Table:</div>
+            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">drink_list</span>;</div>
+          </div>
+
+          {/* Output Table */}
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">CTE OUTPUT: drink_list</div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">drink</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">category</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">price</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-500/10">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Latte</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">5</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Cold Brew</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Coffee</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Mocha</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* STEP 3 */}
+        <div className="bg-zinc-950/50 border-l-4 border-emerald-500 p-6 md:p-8 rounded-r-2xl shadow-lg mt-8">
+          <h5 className="text-emerald-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 3: Filter the Mini-Table</h5>
+          <p className="text-lg text-zinc-300 mb-6">
+            Finally, we modify the <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">SELECT</code> statement that is outside our CTE and apply a <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">WHERE</code> filter to find just the Espresso drinks. The CTE acts exactly like a real table!
+          </p>
+          
+          {/* Code Block */}
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
+            <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+            <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-amber-400 font-normal">drink</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">category</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">price</span></div>
+            <div className="pl-8 text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">coffee_sales</span></div>
+            <div className="text-zinc-500 font-bold">)</div>
+            <div className="text-zinc-500 italic mt-4 mb-1">-- Main query with a filter applied:</div>
+            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">drink_list</span></div>
+            <div className="text-indigo-400 font-bold">WHERE <span className="text-amber-400 font-normal">category</span> <span className="text-pink-400 font-bold">=</span> <span className="text-emerald-400 font-normal">'Espresso'</span>;</div>
+          </div>
+
+          {/* Output Table */}
+          <div className="border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md">
+            <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">Final Output Result</div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-black/40 border-b border-emerald-500/20">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">drink</th>
+                    <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">category</th>
+                    <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">price</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-emerald-500/10">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base font-bold text-white">Latte</td>
+                    <td className="px-4 py-3 font-mono text-base font-bold text-white">Espresso</td>
+                    <td className="px-4 py-3 font-mono text-base font-bold text-white">5</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base font-bold text-white">Mocha</td>
+                    <td className="px-4 py-3 font-mono text-base font-bold text-white">Espresso</td>
+                    <td className="px-4 py-3 font-mono text-base font-bold text-white">6</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -4291,10 +4602,44 @@ const CteLesson: React.FC<LessonModuleProps> = ({
       </div>
 
       {/* --- NEW STEP-BY-STEP EXAMPLE --- */}
-      
+     
       {/* --- END STEP-BY-STEP EXAMPLE --- */}
 
-      <div className="mt-12">
+      {/* 🌟 MOVED SYNTAX EXAMPLES TO AFTER THE WALKTHROUGH 🌟 */}
+     {/* 🌟 SYNTAX EXAMPLES 🌟 */}
+      <div className="max-w-4xl mt-16 space-y-6">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+          Syntax Examples
+        </h3>
+        
+        {/* Single CTE */}
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+          <div className="text-zinc-500 italic mb-1">-- 1. Single CTE</div>
+          <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">mini_table</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+          <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span> FROM <span className="text-amber-400 font-normal">original_table</span></div>
+          <div className="text-zinc-500 font-bold">)</div>
+          <div className="text-indigo-400 font-bold mt-2">SELECT <span className="text-white font-normal">*</span> FROM <span className="text-amber-400 font-normal">mini_table</span>;</div>
+        </div>
+
+        {/* Multiple CTEs */}
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+          <div className="text-zinc-500 italic mb-1">-- 2. Multiple CTEs (Separated by a comma!)</div>
+          <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">apartment_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+          <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span> FROM <span className="text-amber-400 font-normal">apartments</span></div>
+          <div className="text-zinc-500 font-bold">)<span className="text-white font-bold">,</span></div>
+          
+          <div className="text-amber-400 font-normal mt-2">tenant_history <span className="text-indigo-400 font-bold">AS</span> <span className="text-zinc-500 font-bold">(</span></div>
+          <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span> FROM <span className="text-amber-400 font-normal">history</span></div>
+          <div className="text-zinc-500 font-bold">)</div>
+
+          <div className="text-indigo-400 font-bold mt-4">SELECT <span className="text-white font-normal">*</span></div>
+          <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">apartment_list</span></div>
+          <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">tenant_history</span></div>
+          <div className="text-indigo-400 font-bold">ON <span className="text-amber-400 font-normal">apartment_list.unit</span> <span className="text-pink-400 font-bold">=</span> <span className="text-amber-400 font-normal">tenant_history.unit</span>;</div>
+        </div>
+      </div>
+
+      <div className="mt-16">
         <h2 className="text-3xl font-black text-white mb-8">Examples</h2>
         {CTE_EXAMPLES.map((step, idx) => (
           <InteractiveCteExample
@@ -4327,17 +4672,225 @@ const CteLesson: React.FC<LessonModuleProps> = ({
   );
 };
 
+
+const STUDY_TOPICS = [
+  {
+    title: "UNION vs UNION ALL",
+    concept: "Combining Result Sets",
+    description: "Both stack the results of two queries on top of each other. The brutal difference is performance and duplicates.",
+    details: "UNION ALL is the fast, lazy one—it just stacks the data and moves on. UNION is the slow, perfectionist one—it runs a hidden DISTINCT operation to find and remove every single duplicate row. In an interview, always mention that UNION ALL is significantly faster.",
+    syntax: "-- UNION ALL (Faster)\nSELECT name FROM nyc_rentals\nUNION ALL\nSELECT name FROM nj_rentals;\n\n-- UNION (Slower, removes duplicates)\nSELECT category FROM coffee_sales\nUNION\nSELECT category FROM snack_sales;"
+  },
+  {
+    title: "INNER vs LEFT JOIN",
+    concept: "Table Relationships",
+    description: "The 'Strict Bouncer' vs the 'Safe Keeper'.",
+    details: "An INNER JOIN only returns rows where there is a perfect match in both tables. If a record doesn't have a partner, it's deleted. A LEFT JOIN keeps everything from the 'Left' table, filling in the blanks with NULL if there is no match on the right.",
+    syntax: "-- Only customers with orders\nSELECT * FROM customers\nINNER JOIN orders ON c.id = o.cust_id;\n\n-- All customers, even window shoppers\nSELECT * FROM customers\nLEFT JOIN orders ON c.id = o.cust_id;"
+  },
+  {
+    title: "The Accidental INNER JOIN",
+    concept: "The LEFT JOIN Trap",
+    description: "How a WHERE clause can secretly destroy your LEFT JOIN logic.",
+    details: "If you LEFT JOIN two tables but then add a WHERE clause that filters for a specific value in the 'Right' table, you have accidentally turned it into an INNER JOIN. This is because NULL rows don't meet the WHERE criteria. To fix it, move that filter logic up into the ON clause.",
+    syntax: "-- WRONG: Turns it into an INNER JOIN\nSELECT * FROM users\nLEFT JOIN subs ON u.id = s.user_id\nWHERE s.plan = 'Premium';\n\n-- RIGHT: Keeps it a LEFT JOIN\nSELECT * FROM users\nLEFT JOIN subs ON u.id = s.user_id AND s.plan = 'Premium';"
+  },
+  {
+    title: "Finding Missing Records",
+    concept: "Anti-Joins",
+    description: "Identifying orphans (e.g., users who never bought anything).",
+    details: "There are two main ways to do this. You can use a LEFT JOIN and filter for WHERE [id] IS NULL, or use NOT EXISTS. In many modern databases (like PostgreSQL), NOT EXISTS is often more readable and sometimes faster.",
+    syntax: "-- Option A: The LEFT JOIN method\nSELECT name FROM users\nLEFT JOIN orders ON users.id = orders.user_id\nWHERE orders.id IS NULL;\n\n-- Option B: The NOT EXISTS method\nSELECT name FROM users\nWHERE NOT EXISTS (SELECT 1 FROM orders WHERE user_id = users.id);"
+  },
+  {
+    title: "SELECT DISTINCT vs GROUP BY",
+    concept: "Deduplication",
+    description: "When to use each for unique lists.",
+    details: "SELECT DISTINCT is best for simple deduplication of a final list. GROUP BY is required when you need to perform math (aggregations like SUM or COUNT) on those unique categories. Use DISTINCT for lists, GROUP BY for metrics.",
+    syntax: "-- Use DISTINCT for unique names\nSELECT DISTINCT category FROM inventory;\n\n-- Use GROUP BY for counts\nSELECT category, COUNT(*) FROM inventory GROUP BY category;"
+  },
+  {
+    title: "FULL OUTER JOIN",
+    concept: "The Ultimate Connection",
+    description: "Finding non-matches on both sides.",
+    details: "A FULL OUTER JOIN is rare but powerful. It returns all records when there is a match in either left or right table records. It is the best tool for identifying 'orphan' records on both sides of a relationship simultaneously.",
+    syntax: "SELECT * FROM contractors\nFULL OUTER JOIN projects\nON contractors.id = projects.lead_id;"
+  },
+  {
+    title: "Window Functions (ROW_NUMBER)",
+    concept: "Advanced Ranking",
+    description: "Numbering rows without collapsing them.",
+    details: "Unlike GROUP BY, Window Functions let you calculate values across a set of rows while still seeing every individual row. ROW_NUMBER() combined with PARTITION BY allows you to restart the count for every new category (like ranking sales per barista).",
+    syntax: "SELECT barista, drink, \nROW_NUMBER() OVER(PARTITION BY barista ORDER BY price DESC) as rank\nFROM coffee_sales;"
+  },
+  {
+    title: "Handling NULL Values",
+    concept: "Data Integrity",
+    description: "COALESCE and the AVG() trap.",
+    details: "NULL values can ruin your math. For example, AVG() completely ignores NULL rows, which might artificially inflate your numbers. Use COALESCE(column, 0) to turn those blanks into zeros so your averages remain honest.",
+    syntax: "-- Treat missing salaries as 0\nSELECT AVG(COALESCE(salary, 0)) FROM employees;"
+  },
+  {
+    title: "Data Cleaning (TRIM/LOWER)",
+    concept: "Standardization",
+    description: "Fixing messy text entry.",
+    details: "Databases are only as good as the data entered. TRIM() removes accidental spaces, and LOWER() ensures 'Apple' and 'apple' are treated as the same item. Always use these when joining on text columns.",
+    syntax: "SELECT * FROM leads\nWHERE LOWER(TRIM(email)) = 'animesh@tech.com';"
+  }
+];
+
+const FLASHCARDS = [
+  { q: "Which is faster: UNION or UNION ALL?", a: "UNION ALL. It doesn't waste time checking for duplicates." },
+  { q: "What happens if you filter the Right table of a LEFT JOIN in a WHERE clause?", a: "It turns into an INNER JOIN. The NULL rows are filtered out." },
+  { q: "What does COALESCE do?", a: "It returns the first non-NULL value. Perfect for replacing blanks with zeros." },
+  { q: "When should you use GROUP BY instead of SELECT DISTINCT?", a: "When you need to perform an aggregation (SUM, COUNT, AVG) on the groups." },
+  { q: "How do you find all 'orphan' records on both sides of a table link?", a: "Use a FULL OUTER JOIN." },
+  { q: "Does AVG() include NULL values in its calculation?", a: "No, it ignores them entirely. Use COALESCE to include them as zeros." }
+];
+
+const CoreConceptsLesson: React.FC<LessonModuleProps> = ({ onComplete }) => {
+  const [openAccordion, setOpenAccordion] = useState<number | null>(null);
+  const [activeCard, setActiveCard] = useState<number>(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <div className="w-full flex flex-col gap-12 pb-32">
+      <div className="max-w-3xl">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">Module 8</span>
+        <h1 className="text-4xl font-black text-white mt-2 mb-6">SQL Core Concepts & <span className="text-indigo-400">Interview Prep</span></h1>
+        <p className="text-zinc-400 text-lg">This is the 'brutally honest' guide to the nuances of SQL. These are the concepts that separate junior analysts from the pros.</p>
+      </div>
+
+      {/* 🌟 ACCORDION GLOSSARY 🌟 */}
+      <div className="max-w-5xl flex flex-col gap-4">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-2">Concept Glossary</h3>
+        {STUDY_TOPICS.map((topic, idx) => (
+          <div key={idx} className="border border-zinc-800 rounded-2xl overflow-hidden bg-zinc-900/20 transition-all">
+            <button 
+              onClick={() => setOpenAccordion(openAccordion === idx ? null : idx)}
+              className="w-full p-6 text-left flex justify-between items-center hover:bg-zinc-800/30 transition-colors"
+            >
+              <div>
+                <span className="text-xs font-bold text-indigo-500 uppercase block mb-1">{topic.concept}</span>
+                <h4 className="text-xl font-bold text-white">{topic.title}</h4>
+              </div>
+              <span className={`text-2xl transition-transform duration-300 ${openAccordion === idx ? 'rotate-45 text-pink-500' : 'text-zinc-600'}`}>+</span>
+            </button>
+            
+            <AnimatePresence>
+              {openAccordion === idx && (
+                <motion.div 
+                  initial={{ height: 0, opacity: 0 }} 
+                  animate={{ height: 'auto', opacity: 1 }} 
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-8 pt-0 border-t border-zinc-800/50 flex flex-col gap-6">
+                    <p className="text-zinc-300 text-lg leading-relaxed mt-6">{topic.description}</p>
+                    <div className="bg-zinc-950/50 p-6 rounded-xl border border-zinc-800 shadow-inner">
+                       <h5 className="text-white font-bold mb-2">The Brutal Truth:</h5>
+                       <p className="text-zinc-400 leading-relaxed">{topic.details}</p>
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3 italic">Syntax Snippet</h5>
+                      <div className="bg-zinc-950 rounded-xl p-6 font-mono text-base text-amber-400 whitespace-pre overflow-x-auto shadow-lg border border-zinc-800">
+                        {topic.syntax}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+
+      {/* 🌟 FLASHCARDS SECTION (PURE TAILWIND 3D) 🌟 */}
+      <div className="mt-16 max-w-4xl mx-auto w-full flex flex-col items-center gap-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-black text-white mb-2 italic underline decoration-indigo-500">The Flashcard Gauntlet</h2>
+          <p className="text-zinc-500">Click the card to reveal the answer. Can you go 6 for 6?</p>
+        </div>
+
+        {/* 3D Container using arbitrary perspective value */}
+        <div 
+          className="w-full max-w-md h-72 cursor-pointer [perspective:1000px]" 
+          onClick={() => setIsFlipped(!isFlipped)}
+        >
+          <motion.div 
+            className="relative w-full h-full transition-all duration-500 [transform-style:preserve-3d]"
+            animate={{ rotateY: isFlipped ? 180 : 0 }}
+          >
+            {/* Front of Card */}
+            <div className="absolute inset-0 bg-indigo-600 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[0_0_40px_rgba(79,70,229,0.3)] border-2 border-indigo-400 [backface-visibility:hidden]">
+              <span className="text-xs font-black text-indigo-200 uppercase tracking-tighter mb-4 opacity-50 italic">
+                Question {activeCard + 1} of {FLASHCARDS.length}
+              </span>
+              <h3 className="text-2xl font-black text-white leading-tight">
+                {FLASHCARDS[activeCard].q}
+              </h3>
+              <div className="mt-8 text-indigo-300 font-bold text-sm animate-pulse italic">
+                Tap to flip ↺
+              </div>
+            </div>
+            
+            {/* Back of Card */}
+            <div className="absolute inset-0 bg-emerald-600 rounded-3xl p-8 flex flex-col items-center justify-center text-center shadow-[0_0_40px_rgba(16,185,129,0.3)] border-2 border-emerald-400 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <span className="text-xs font-black text-emerald-200 uppercase tracking-tighter mb-4 opacity-50 italic underline decoration-emerald-800">
+                The Pro Answer
+              </span>
+              <p className="text-xl font-bold text-white leading-relaxed">
+                {FLASHCARDS[activeCard].a}
+              </p>
+              <div className="mt-8 text-emerald-950 font-black text-sm italic">
+                Understood! ➔
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex gap-4">
+          <button 
+            disabled={activeCard === 0}
+            onClick={() => { setActiveCard(c => c - 1); setIsFlipped(false); }}
+            className="px-6 py-2 rounded-full bg-zinc-800 text-zinc-400 font-bold disabled:opacity-20 hover:bg-zinc-700 transition-colors"
+          >
+            Previous
+          </button>
+          <button 
+            onClick={() => {
+              if (activeCard === FLASHCARDS.length - 1) {
+                onComplete();
+              } else {
+                setActiveCard(c => c + 1);
+                setIsFlipped(false);
+              }
+            }}
+            className="px-8 py-2 rounded-full bg-white text-black font-black hover:scale-105 transition-transform"
+          >
+            {activeCard === FLASHCARDS.length - 1 ? 'Finish Module' : 'Next Card'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+// ==========================================
+// 3. THE REGISTRY & HOST
+// ==========================================
 // ==========================================
 // 3. THE REGISTRY & HOST
 // ==========================================
 const LESSON_REGISTRY: Record<string, React.FC<LessonModuleProps>> = {
-  select: SelectLesson,
-  where: WhereLesson,
-  'order by': OrderByLesson,
-  'group by': GroupByLesson,
-  'left join': LeftJoinLesson,
-  'inner join':InnerJoinLesson,
+  'select': SelectLesson,
+  'where': WhereLesson,
+  'order-by': OrderByLesson,     // <-- Added hyphen
+  'group-by': GroupByLesson,     // <-- Added hyphen
+  'left-join': LeftJoinLesson,   // <-- Added hyphen
+  'inner-join': InnerJoinLesson, // <-- Added hyphen
   'cte': CteLesson,
+  'core-concepts': CoreConceptsLesson, // <-- Added hyphen
 };
 
 export default function Lesson() {
