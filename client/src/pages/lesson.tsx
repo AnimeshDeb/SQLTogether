@@ -32,6 +32,13 @@ interface OrderByStepData {
   expected: { col1: string; dir1: string; col2?: string; dir2?: string };
 }
 
+interface AggStepData {
+  title: string;
+  prompt: string;
+  type: 'agg' | 'groupby';
+  expected: { aggFunc: string; col: string; groupByCol?: string };
+}
+
 // ==========================================
 // MODULE 1: THE "SELECT" LESSON
 // ==========================================
@@ -66,18 +73,22 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-16 pb-16">
+    <div className="w-full flex flex-col gap-12 pb-32">
       <div className="max-w-3xl">
-        <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
           Interactive Lesson
         </span>
-        <h1 className="text-4xl font-black text-white mt-2 mb-4">
-          The SELECT Statement
+        <h1 className="text-4xl font-black text-white mt-2 mb-6">
+          The <span className="text-indigo-400 font-bold">SELECT</span>{' '}
+          Statement
         </h1>
-        <div className="text-slate-300 leading-relaxed space-y-4 text-lg">
+      </div>
+
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
             The{' '}
-            <code className="bg-slate-800 text-blue-400 px-2 py-0.5 rounded font-mono text-sm">
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
               SELECT
             </code>{' '}
             keyword tells the database <strong>which columns</strong> of data
@@ -85,94 +96,127 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
           </p>
         </div>
       </div>
-      <hr className="border-slate-800" />
+
+      <div className="max-w-4xl mt-4">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+          Syntax Example
+        </h3>
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner">
+          <div className="text-indigo-400 font-bold">
+            SELECT <span className="text-white font-normal">*</span>
+          </div>
+          <div className="text-indigo-400 font-bold">
+            FROM <span className="text-amber-400 font-normal">table_name</span>;
+          </div>
+        </div>
+      </div>
+
+      <hr className="border-zinc-800/50" />
       <div className="w-full flex flex-col xl:flex-row gap-8">
-        <div className="w-full xl:w-1/2 flex flex-col gap-4">
-          <div className="bg-[#141620] border border-slate-800 rounded-xl p-6 shadow-lg h-full">
-            <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-              <span className="bg-blue-500 text-slate-900 w-6 h-6 rounded-full flex items-center justify-center text-sm">
+        <div className="w-full xl:w-1/2 flex flex-col gap-6">
+          <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl h-full">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
+              <span className="bg-indigo-600 text-white w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black shadow-lg">
                 1
               </span>{' '}
               Example Problem
             </h2>
-            <p className="text-slate-400 mb-6">
-              "Return all <strong>order_details</strong> for each customer from
-              the <strong>customers</strong> table."
+            <p className="text-zinc-400 mb-6 text-lg">
+              Return all{' '}
+              <strong className="text-amber-400 font-mono text-base">
+                order_details
+              </strong>{' '}
+              for each customer from the{' '}
+              <strong className="text-amber-400 font-mono text-base">
+                customers
+              </strong>{' '}
+              table by clicking on the column in the table and then clicking 'Submit Query.'
             </p>
-            <div className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-900/20">
-              <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/50">
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
                 Table: customers
               </div>
-              <table className="w-full text-left text-sm cursor-pointer">
-                <thead className="bg-slate-900/80">
-                  <tr>
-                    {['cust_id', 'name', 'order_details'].map((col) => (
-                      <th
-                        key={col}
-                        onClick={() => toggleColumn(col)}
-                        className={`px-4 py-3 font-mono border-b-2 transition-colors ${selectedColumns.includes(col) ? 'border-blue-500 text-blue-400 bg-blue-500/10' : 'border-transparent text-slate-300 hover:bg-slate-800/50'}`}
-                      >
-                        {col}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50 opacity-50 pointer-events-none">
-                  <tr>
-                    <td className="px-4 py-3 font-mono text-xs">101</td>
-                    <td className="px-4 py-3 font-mono text-xs">Alice</td>
-                    <td className="px-4 py-3 font-mono text-xs">2x Widget A</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base cursor-pointer">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      {['cust_id', 'name', 'order_details'].map((col) => (
+                        <th
+                          key={col}
+                          onClick={() => toggleColumn(col)}
+                          className={`px-4 py-3 font-mono font-bold uppercase tracking-tight italic transition-colors ${selectedColumns.includes(col) ? 'text-indigo-400 bg-indigo-500/10' : 'text-zinc-500 hover:text-indigo-300 hover:bg-zinc-800/50'}`}
+                        >
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/50 opacity-50 pointer-events-none">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        101
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Alice
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        2x Widget A
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
+
         <div className="w-full xl:w-1/2 flex flex-col">
           <div
-            className={`bg-[#141620] border-2 rounded-xl overflow-hidden flex flex-col flex-1 shadow-lg transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-slate-800'}`}
+            className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col flex-1 shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
           >
-            <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+              <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
                 Your Query
               </span>
             </div>
-            <div className="p-8 flex-1 bg-[#0f111a] font-mono text-xl flex items-center justify-center">
-              <pre className="text-blue-400">
-                <span className="text-purple-400">SELECT</span>{' '}
-                {selectedColumns.length > 0
-                  ? selectedColumns.join(', ')
-                  : '...'}{' '}
+            <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-4">
+              <div>
+                <span className="text-indigo-400 font-bold">SELECT</span>{' '}
+                <span className="text-amber-400">
+                  {selectedColumns.length > 0
+                    ? selectedColumns.join(', ')
+                    : '...'}
+                </span>
                 <br />
-                <span className="text-purple-400">FROM</span>{' '}
-                <span className="text-amber-300">customers</span>;
-              </pre>
+                <span className="text-indigo-400 font-bold">FROM</span>{' '}
+                <span className="text-amber-400">customers</span>;
+              </div>
             </div>
-            <div className="p-6 border-t border-slate-800 bg-[#141620]">
+            <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
               {feedback === 'idle' && (
                 <button
                   onClick={handleSubmit}
                   disabled={selectedColumns.length === 0}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-lg transition-all"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
                 >
                   Submit Query
                 </button>
               )}
               {feedback === 'wrong' && (
                 <div className="flex flex-col gap-4">
-                  <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold">
-                    Not quite!
+                  <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
+                    Not quite! Look at the requested column.
                   </div>
                   <button
                     onClick={() => setFeedback('idle')}
-                    className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-lg transition-all"
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
                   >
                     Try Again
                   </button>
                 </div>
               )}
               {feedback === 'correct' && (
-                <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold">
+                <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
                   Perfect!
                 </div>
               )}
@@ -180,6 +224,7 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
           </div>
         </div>
       </div>
+
       <div className="mt-8 flex justify-center">
         <button
           onClick={() =>
@@ -187,7 +232,7 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
               ? navigate(`/quest/${firstQuestId}`)
               : navigate('/home')
           }
-          className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black py-4 px-12 rounded-lg transition-all flex justify-center items-center gap-2"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
           Now Try It Yourself ➔
         </button>
@@ -218,11 +263,11 @@ const InteractiveWhereExample = ({
   );
 
   const handleSubmit = () => {
-    const isCorrect =
+    if (
       selectedCol === step.expected.col &&
       selectedOp === step.expected.op &&
-      selectedVal === step.expected.val;
-    if (isCorrect) {
+      selectedVal === step.expected.val
+    ) {
       setFeedback('correct');
       onPass();
     } else {
@@ -238,100 +283,106 @@ const InteractiveWhereExample = ({
   };
 
   return (
-    <div className="w-full flex flex-col xl:flex-row gap-8">
-      <div className="w-full xl:w-1/2 flex flex-col">
+    <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
+      <div className="w-full xl:w-1/2 flex flex-col gap-6">
         <div
-          className={`bg-[#141620] border ${isCompleted ? 'border-emerald-500/30' : 'border-slate-800'} rounded-xl p-6 shadow-lg h-full transition-all`}
+          className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl h-full transition-all`}
         >
-          <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
             <span
-              className={`${isCompleted ? 'bg-emerald-500' : 'bg-amber-500'} text-slate-900 w-6 h-6 rounded-full flex items-center justify-center text-sm font-black transition-colors`}
+              className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}
             >
               {isCompleted ? '✓' : index + 1}
             </span>
             {step.title}
           </h2>
-          <p className="text-slate-400 mb-6">{step.prompt}</p>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">
+            {step.prompt}
+          </p>
 
-          <div className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-900/20">
-            <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/50">
+          <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
               Table: {step.table}
             </div>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-900/80 border-b border-slate-700/50">
-                <tr>
-                  {Object.keys(step.data[0]).map((col) => (
-                    <th
-                      key={col}
-                      className="px-4 py-3 font-mono text-amber-400/70"
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {step.data.map((row, i) => {
-                  const rowValue = row[step.expected.col];
-                  const expectedValue = step.expected.val.replace(/'/g, '');
-                  let shouldFade = false;
-                  if (feedback === 'correct') {
-                    if (step.expected.op === '=')
-                      shouldFade = String(rowValue) !== expectedValue;
-                    if (step.expected.op === '>')
-                      shouldFade = Number(rowValue) <= Number(expectedValue);
-                    if (step.expected.op === '<')
-                      shouldFade = Number(rowValue) >= Number(expectedValue);
-                    if (step.expected.op === '>=')
-                      shouldFade = Number(rowValue) < Number(expectedValue);
-                    if (step.expected.op === '<=')
-                      shouldFade = Number(rowValue) > Number(expectedValue);
-                  }
-                  return (
-                    <tr
-                      key={i}
-                      className={`transition-opacity duration-700 ${shouldFade ? 'opacity-10' : 'opacity-100'}`}
-                    >
-                      {Object.values(row).map((val, j) => (
-                        <td
-                          key={j}
-                          className="px-4 py-3 font-mono text-xs text-slate-300"
-                        >
-                          {val}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    {Object.keys(step.data[0]).map((col) => (
+                      <th
+                        key={col}
+                        className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap"
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  {step.data.map((row, i) => {
+                    const rowValue = row[step.expected.col];
+                    const expectedValue = step.expected.val.replace(/'/g, '');
+                    let shouldFade = false;
+                    if (feedback === 'correct') {
+                      if (step.expected.op === '=')
+                        shouldFade = String(rowValue) !== expectedValue;
+                      if (step.expected.op === '>')
+                        shouldFade = Number(rowValue) <= Number(expectedValue);
+                      if (step.expected.op === '<')
+                        shouldFade = Number(rowValue) >= Number(expectedValue);
+                      if (step.expected.op === '>=')
+                        shouldFade = Number(rowValue) < Number(expectedValue);
+                      if (step.expected.op === '<=')
+                        shouldFade = Number(rowValue) > Number(expectedValue);
+                    }
+                    return (
+                      <tr
+                        key={i}
+                        className={`hover:bg-zinc-800/30 transition-all duration-700 ${shouldFade ? 'opacity-10' : 'opacity-100'}`}
+                      >
+                        {Object.values(row).map((val, j) => (
+                          <td
+                            key={j}
+                            className="px-4 py-3 font-mono text-base text-zinc-300 whitespace-nowrap"
+                          >
+                            {val}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
+
       <div className="w-full xl:w-1/2 flex flex-col">
         <div
-          className={`bg-[#141620] border-2 rounded-xl overflow-hidden flex flex-col flex-1 shadow-lg transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-slate-800'}`}
+          className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col flex-1 shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
         >
-          <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
               Query Builder
             </span>
           </div>
-          <div className="p-8 flex-1 bg-[#0f111a] font-mono text-xl flex flex-col justify-center gap-4">
-            <div className="text-blue-400">
-              <span className="text-purple-400">SELECT</span> * <br />
-              <span className="text-purple-400">FROM</span>{' '}
-              <span className="text-amber-300">{step.table}</span>
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
+            <div>
+              <span className="text-indigo-400 font-bold">SELECT</span>{' '}
+              <span className="text-white">*</span> <br />
+              <span className="text-indigo-400 font-bold">FROM</span>{' '}
+              <span className="text-amber-400">{step.table}</span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 bg-slate-800/30 p-4 rounded-lg border border-slate-800">
-              <span className="text-purple-400">WHERE</span>
+            <div className="flex flex-wrap items-center gap-3 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+              <span className="text-indigo-400 font-bold">WHERE</span>
               <select
                 value={selectedCol}
                 onChange={(e) => {
                   setSelectedCol(e.target.value);
                   setFeedback('idle');
                 }}
-                className="bg-slate-900 border border-slate-700 text-amber-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
               >
                 <option value="" disabled>
                   column
@@ -348,7 +399,7 @@ const InteractiveWhereExample = ({
                   setSelectedOp(e.target.value);
                   setFeedback('idle');
                 }}
-                className="bg-slate-900 border border-slate-700 text-pink-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                className="bg-zinc-950 border border-zinc-800 text-pink-400 font-bold font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
               >
                 <option value="" disabled>
                   operator
@@ -365,7 +416,7 @@ const InteractiveWhereExample = ({
                   setSelectedVal(e.target.value);
                   setFeedback('idle');
                 }}
-                className="bg-slate-900 border border-slate-700 text-emerald-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
               >
                 <option value="" disabled>
                   value
@@ -378,31 +429,31 @@ const InteractiveWhereExample = ({
               </select>
             </div>
           </div>
-          <div className="p-6 border-t border-slate-800 bg-[#141620]">
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
             {feedback === 'idle' && (
               <button
                 onClick={handleSubmit}
                 disabled={!selectedCol || !selectedOp || !selectedVal}
-                className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
               >
                 Run Filter
               </button>
             )}
             {feedback === 'wrong' && (
               <div className="flex flex-col gap-4">
-                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold">
+                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
                   Not quite! Check your logic.
                 </div>
                 <button
                   onClick={handleReset}
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-lg transition-all"
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
                 >
                   Reset Builder
                 </button>
               </div>
             )}
             {feedback === 'correct' && (
-              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold">
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
                 Great logic! Filter applied.
               </div>
             )}
@@ -422,10 +473,10 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
   const LESSON_STEPS: WhereStepData[] = [
     {
       title: '1. Exact Matching (=)',
-      prompt: "Find the user named 'Animesh' in our system logs.",
+      prompt: "Find the user named 'Ali' in our system logs.",
       table: 'users',
       data: [
-        { id: 1, name: 'Animesh', role: 'Instructor' },
+        { id: 1, name: 'Ali', role: 'Instructor' },
         { id: 2, name: 'Alice', role: 'Student' },
         { id: 3, name: 'Bob', role: 'Student' },
       ],
@@ -519,27 +570,154 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-16 pb-32">
+    <div className="w-full flex flex-col gap-12 pb-32">
       <div className="max-w-3xl">
-        <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
           Interactive Lesson
         </span>
-        <h1 className="text-4xl font-black text-white mt-2 mb-4">
-          The WHERE Clause
+        <h1 className="text-4xl font-black text-white mt-2 mb-6">
+          The <span className="text-indigo-400 font-bold">WHERE</span> Clause
         </h1>
-        <p className="text-slate-300 text-lg leading-relaxed">
-          The{' '}
-          <code className="bg-slate-800 text-amber-400 px-2 py-0.5 rounded font-mono text-sm">
-            WHERE
-          </code>{' '}
-          clause acts as a filter. While `SELECT` picks your{' '}
-          <strong>vertical</strong> columns, `WHERE` picks your{' '}
-          <strong>horizontal</strong> rows.
-        </p>
       </div>
+
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
+          <p>
+            The{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              WHERE
+            </code>{' '}
+            clause acts as a filter. While{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              SELECT
+            </code>{' '}
+            picks your <strong>vertical</strong> columns,{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              WHERE
+            </code>{' '}
+            picks your <strong>horizontal</strong> rows.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mt-4">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+          Syntax Examples
+        </h3>
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-6">
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Equals (Exact Match)
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">=</span>{' '}
+              <span className="text-emerald-400 font-normal">value</span>;
+            </div>
+          </div>
+
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Greater Than</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">&gt;</span>{' '}
+              <span className="text-emerald-400 font-normal">value</span>;
+            </div>
+          </div>
+
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Less Than</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">&lt;</span>{' '}
+              <span className="text-emerald-400 font-normal">value</span>;
+            </div>
+          </div>
+
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Greater Than or Equal To
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">&gt;=</span>{' '}
+              <span className="text-emerald-400 font-normal">value</span>;
+            </div>
+          </div>
+
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Less Than or Equal To
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">&lt;=</span>{' '}
+              <span className="text-emerald-400 font-normal">value</span>;
+            </div>
+          </div>
+
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Not Equal</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">!=</span>{' '}
+              <span className="text-emerald-400 font-normal">value</span>;
+            </div>
+          </div>
+        </div>
+      </div>
+
       {LESSON_STEPS.map((step, index) => (
         <React.Fragment key={index}>
-          <hr className="border-slate-800" />
+          <hr className="border-zinc-800/50 my-4" />
           <InteractiveWhereExample
             step={step}
             index={index}
@@ -548,8 +726,9 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
           />
         </React.Fragment>
       ))}
+
       <div className="mt-12 flex flex-col items-center gap-6">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-800 to-transparent"></div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
         <h3 className="text-xl font-bold text-white">Lesson Complete?</h3>
         <button
           onClick={() =>
@@ -557,7 +736,7 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
               ? navigate(`/quest/${firstQuestId}`)
               : navigate('/home')
           }
-          className="bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-5 px-16 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_30px_rgba(245,158,11,0.25)]"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
           Enter the Arena ➔
         </button>
@@ -637,89 +816,99 @@ const InteractiveOrderByExample = ({
   const columns = ['unit', 'rent', 'bedrooms'];
 
   return (
-    <div className="w-full flex flex-col xl:flex-row gap-8">
-      <div className="w-full xl:w-1/2 flex flex-col">
+    <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
+      <div className="w-full xl:w-1/2 flex flex-col gap-6">
         <div
-          className={`bg-[#141620] border ${isCompleted ? 'border-pink-500/30' : 'border-slate-800'} rounded-xl p-6 shadow-lg h-full transition-all`}
+          className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl h-full transition-all`}
         >
-          <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
             <span
-              className={`${isCompleted ? 'bg-pink-500 text-white' : 'bg-pink-400 text-slate-900'} w-6 h-6 rounded-full flex items-center justify-center text-sm font-black transition-colors`}
+              className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}
             >
               {isCompleted ? '✓' : index + 1}
             </span>
             {step.title}
           </h2>
-          <p className="text-slate-400 mb-6">{step.prompt}</p>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">
+            {step.prompt}
+          </p>
 
-          <div className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-900/20">
-            <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/50">
+          <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
               Table: apartments
             </div>
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-900/80 border-b border-slate-700/50">
-                <tr>
-                  {columns.map((col) => (
-                    <th
-                      key={col}
-                      className="px-4 py-3 font-mono text-pink-400/70"
-                    >
-                      {col}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/50">
-                {currentData.map((row) => (
-                  <motion.tr
-                    layout
-                    key={row.unit}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  >
-                    {columns.map((col, j) => (
-                      <td
-                        key={j}
-                        className="px-4 py-3 font-mono text-xs text-slate-300"
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    {columns.map((col) => (
+                      <th
+                        key={col}
+                        className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap"
                       >
-                        {row[col]}
-                      </td>
+                        {col}
+                      </th>
                     ))}
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  {currentData.map((row) => (
+                    <motion.tr
+                      layout
+                      key={row.unit}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 30,
+                      }}
+                      className="hover:bg-zinc-800/30 transition-colors"
+                    >
+                      {columns.map((col, j) => (
+                        <td
+                          key={j}
+                          className="px-4 py-3 font-mono text-base text-zinc-300"
+                        >
+                          {row[col]}
+                        </td>
+                      ))}
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="w-full xl:w-1/2 flex flex-col">
         <div
-          className={`bg-[#141620] border-2 rounded-xl overflow-hidden flex flex-col flex-1 shadow-lg transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-slate-800'}`}
+          className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col flex-1 shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
         >
-          <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
               Query Builder
             </span>
           </div>
-          <div className="p-8 flex-1 bg-[#0f111a] font-mono text-xl flex flex-col justify-center gap-4">
-            <div className="text-blue-400">
-              <span className="text-purple-400">SELECT</span> * <br />
-              <span className="text-purple-400">FROM</span>{' '}
-              <span className="text-pink-300">apartments</span>
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
+            <div>
+              <span className="text-indigo-400 font-bold">SELECT</span>{' '}
+              <span className="text-white">*</span> <br />
+              <span className="text-indigo-400 font-bold">FROM</span>{' '}
+              <span className="text-amber-400">apartments</span>
             </div>
 
-            <div className="flex flex-col gap-3 bg-slate-800/30 p-4 rounded-lg border border-slate-800">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-purple-400">ORDER BY</span>
+            <div className="flex flex-col gap-4 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-indigo-400 font-bold">ORDER BY</span>
                 <select
                   value={selectedCol1}
                   onChange={(e) => {
                     setSelectedCol1(e.target.value);
                     setFeedback('idle');
                   }}
-                  className="bg-slate-900 border border-slate-700 text-pink-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                  className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                 >
                   <option value="" disabled>
                     column
@@ -736,7 +925,7 @@ const InteractiveOrderByExample = ({
                     setSelectedDir1(e.target.value);
                     setFeedback('idle');
                   }}
-                  className="bg-slate-900 border border-slate-700 text-emerald-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                  className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                 >
                   <option value="" disabled>
                     direction
@@ -746,15 +935,15 @@ const InteractiveOrderByExample = ({
                 </select>
               </div>
               {step.isMulti && (
-                <div className="flex flex-wrap items-center gap-2 ml-4">
-                  <span className="text-slate-500">,</span>
+                <div className="flex flex-wrap items-center gap-3 pl-4 md:pl-8">
+                  <span className="text-zinc-500 text-lg font-black">,</span>
                   <select
                     value={selectedCol2}
                     onChange={(e) => {
                       setSelectedCol2(e.target.value);
                       setFeedback('idle');
                     }}
-                    className="bg-slate-900 border border-slate-700 text-pink-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                    className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                   >
                     <option value="" disabled>
                       column
@@ -771,7 +960,7 @@ const InteractiveOrderByExample = ({
                       setSelectedDir2(e.target.value);
                       setFeedback('idle');
                     }}
-                    className="bg-slate-900 border border-slate-700 text-emerald-400 text-sm rounded pr-6 pl-2 py-1 outline-none cursor-pointer"
+                    className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                   >
                     <option value="" disabled>
                       direction
@@ -783,8 +972,7 @@ const InteractiveOrderByExample = ({
               )}
             </div>
           </div>
-
-          <div className="p-6 border-t border-slate-800 bg-[#141620]">
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
             {feedback === 'idle' && (
               <button
                 onClick={handleSubmit}
@@ -793,26 +981,26 @@ const InteractiveOrderByExample = ({
                   !selectedDir1 ||
                   (step.isMulti && (!selectedCol2 || !selectedDir2))
                 }
-                className="w-full bg-pink-600 hover:bg-pink-500 disabled:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
               >
                 Run Sort
               </button>
             )}
             {feedback === 'wrong' && (
               <div className="flex flex-col gap-4">
-                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold">
+                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
                   Not quite! Check your logic.
                 </div>
                 <button
                   onClick={() => setFeedback('idle')}
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-lg transition-all"
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
                 >
                   Try Again
                 </button>
               </div>
             )}
             {feedback === 'correct' && (
-              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold">
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
                 Sorted successfully! Watch the table react.
               </div>
             )}
@@ -863,42 +1051,48 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-16 pb-32">
+    <div className="w-full flex flex-col gap-12 pb-32">
       <div className="max-w-3xl">
-        <span className="text-xs font-bold text-pink-500 uppercase tracking-widest">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
           Interactive Lesson
         </span>
         <h1 className="text-4xl font-black text-white mt-2 mb-6">
-          The ORDER BY Clause
+          The <span className="text-indigo-400 font-bold">ORDER BY</span> Clause
         </h1>
+      </div>
 
-        <div className="text-slate-300 leading-relaxed space-y-5 text-lg">
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
             Think of your database table like a massive online store. You
-            already know how to use `SELECT` to pick your vertical columns (like
-            'Product' and 'Price'), and `WHERE` to filter your horizontal rows
-            (like keeping only 'Category = Shoes'). But right now, those shoes
-            are displayed in a completely random order!
+            already know how to use{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              SELECT
+            </code>{' '}
+            to pick your vertical columns, and{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              WHERE
+            </code>{' '}
+            to filter your horizontal rows. But right now, those rows are
+            displayed in a random order!
           </p>
           <p>
             That is where{' '}
-            <code className="bg-slate-800 text-pink-400 px-2 py-0.5 rounded font-mono text-sm">
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
               ORDER BY
             </code>{' '}
-            comes in. It takes your remaining rows and physically ranks them,
-            exactly like changing the "Sort By" dropdown on a website to
-            organize items by "Price: Low to High" or "Alphabetical: A to Z."
+            comes in. It takes your remaining rows and physically ranks them.
           </p>
 
-          <div className="bg-slate-800/30 border border-slate-700/50 rounded-xl p-6 mt-6">
-            <h3 className="text-white font-bold mb-3">The Two Directions:</h3>
-            <ul className="space-y-4 text-base">
-              <li className="flex items-start gap-3">
-                <span className="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-xs font-bold font-mono mt-0.5">
+          <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-6 mt-6 shadow-md">
+            <h3 className="text-white font-bold mb-4">The Two Directions:</h3>
+            <ul className="space-y-6 text-base">
+              <li className="flex items-start gap-4">
+                <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-1 rounded text-sm font-bold font-mono mt-0.5 shadow-sm">
                   ASC
                 </span>
-                <div>
-                  <strong className="text-white block">
+                <div className="text-lg">
+                  <strong className="text-white block mb-1">
                     Ascending (Going Up)
                   </strong>
                   Sorts numbers from smallest to largest (1 to 10), and words
@@ -906,17 +1100,16 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
                   will automatically use this default.
                 </div>
               </li>
-              <li className="flex items-start gap-3">
-                <span className="bg-pink-500/20 text-pink-400 px-2 py-1 rounded text-xs font-bold font-mono mt-0.5">
+              <li className="flex items-start gap-4">
+                <span className="bg-pink-500/10 border border-pink-500/30 text-pink-400 px-2 py-1 rounded text-sm font-bold font-mono mt-0.5 shadow-sm">
                   DESC
                 </span>
-                <div>
-                  <strong className="text-white block">
+                <div className="text-lg">
+                  <strong className="text-white block mb-1">
                     Descending (Going Down)
                   </strong>
                   Sorts numbers from largest to smallest (10 to 1), and words
-                  backwards (Z to A). This is essential for building things like
-                  "Top 10" leaderboards or finding the most expensive items.
+                  backwards (Z to A). Essential for "Top 10" leaderboards.
                 </div>
               </li>
             </ul>
@@ -934,9 +1127,69 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
         </div>
       </div>
 
+      <div className="max-w-4xl mt-4">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+          Syntax Examples
+        </h3>
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-6">
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Ascending Sort (Default)
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ORDER BY{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-emerald-400 font-bold">ASC</span>;
+            </div>
+          </div>
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Descending Sort</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ORDER BY{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-emerald-400 font-bold">DESC</span>;
+            </div>
+          </div>
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Multi-Column Sort
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ORDER BY{' '}
+              <span className="text-amber-400 font-normal">column1</span>{' '}
+              <span className="text-emerald-400 font-bold">ASC</span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">column2</span>{' '}
+              <span className="text-emerald-400 font-bold">DESC</span>;
+            </div>
+          </div>
+        </div>
+      </div>
+
       {LESSON_STEPS.map((step, index) => (
         <React.Fragment key={index}>
-          <hr className="border-slate-800" />
+          <hr className="border-zinc-800/50 my-4" />
           <InteractiveOrderByExample
             step={step}
             index={index}
@@ -947,7 +1200,7 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
       ))}
 
       <div className="mt-12 flex flex-col items-center gap-6">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-800 to-transparent"></div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
         <h3 className="text-xl font-bold text-white">Lesson Complete?</h3>
         <button
           onClick={() =>
@@ -955,18 +1208,18 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
               ? navigate(`/quest/${firstQuestId}`)
               : navigate('/home')
           }
-          className="bg-pink-500 hover:bg-pink-400 text-slate-900 font-black py-5 px-16 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_30px_rgba(236,72,153,0.25)]"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Enter the Arena: Start ORDER BY Quests ➔
+          Start ORDER BY Quests ➔
         </button>
       </div>
     </div>
   );
 };
+
 // ==========================================
 // MODULE 4: THE "GROUP BY" & AGGREGATE LESSON
 // ==========================================
-
 const COFFEE_SALES_DATA: Record<string, string | number>[] = [
   {
     transaction_id: 101,
@@ -1018,13 +1271,6 @@ const COFFEE_SALES_DATA: Record<string, string | number>[] = [
   },
 ];
 
-interface AggStepData {
-  title: string;
-  prompt: string;
-  type: 'agg' | 'groupby';
-  expected: { aggFunc: string; col: string; groupByCol?: string };
-}
-
 const InteractiveAggExample = ({
   step,
   index,
@@ -1053,7 +1299,6 @@ const InteractiveAggExample = ({
     if (step.type === 'groupby') {
       isCorrect = isCorrect && selectedGroupCol === step.expected.groupByCol;
     }
-
     if (isCorrect) {
       setFeedback('correct');
       onPass();
@@ -1074,17 +1319,13 @@ const InteractiveAggExample = ({
       if (step.expected.aggFunc === 'COUNT') result = COFFEE_SALES_DATA.length;
       if (step.expected.aggFunc === 'SUM')
         result = values.reduce((a, b) => a + b, 0);
-
-      // 🌟 UPDATED: Use Math.round to match the "ROUND()" behavior
       if (step.expected.aggFunc === 'AVG') {
         const sum = values.reduce((a, b) => a + b, 0);
         result = Math.round(sum / values.length);
       }
-
       if (step.expected.aggFunc === 'MAX') result = Math.max(...values);
       if (step.expected.aggFunc === 'MIN') result = Math.min(...values);
 
-      // 🌟 UPDATED: Change the key name to "round" for AVG to match the prompt
       const keyName =
         step.expected.aggFunc === 'AVG'
           ? 'round'
@@ -1107,11 +1348,8 @@ const InteractiveAggExample = ({
 
         if (step.expected.aggFunc === 'COUNT') res = vals.length;
         if (step.expected.aggFunc === 'SUM') res = sum;
-
-        // 🌟 UPDATED: Use Math.round here too
         if (step.expected.aggFunc === 'AVG')
           res = Math.round(sum / vals.length);
-
         if (step.expected.aggFunc === 'MAX') res = Math.max(...vals);
         if (step.expected.aggFunc === 'MIN') res = Math.min(...vals);
 
@@ -1129,33 +1367,34 @@ const InteractiveAggExample = ({
 
   return (
     <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
-      {/* Left Column: Context & Table */}
-      <div className="w-full xl:w-1/2 flex flex-col gap-4">
+      <div className="w-full xl:w-1/2 flex flex-col gap-6">
         <div
-          className={`bg-[#141620] border ${isCompleted ? 'border-purple-500/30' : 'border-slate-800'} rounded-xl p-6 shadow-lg transition-all`}
+          className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl h-full transition-all`}
         >
-          <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
             <span
-              className={`${isCompleted ? 'bg-purple-500 text-white' : 'bg-purple-400 text-slate-900'} w-6 h-6 rounded-full flex items-center justify-center text-sm font-black transition-colors`}
+              className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}
             >
               {isCompleted ? '✓' : index + 1}
             </span>
             {step.title}
           </h2>
-          <p className="text-slate-400 mb-6">{step.prompt}</p>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">
+            {step.prompt}
+          </p>
 
-          <div className="border border-slate-700/50 rounded-lg overflow-hidden bg-slate-900/20">
-            <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/50">
+          <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
               Raw Table: coffee_sales
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-900/80 border-b border-slate-700/50">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
                   <tr>
                     {columns.map((col) => (
                       <th
                         key={col}
-                        className="px-4 py-2 font-mono text-purple-400/70 whitespace-nowrap"
+                        className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap"
                       >
                         {col}
                       </th>
@@ -1163,14 +1402,17 @@ const InteractiveAggExample = ({
                   </tr>
                 </thead>
                 <tbody
-                  className={`divide-y divide-slate-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
+                  className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
                 >
                   {COFFEE_SALES_DATA.map((row, i) => (
-                    <tr key={i}>
+                    <tr
+                      key={i}
+                      className="hover:bg-zinc-800/30 transition-colors"
+                    >
                       {columns.map((col, j) => (
                         <td
                           key={j}
-                          className="px-4 py-2 font-mono text-xs text-slate-300 whitespace-nowrap"
+                          className="px-4 py-3 font-mono text-base text-zinc-300 whitespace-nowrap"
                         >
                           {row[col]}
                         </td>
@@ -1183,34 +1425,33 @@ const InteractiveAggExample = ({
           </div>
         </div>
 
-        {/* Dynamic Output Box */}
         {outputData && (
-          <div className="bg-purple-900/20 border border-purple-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
-            <h3 className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-3">
+          <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
               SQL Output Result
             </h3>
-            <div className="border border-purple-500/20 rounded-lg overflow-hidden bg-slate-900/50">
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-900/80 border-b border-purple-500/20">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-black/60 border-b border-emerald-500/20">
                     <tr>
                       {Object.keys(outputData[0]).map((col) => (
                         <th
                           key={col}
-                          className="px-4 py-2 font-mono text-purple-300 whitespace-nowrap"
+                          className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap"
                         >
                           {col}
                         </th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-purple-500/10">
+                  <tbody className="divide-y divide-emerald-500/10">
                     {outputData.map((row, i) => (
                       <tr key={i}>
                         {Object.values(row).map((val, j) => (
                           <td
                             key={j}
-                            className="px-4 py-2 font-mono text-xs text-white font-bold whitespace-nowrap"
+                            className="px-4 py-3 font-mono text-base text-zinc-200 font-bold whitespace-nowrap"
                           >
                             {String(val)}
                           </td>
@@ -1225,32 +1466,26 @@ const InteractiveAggExample = ({
         )}
       </div>
 
-      {/* Right Column: Query Builder */}
-      {/* Right Column: Query Builder */}
       <div className="w-full xl:w-1/2 flex flex-col">
         <div
-          className={`bg-[#141620] border-2 rounded-xl overflow-hidden flex flex-col h-full shadow-lg transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-slate-800'}`}
+          className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col flex-1 shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
         >
-          <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
               Query Builder
             </span>
           </div>
-          <div className="p-8 flex-1 bg-[#0f111a] font-mono text-xl flex flex-col justify-center gap-5">
-            {/* SELECT ROW */}
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-3">
-              <span className="text-purple-400">SELECT</span>
-
-              {/* Dynamically mirror the GROUP BY column seamlessly */}
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-4">
+              <span className="text-indigo-400 font-bold">SELECT</span>
               {step.type === 'groupby' && (
                 <>
-                  <span className="text-pink-400">
+                  <span className="text-amber-400">
                     {selectedGroupCol || 'group_col'}
                   </span>
-                  <span className="text-slate-500">,</span>
+                  <span className="text-zinc-500 font-bold">,</span>
                 </>
               )}
-
               <div className="flex items-center gap-1">
                 <select
                   value={selectedAgg}
@@ -1258,7 +1493,7 @@ const InteractiveAggExample = ({
                     setSelectedAgg(e.target.value);
                     setFeedback('idle');
                   }}
-                  className="bg-slate-900 border border-slate-700 text-emerald-400 text-sm rounded px-2 py-1 outline-none cursor-pointer"
+                  className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold font-mono text-base rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                 >
                   <option value="" disabled>
                     AGG
@@ -1269,14 +1504,14 @@ const InteractiveAggExample = ({
                     </option>
                   ))}
                 </select>
-                <span className="text-slate-500 font-bold">(</span>
+                <span className="text-zinc-500 font-bold">(</span>
                 <select
                   value={selectedCol}
                   onChange={(e) => {
                     setSelectedCol(e.target.value);
                     setFeedback('idle');
                   }}
-                  className="bg-slate-900 border border-slate-700 text-purple-300 text-sm rounded px-2 py-1 outline-none cursor-pointer"
+                  className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                 >
                   <option value="" disabled>
                     column
@@ -1287,29 +1522,28 @@ const InteractiveAggExample = ({
                     </option>
                   ))}
                 </select>
-                <span className="text-slate-500 font-bold">)</span>
+                <span className="text-zinc-500 font-bold">)</span>
               </div>
             </div>
 
-            {/* FROM ROW */}
-            <div className="text-purple-400">
-              FROM <span className="text-purple-300">coffee_sales</span>
+            <div>
+              <span className="text-indigo-400 font-bold">FROM</span>{' '}
+              <span className="text-amber-400">coffee_sales</span>
             </div>
 
-            {/* GROUP BY ROW */}
             {step.type === 'groupby' && (
-              <div className="flex flex-wrap items-center gap-2 mt-2 bg-slate-800/30 p-4 rounded-lg border border-slate-800">
-                <span className="text-purple-400">GROUP BY</span>
+              <div className="flex flex-wrap items-center gap-3 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+                <span className="text-indigo-400 font-bold">GROUP BY</span>
                 <select
                   value={selectedGroupCol}
                   onChange={(e) => {
                     setSelectedGroupCol(e.target.value);
                     setFeedback('idle');
                   }}
-                  className="bg-slate-900 border border-slate-700 text-pink-400 text-sm rounded px-2 py-1 outline-none cursor-pointer"
+                  className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                 >
                   <option value="" disabled>
-                    group_col
+                    column
                   </option>
                   {columns.map((c) => (
                     <option key={c} value={c}>
@@ -1321,7 +1555,7 @@ const InteractiveAggExample = ({
             )}
           </div>
 
-          <div className="p-6 border-t border-slate-800 bg-[#141620]">
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
             {feedback === 'idle' && (
               <button
                 onClick={handleSubmit}
@@ -1330,27 +1564,27 @@ const InteractiveAggExample = ({
                   !selectedCol ||
                   (step.type === 'groupby' && !selectedGroupCol)
                 }
-                className="w-full bg-purple-600 hover:bg-purple-500 disabled:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
               >
                 Run Aggregation
               </button>
             )}
             {feedback === 'wrong' && (
               <div className="flex flex-col gap-4">
-                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold">
+                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
                   Incorrect syntax. Check your logic.
                 </div>
                 <button
                   onClick={() => setFeedback('idle')}
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-lg transition-all"
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
                 >
                   Try Again
                 </button>
               </div>
             )}
             {feedback === 'correct' && (
-              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold">
-                Calculation successful! Check the output table.
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
+                Calculation successful! Check the output.
               </div>
             )}
           </div>
@@ -1359,6 +1593,7 @@ const InteractiveAggExample = ({
     </div>
   );
 };
+
 const GroupByLesson: React.FC<LessonModuleProps> = ({
   firstQuestId,
   onComplete,
@@ -1366,12 +1601,10 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
-  // PART 1: The Aggregate Functions (3 Examples Each + Syntax + Returns)
   const AGG_SECTIONS = [
     {
       func: 'COUNT()',
       desc: 'Counts the number of rows that contain data. Great for finding total transactions or total employees.',
-      syntax: 'SELECT COUNT(column_name) FROM table_name;',
       returns: 'A single number representing the total tally of rows.',
       steps: [
         {
@@ -1400,7 +1633,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'SUM()',
       desc: 'Adds up all the numbers in a specific column. Essential for calculating total revenue or total inventory.',
-      syntax: 'SELECT SUM(column_name) FROM table_name;',
       returns:
         'A single number representing the mathematical total of the column.',
       steps: [
@@ -1430,7 +1662,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'AVG()',
       desc: 'Calculates the mathematical average of a column. Perfect for finding the average order value.',
-      syntax: 'SELECT AVG(column_name) FROM table_name;',
       returns: 'A single decimal number representing the calculated average.',
       steps: [
         {
@@ -1459,7 +1690,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'MAX()',
       desc: 'Finds the absolute highest value in a column. Use this to find the most expensive item or highest score.',
-      syntax: 'SELECT MAX(column_name) FROM table_name;',
       returns:
         'A single value representing the largest number (or latest date/last alphabetical word).',
       steps: [
@@ -1489,7 +1719,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'MIN()',
       desc: 'Finds the absolute lowest value in a column. Used for finding the cheapest item or oldest date.',
-      syntax: 'SELECT MIN(column_name) FROM table_name;',
       returns:
         'A single value representing the smallest number (or earliest date/first alphabetical word).',
       steps: [
@@ -1518,13 +1747,10 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     },
   ];
 
-  // PART 2: The GROUP BY Function (2 Examples Each + Syntax + Returns)
   const GROUP_BY_SECTIONS = [
     {
       func: 'GROUP BY + COUNT()',
       desc: 'Group your data into categories, then counts the rows inside each category.',
-      syntax:
-        'SELECT category_col, COUNT(data_col) FROM table_name GROUP BY category_col;',
       returns:
         'A two-column summary table: Column 1 shows the unique categories, Column 2 shows the tally for each.',
       steps: [
@@ -1551,8 +1777,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'GROUP BY + SUM()',
       desc: 'Buckets your data, then adds up the numbers in each bucket.',
-      syntax:
-        'SELECT category_col, SUM(data_col) FROM table_name GROUP BY category_col;',
       returns:
         'A two-column summary table: Column 1 shows the unique categories, Column 2 shows the mathematical total for each.',
       steps: [
@@ -1575,8 +1799,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'GROUP BY + AVG()',
       desc: 'Finds the average value for each distinct bucket.',
-      syntax:
-        'SELECT category_col, AVG(data_col) FROM table_name GROUP BY category_col;',
       returns:
         'A two-column summary table: Column 1 shows the unique categories, Column 2 shows the calculated average for each.',
       steps: [
@@ -1598,8 +1820,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'GROUP BY + MAX()',
       desc: 'Finds the highest value within each bucket.',
-      syntax:
-        'SELECT category_col, MAX(data_col) FROM table_name GROUP BY category_col;',
       returns:
         'A two-column summary table: Column 1 shows the unique categories, Column 2 shows the maximum value found in each.',
       steps: [
@@ -1620,8 +1840,6 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
     {
       func: 'GROUP BY + MIN()',
       desc: 'Finds the lowest value within each bucket.',
-      syntax:
-        'SELECT category_col, MIN(data_col) FROM table_name GROUP BY category_col;',
       returns:
         'A two-column summary table: Column 1 shows the unique categories, Column 2 shows the minimum value found in each.',
       steps: [
@@ -1659,14 +1877,17 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
   return (
     <div className="w-full flex flex-col gap-12 pb-32">
       <div className="max-w-3xl">
-        <span className="text-xs font-bold text-purple-500 uppercase tracking-widest">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
           Interactive Lesson
         </span>
         <h1 className="text-4xl font-black text-white mt-2 mb-6">
-          Aggregations & GROUP BY
+          Aggregations &{' '}
+          <span className="text-indigo-400 font-bold">GROUP BY</span>
         </h1>
+      </div>
 
-        <div className="text-slate-300 leading-relaxed space-y-5 text-lg">
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
             So far, every SQL command you've learned keeps your data looking
             like a spreadsheet. But what if you don't want to see 1,000
@@ -1685,20 +1906,29 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
       {/* RENDER PART 1: AGGREGATES */}
       {AGG_SECTIONS.map((section, sIdx) => (
         <div key={`agg-sec-${sIdx}`} className="mt-8">
-          <div className="mb-8 border-l-4 border-purple-500 pl-6">
-            <h2 className="text-2xl font-black text-white font-mono">
+          <div className="mb-8 border-l-4 border-indigo-500 pl-6">
+            <h2 className="text-2xl font-black text-indigo-400 font-mono">
               {section.func}
             </h2>
-            <p className="text-slate-400 mt-2">{section.desc}</p>
-            {/* 🌟 NEW SYNTAX BLOCK */}
-            <div className="mt-4 bg-[#0f111a] border border-slate-700/50 py-2 px-4 rounded-lg inline-block shadow-inner">
-              <code className="text-purple-300 font-mono text-sm">
-                {section.syntax}
-              </code>
+            <p className="text-zinc-400 mt-2 text-lg">{section.desc}</p>
+
+            <div className="mt-4 bg-zinc-950 border border-zinc-800 p-6 rounded-xl inline-flex flex-col gap-1 font-mono text-base shadow-inner">
+              <div className="text-indigo-400 font-bold">
+                SELECT{' '}
+                <span className="text-indigo-400 font-bold">
+                  {section.func.replace('()', '')}
+                </span>
+                (<span className="text-amber-400 font-normal">column_name</span>
+                )
+              </div>
+              <div className="text-indigo-400 font-bold">
+                FROM{' '}
+                <span className="text-amber-400 font-normal">table_name</span>;
+              </div>
             </div>
-            {/* 🌟 NEW RETURNS BLOCK */}
-            <p className="text-sm text-slate-400 mt-3 italic flex items-center gap-2">
-              <span className="text-purple-500">↳</span>{' '}
+
+            <p className="text-base text-zinc-400 mt-4 italic flex items-center gap-2">
+              <span className="text-indigo-500 font-black">↳</span>{' '}
               <strong>Returns:</strong> {section.returns}
             </p>
           </div>
@@ -1717,12 +1947,14 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         </div>
       ))}
 
-      {/* MIDPOINT EXPLANATION */}
-      <div className="max-w-3xl mt-16 mb-8 py-8 border-y border-slate-800">
+      <div className="max-w-3xl mt-16 mb-6">
         <h1 className="text-4xl font-black text-white mb-6">
-          Enter: The GROUP BY Clause
+          Enter: The <span className="text-indigo-400">GROUP BY</span> Clause
         </h1>
-        <div className="text-slate-300 leading-relaxed space-y-5 text-lg">
+      </div>
+
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
             You just learned how to crush an entire table into a single number.
             But what if you own a Coffee Shop and want to know the total revenue{' '}
@@ -1731,16 +1963,16 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
           </p>
           <p>
             By adding{' '}
-            <code className="bg-slate-800 text-pink-400 px-2 py-0.5 rounded font-mono text-sm">
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-1.5 py-0.5 rounded font-mono text-base">
               GROUP BY
             </code>{' '}
             to your query, SQL will sort your data into groups first, and{' '}
             <em>then</em> run the aggregate math on each group independently!
           </p>
-          <p>
-            Tip: Whenever you see the words{' '}
-            <strong>'per', 'each', 'for each', or 'by'</strong> in a sql
-            problem, it means you have to use GROUP BY!{' '}
+          <p className="bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-lg text-indigo-300">
+            <strong>Tip:</strong> Whenever you see the words{' '}
+            <strong>'per', 'each', 'for each', or 'by'</strong> in a SQL
+            problem, it means you have to use GROUP BY!
           </p>
         </div>
       </div>
@@ -1748,21 +1980,36 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
       {/* RENDER PART 2: GROUP BY */}
       {GROUP_BY_SECTIONS.map((section, sIdx) => (
         <div key={`gb-sec-${sIdx}`} className="mt-8">
-          <div className="mb-8 border-l-4 border-pink-500 pl-6">
-            <h2 className="text-2xl font-black text-white font-mono">
+          <div className="mb-8 border-l-4 border-indigo-500 pl-6">
+            <h2 className="text-2xl font-black text-indigo-400 font-mono">
               {section.func}
             </h2>
-            <p className="text-slate-400 mt-2">{section.desc}</p>
-            {/* 🌟 NEW SYNTAX BLOCK */}
-            <div className="mt-4 bg-[#0f111a] border border-slate-700/50 py-2 px-4 rounded-lg inline-block shadow-inner">
-              <code className="text-pink-300 font-mono text-sm">
-                {section.syntax}
-              </code>
+            <p className="text-zinc-400 mt-2 text-lg">{section.desc}</p>
+
+            <div className="mt-4 bg-zinc-950 border border-zinc-800 p-6 rounded-xl inline-flex flex-col gap-1 font-mono text-base shadow-inner">
+              <div className="text-indigo-400 font-bold">
+                SELECT{' '}
+                <span className="text-amber-400 font-normal">category_col</span>
+                <span className="text-zinc-500 font-bold">,</span>{' '}
+                <span className="text-indigo-400 font-bold">
+                  {section.func.split(' ')[3].replace('()', '')}
+                </span>
+                (<span className="text-amber-400 font-normal">data_col</span>)
+              </div>
+              <div className="text-indigo-400 font-bold">
+                FROM{' '}
+                <span className="text-amber-400 font-normal">table_name</span>
+              </div>
+              <div className="text-indigo-400 font-bold">
+                GROUP BY{' '}
+                <span className="text-amber-400 font-normal">category_col</span>
+                ;
+              </div>
             </div>
-            {/* 🌟 NEW RETURNS BLOCK */}
-            <p className="text-sm text-slate-400 mt-3 italic flex items-center gap-2">
-              <span className="text-pink-500">↳</span> <strong>Returns:</strong>{' '}
-              {section.returns}
+
+            <p className="text-base text-zinc-400 mt-4 italic flex items-center gap-2">
+              <span className="text-indigo-500 font-black">↳</span>{' '}
+              <strong>Returns:</strong> {section.returns}
             </p>
           </div>
           {section.steps.map((step) => {
@@ -1781,7 +2028,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
       ))}
 
       <div className="mt-12 flex flex-col items-center gap-6">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-800 to-transparent"></div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
         <h3 className="text-xl font-bold text-white">
           Massive Lesson Complete!
         </h3>
@@ -1791,7 +2038,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
               ? navigate(`/quest/${firstQuestId}`)
               : navigate('/home')
           }
-          className="bg-purple-500 hover:bg-purple-400 text-slate-900 font-black py-5 px-16 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_30px_rgba(168,85,247,0.25)]"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
           Enter the Arena: Start GROUP BY Quests ➔
         </button>
@@ -1801,209 +2048,196 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
 };
 
 // ==========================================
-// 1. THE MOCK DATA FOR THE 3 EXAMPLES
-// ==========================================
-// ==========================================
-// 1. THE MOCK DATA FOR THE 5 EXAMPLES
-// ==========================================
-// ==========================================
-// 1. THE MOCK DATA FOR THE 6 EXAMPLES
+// MODULE 5: THE "LEFT JOIN" LESSON
 // ==========================================
 const JOIN_EXAMPLES = [
   {
-    title: "Customers and Food Orders",
-    prompt: "Let's connect our customers to their food orders. Link the tables using the column they both share.",
-    selectText: "*",
+    title: 'Customers and Food Orders',
+    prompt:
+      "Let's connect our customers to their food orders. Link the tables using the column they both share.",
+    selectText: '*',
     leftTable: {
-      name: "customers",
-      columns: ["customer_id", "name"],
+      name: 'customers',
+      columns: ['customer_id', 'name'],
       data: [
         { customer_id: 1, name: 'Alice' },
         { customer_id: 2, name: 'Bob' },
-        { customer_id: 3, name: 'Charlie' }
-      ]
+        { customer_id: 3, name: 'Charlie' },
+      ],
     },
     rightTable: {
-      name: "orders",
-      columns: ["order_id", "customer_id", "food"],
+      name: 'orders',
+      columns: ['order_id', 'customer_id', 'food'],
       data: [
         { order_id: 101, customer_id: 1, food: 'Pizza' },
-        { order_id: 102, customer_id: 3, food: 'Burger' }
-      ]
+        { order_id: 102, customer_id: 3, food: 'Burger' },
+      ],
     },
-    expectedLeft: "customer_id",
-    expectedRight: "customer_id",
+    expectedLeft: 'customer_id',
+    expectedRight: 'customer_id',
     outputData: [
       { customer_id: 1, name: 'Alice', order_id: 101, food: 'Pizza' },
       { customer_id: 2, name: 'Bob', order_id: 'NULL', food: 'NULL' },
-      { customer_id: 3, name: 'Charlie', order_id: 102, food: 'Burger' }
-    ]
+      { customer_id: 3, name: 'Charlie', order_id: 102, food: 'Burger' },
+    ],
   },
   {
-    title: "Employees and Departments",
-    prompt: "Connect the employees to their departments. New hires without a department will show up with blank values!",
-    selectText: "*",
+    title: 'Employees and Departments',
+    prompt:
+      'Connect the employees to their departments. New hires without a department will show up with blank values!',
+    selectText: '*',
     leftTable: {
-      name: "employees",
-      columns: ["emp_id", "name"],
+      name: 'employees',
+      columns: ['emp_id', 'name'],
       data: [
         { emp_id: 1, name: 'Sarah' },
         { emp_id: 2, name: 'John' },
-        { emp_id: 3, name: 'David' }
-      ]
+        { emp_id: 3, name: 'David' },
+      ],
     },
     rightTable: {
-      name: "departments",
-      columns: ["dept_id", "emp_id", "dept_name"],
+      name: 'departments',
+      columns: ['dept_id', 'emp_id', 'dept_name'],
       data: [
         { dept_id: 80, emp_id: 1, dept_name: 'Sales' },
-        { dept_id: 81, emp_id: 3, dept_name: 'Engineering' }
-      ]
+        { dept_id: 81, emp_id: 3, dept_name: 'Engineering' },
+      ],
     },
-    expectedLeft: "emp_id",
-    expectedRight: "emp_id",
+    expectedLeft: 'emp_id',
+    expectedRight: 'emp_id',
     outputData: [
       { emp_id: 1, name: 'Sarah', dept_id: 80, dept_name: 'Sales' },
       { emp_id: 2, name: 'John', dept_id: 'NULL', dept_name: 'NULL' },
-      { emp_id: 3, name: 'David', dept_id: 81, dept_name: 'Engineering' }
-    ]
+      { emp_id: 3, name: 'David', dept_id: 81, dept_name: 'Engineering' },
+    ],
   },
   {
-    title: "Products and Reviews",
-    prompt: "Link the products to their reviews. Products with no reviews will still appear on the list.",
-    selectText: "*",
+    title: 'Products and Reviews',
+    prompt:
+      'Link the products to their reviews. Products with no reviews will still appear on the list.',
+    selectText: '*',
     leftTable: {
-      name: "products",
-      columns: ["product_id", "product_name"],
+      name: 'products',
+      columns: ['product_id', 'product_name'],
       data: [
         { product_id: 1, product_name: 'Laptop' },
         { product_id: 2, product_name: 'Monitor' },
-        { product_id: 3, product_name: 'Keyboard' }
-      ]
+        { product_id: 3, product_name: 'Keyboard' },
+      ],
     },
     rightTable: {
-      name: "reviews",
-      columns: ["review_id", "product_id", "rating"],
+      name: 'reviews',
+      columns: ['review_id', 'product_id', 'rating'],
       data: [
         { review_id: 901, product_id: 1, rating: 5 },
-        { review_id: 902, product_id: 3, rating: 4 }
-      ]
+        { review_id: 902, product_id: 3, rating: 4 },
+      ],
     },
-    expectedLeft: "product_id",
-    expectedRight: "product_id",
+    expectedLeft: 'product_id',
+    expectedRight: 'product_id',
     outputData: [
       { product_id: 1, product_name: 'Laptop', review_id: 901, rating: 5 },
-      { product_id: 2, product_name: 'Monitor', review_id: 'NULL', rating: 'NULL' },
-      { product_id: 3, product_name: 'Keyboard', review_id: 902, rating: 4 }
-    ]
+      {
+        product_id: 2,
+        product_name: 'Monitor',
+        review_id: 'NULL',
+        rating: 'NULL',
+      },
+      { product_id: 3, product_name: 'Keyboard', review_id: 902, rating: 4 },
+    ],
   },
   {
-    title: "Library Books (Specific Columns)",
-    prompt: "Let's clean up our output. Instead of SELECT *, this query explicitly asks for just the book title and its due date. Link the tables to see the clean report!",
-    selectText: "books.title, checkouts.due_date",
+    title: 'Library Books (Specific Columns)',
+    prompt:
+      "Let's clean up our output. Instead of SELECT *, this query explicitly asks for just the book title and its due date. Link the tables to see the clean report!",
+    selectText: 'books.title, checkouts.due_date',
     leftTable: {
-      name: "books",
-      columns: ["book_id", "title"],
+      name: 'books',
+      columns: ['book_id', 'title'],
       data: [
         { book_id: 1, title: 'Dune' },
         { book_id: 2, title: '1984' },
-        { book_id: 3, title: 'Foundation' }
-      ]
+        { book_id: 3, title: 'Foundation' },
+      ],
     },
     rightTable: {
-      name: "checkouts",
-      columns: ["checkout_id", "book_id", "due_date"],
+      name: 'checkouts',
+      columns: ['checkout_id', 'book_id', 'due_date'],
       data: [
         { checkout_id: 55, book_id: 1, due_date: 'Oct 12' },
-        { checkout_id: 56, book_id: 3, due_date: 'Oct 15' }
-      ]
+        { checkout_id: 56, book_id: 3, due_date: 'Oct 15' },
+      ],
     },
-    expectedLeft: "book_id",
-    expectedRight: "book_id",
+    expectedLeft: 'book_id',
+    expectedRight: 'book_id',
     outputData: [
       { title: 'Dune', due_date: 'Oct 12' },
       { title: '1984', due_date: 'NULL' },
-      { title: 'Foundation', due_date: 'Oct 15' }
-    ]
+      { title: 'Foundation', due_date: 'Oct 15' },
+    ],
   },
   {
-    title: "Clinic Schedule (Specific Columns)",
-    prompt: "We just want the doctor's name and the patient they are seeing. No extra IDs! Build the bridge to generate the schedule.",
-    selectText: "doctors.doc_name, appointments.patient",
+    title: 'Clinic Schedule (Specific Columns)',
+    prompt:
+      "We just want the doctor's name and the patient they are seeing. No extra IDs! Build the bridge to generate the schedule.",
+    selectText: 'doctors.doc_name, appointments.patient',
     leftTable: {
-      name: "doctors",
-      columns: ["doc_id", "doc_name"],
+      name: 'doctors',
+      columns: ['doc_id', 'doc_name'],
       data: [
         { doc_id: 1, doc_name: 'Dr. House' },
         { doc_id: 2, doc_name: 'Dr. Grey' },
-        { doc_id: 3, doc_name: 'Dr. Carter' }
-      ]
+        { doc_id: 3, doc_name: 'Dr. Carter' },
+      ],
     },
     rightTable: {
-      name: "appointments",
-      columns: ["appt_id", "doc_id", "patient"],
+      name: 'appointments',
+      columns: ['appt_id', 'doc_id', 'patient'],
       data: [
         { appt_id: 88, doc_id: 2, patient: "O'Malley" },
-        { appt_id: 89, doc_id: 3, patient: 'Benton' }
-      ]
+        { appt_id: 89, doc_id: 3, patient: 'Benton' },
+      ],
     },
-    expectedLeft: "doc_id",
-    expectedRight: "doc_id",
+    expectedLeft: 'doc_id',
+    expectedRight: 'doc_id',
     outputData: [
       { doc_name: 'Dr. House', patient: 'NULL' },
       { doc_name: 'Dr. Grey', patient: "O'Malley" },
-      { doc_name: 'Dr. Carter', patient: 'Benton' }
-    ]
+      { doc_name: 'Dr. Carter', patient: 'Benton' },
+    ],
   },
   {
-    title: "IT Helpdesk (Specific Columns)",
-    prompt: "We need a daily report of our IT support staff and the specific issue they are working on. Make sure agents with no active tickets still appear on the report so we know who is available!",
-    selectText: "agents.name, tickets.issue",
+    title: 'IT Helpdesk (Specific Columns)',
+    prompt:
+      'We need a daily report of our IT support staff and the specific issue they are working on. Make sure agents with no active tickets still appear on the report so we know who is available!',
+    selectText: 'agents.name, tickets.issue',
     leftTable: {
-      name: "agents",
-      columns: ["agent_id", "name"],
+      name: 'agents',
+      columns: ['agent_id', 'name'],
       data: [
         { agent_id: 1, name: 'Roy' },
         { agent_id: 2, name: 'Moss' },
-        { agent_id: 3, name: 'Jen' }
-      ]
+        { agent_id: 3, name: 'Jen' },
+      ],
     },
     rightTable: {
-      name: "tickets",
-      columns: ["ticket_id", "agent_id", "issue"],
+      name: 'tickets',
+      columns: ['ticket_id', 'agent_id', 'issue'],
       data: [
         { ticket_id: 404, agent_id: 1, issue: 'Server down' },
-        { ticket_id: 405, agent_id: 3, issue: 'Locked out' }
-      ]
+        { ticket_id: 405, agent_id: 3, issue: 'Locked out' },
+      ],
     },
-    expectedLeft: "agent_id",
-    expectedRight: "agent_id",
+    expectedLeft: 'agent_id',
+    expectedRight: 'agent_id',
     outputData: [
       { name: 'Roy', issue: 'Server down' },
       { name: 'Moss', issue: 'NULL' },
-      { name: 'Jen', issue: 'Locked out' }
-    ]
-  }
+      { name: 'Jen', issue: 'Locked out' },
+    ],
+  },
 ];
 
-// ==========================================
-// 2. THE DYNAMIC INTERACTIVE COMPONENT
-// ==========================================
-
-// ==========================================
-// 3. THE MAIN LESSON COMPONENT
-// ==========================================
-
-// ==========================================
-// 1. THE MOCK DATA FOR THE 3 EXAMPLES
-// ==========================================
-
-// ==========================================
-// 2. THE DYNAMIC INTERACTIVE COMPONENT
-// ==========================================
-// ==========================================
-// 2. THE DYNAMIC INTERACTIVE COMPONENT
-// ==========================================
 const InteractiveJoinExample = ({
   step,
   index,
@@ -2031,52 +2265,108 @@ const InteractiveJoinExample = ({
   };
 
   return (
-    <div className="w-full flex flex-col xl:flex-row gap-8 mt-8 mb-12">
-      
-      {/* 🌟 LEFT COLUMN: Shrunk to 1/3 width, Tables stacked vertically 🌟 */}
+    <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
       <div className="w-full xl:w-1/3 flex flex-col gap-6">
-        <div className={`bg-[#141620] border ${isCompleted ? 'border-blue-500/30' : 'border-slate-800'} rounded-xl p-6 shadow-lg transition-all`}>
-          <h2 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-            <span className={`${isCompleted ? 'bg-blue-500 text-white' : 'bg-blue-400 text-slate-900'} w-6 h-6 rounded-full flex items-center justify-center text-sm font-black transition-colors`}>{isCompleted ? '✓' : index + 1}</span> 
+        <div
+          className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl transition-all`}
+        >
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
+            <span
+              className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}
+            >
+              {isCompleted ? '✓' : index + 1}
+            </span>
             {step.title}
           </h2>
-          <p className="text-slate-400 mb-6 text-sm">{step.prompt}</p>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">
+            {step.prompt}
+          </p>
 
-          {/* Changed to flex-col to stack the tables on top of each other */}
           <div className="flex flex-col gap-5">
             {/* RAW LEFT TABLE */}
-            <div className="flex-1 border border-slate-700/50 rounded-lg overflow-hidden bg-slate-900/20 shadow-md">
-              <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/50">Left: {step.leftTable.name}</div>
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                Left: {step.leftTable.name}
+              </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-900/80 border-b border-slate-700/50">
-                    <tr>{step.leftTable.columns.map(c => <th key={c} className="px-4 py-2 font-mono text-purple-400/70">{c}</th>)}</tr>
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      {step.leftTable.columns.map((c) => (
+                        <th
+                          key={c}
+                          className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic"
+                        >
+                          {c}
+                        </th>
+                      ))}
+                    </tr>
                   </thead>
-                  <tbody className={`divide-y divide-slate-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}>
+                  <tbody
+                    className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
+                  >
                     {step.leftTable.data.map((row, i) => (
-                      <tr key={i}>{step.leftTable.columns.map(c => <td key={c} className="px-4 py-2 font-mono text-xs text-slate-300">{String(row[c as keyof typeof row])}</td>)}</tr>
+                      <tr
+                        key={i}
+                        className="hover:bg-zinc-800/30 transition-colors"
+                      >
+                        {step.leftTable.columns.map((c) => (
+                          <td
+                            key={c}
+                            className="px-4 py-3 font-mono text-base text-zinc-300"
+                          >
+                            {String(row[c as keyof typeof row])}
+                          </td>
+                        ))}
+                      </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Connection Indicator Icon */}
             <div className="flex justify-center -my-2 z-10">
-              <div className="bg-slate-800 border border-slate-700 text-slate-500 rounded-full w-8 h-8 flex items-center justify-center font-black shadow-lg">↓</div>
+              <div className="bg-zinc-800 border border-zinc-700 text-indigo-400 rounded-full w-8 h-8 flex items-center justify-center font-black shadow-xl">
+                ↓
+              </div>
             </div>
 
             {/* RAW RIGHT TABLE */}
-            <div className="flex-1 border border-slate-700/50 rounded-lg overflow-hidden bg-slate-900/20 shadow-md">
-              <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700/50">Right: {step.rightTable.name}</div>
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                Right: {step.rightTable.name}
+              </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-900/80 border-b border-slate-700/50">
-                    <tr>{step.rightTable.columns.map(c => <th key={c} className="px-4 py-2 font-mono text-purple-400/70">{c}</th>)}</tr>
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      {step.rightTable.columns.map((c) => (
+                        <th
+                          key={c}
+                          className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic"
+                        >
+                          {c}
+                        </th>
+                      ))}
+                    </tr>
                   </thead>
-                  <tbody className={`divide-y divide-slate-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}>
+                  <tbody
+                    className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
+                  >
                     {step.rightTable.data.map((row, i) => (
-                      <tr key={i}>{step.rightTable.columns.map(c => <td key={c} className="px-4 py-2 font-mono text-xs text-slate-300">{String(row[c as keyof typeof row])}</td>)}</tr>
+                      <tr
+                        key={i}
+                        className="hover:bg-zinc-800/30 transition-colors"
+                      >
+                        {step.rightTable.columns.map((c) => (
+                          <td
+                            key={c}
+                            className="px-4 py-3 font-mono text-base text-zinc-300"
+                          >
+                            {String(row[c as keyof typeof row])}
+                          </td>
+                        ))}
+                      </tr>
                     ))}
                   </tbody>
                 </table>
@@ -2087,19 +2377,35 @@ const InteractiveJoinExample = ({
 
         {/* DYNAMIC OUTPUT */}
         {feedback === 'correct' && (
-          <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
-            <h3 className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">SQL Output Result</h3>
-            <div className="border border-blue-500/20 rounded-lg overflow-hidden bg-slate-900/50">
+          <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
+              SQL Output Result
+            </h3>
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-900/80 border-b border-blue-500/20">
-                    <tr>{Object.keys(step.outputData[0]).map(col => <th key={col} className="px-4 py-2 font-mono text-blue-300 whitespace-nowrap">{col}</th>)}</tr>
+                <table className="w-full text-left text-base">
+                  <thead className="bg-black/60 border-b border-emerald-500/20">
+                    <tr>
+                      {Object.keys(step.outputData[0]).map((col) => (
+                        <th
+                          key={col}
+                          className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap"
+                        >
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
                   </thead>
-                  <tbody className="divide-y divide-blue-500/10">
+                  <tbody className="divide-y divide-emerald-500/10">
                     {step.outputData.map((row, i) => (
                       <tr key={i}>
                         {Object.values(row).map((val, j) => (
-                          <td key={j} className={`px-4 py-2 font-mono text-xs font-bold whitespace-nowrap ${val === 'NULL' ? 'text-slate-600 italic' : 'text-white'}`}>{String(val)}</td>
+                          <td
+                            key={j}
+                            className={`px-4 py-3 font-mono text-base font-bold whitespace-nowrap ${val === 'NULL' ? 'text-zinc-600 italic' : 'text-zinc-200'}`}
+                          >
+                            {String(val)}
+                          </td>
                         ))}
                       </tr>
                     ))}
@@ -2111,40 +2417,111 @@ const InteractiveJoinExample = ({
         )}
       </div>
 
-      {/* 🌟 RIGHT COLUMN: Expanded to 2/3 width to give the Editor massive room 🌟 */}
+      {/* 🌟 RIGHT COLUMN: Expanded Editor 🌟 */}
       <div className="w-full xl:w-2/3 flex flex-col">
-        <div className={`bg-[#141620] border-2 rounded-xl overflow-hidden flex flex-col h-full shadow-lg transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-slate-800'}`}>
-          <div className="bg-slate-800/50 px-6 py-4 border-b border-slate-800 flex justify-between items-center"><span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Query Builder</span></div>
-          
-          <div className="p-8 flex-1 bg-[#0f111a] font-mono text-xl flex flex-col justify-center gap-6">
-            
-            <div className="text-purple-400">SELECT <span className="text-white">{step.selectText}</span></div>
-            
-            <div className="text-purple-400">FROM <span className="text-purple-300">{step.leftTable.name}</span></div>
-            <div className="text-blue-400">LEFT JOIN <span className="text-purple-300">{step.rightTable.name}</span></div>
-            
-            {/* The ON clause now has plenty of room to stretch out naturally! */}
-            <div className="flex items-center gap-3 mt-2 bg-slate-800/30 p-5 rounded-lg border border-slate-800 whitespace-nowrap overflow-hidden text-lg xl:text-xl">
-              <span className="text-amber-400 font-bold">ON</span>
-              <span className="text-purple-300">{step.leftTable.name}.</span>
-              <select value={leftCol} onChange={(e) => {setLeftCol(e.target.value); setFeedback('idle');}} className="bg-slate-900 border border-slate-700 text-amber-300 rounded px-2 py-1 outline-none cursor-pointer hover:border-amber-500/50 transition-colors">
-                <option value="" disabled>column</option>
-                {step.leftTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <span className="text-white font-black">=</span>
-              <span className="text-purple-300">{step.rightTable.name}.</span>
-              <select value={rightCol} onChange={(e) => {setRightCol(e.target.value); setFeedback('idle');}} className="bg-slate-900 border border-slate-700 text-amber-300 rounded px-2 py-1 outline-none cursor-pointer hover:border-amber-500/50 transition-colors">
-                <option value="" disabled>column</option>
-                {step.rightTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
+        <div
+          className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
+        >
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+              Query Builder
+            </span>
           </div>
 
-          <div className="p-6 border-t border-slate-800 bg-[#141620]">
-            {feedback === 'idle' && <button onClick={handleSubmit} disabled={!leftCol || !rightCol} className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all text-lg">Execute Join</button>}
-            {feedback === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold">Incorrect link. Find the column they share!</div><button onClick={() => setFeedback('idle')} className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-lg transition-all text-lg">Try Again</button></div>}
-            {feedback === 'correct' && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">Link Established! Notice the empty values showing up as NULL.</div>}
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
+            <div>
+              <span className="text-indigo-400 font-bold">SELECT</span>{' '}
+              <span className="text-white font-normal">{step.selectText}</span>
+            </div>
+
+            <div>
+              <span className="text-indigo-400 font-bold">FROM</span>{' '}
+              <span className="text-amber-400 font-normal">
+                {step.leftTable.name}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-indigo-400 font-bold">LEFT JOIN</span>{' '}
+              <span className="text-amber-400 font-normal">
+                {step.rightTable.name}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 mt-2 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+              <span className="text-indigo-400 font-bold">ON</span>
+              <span className="text-amber-400 font-mono">
+                {step.leftTable.name}.
+              </span>
+              <select
+                value={leftCol}
+                onChange={(e) => {
+                  setLeftCol(e.target.value);
+                  setFeedback('idle');
+                }}
+                className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base"
+              >
+                <option value="" disabled>
+                  column
+                </option>
+                {step.leftTable.columns.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <span className="text-pink-400 font-black">=</span>
+              <span className="text-amber-400 font-mono">
+                {step.rightTable.name}.
+              </span>
+              <select
+                value={rightCol}
+                onChange={(e) => {
+                  setRightCol(e.target.value);
+                  setFeedback('idle');
+                }}
+                className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base"
+              >
+                <option value="" disabled>
+                  column
+                </option>
+                {step.rightTable.columns.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
+            {feedback === 'idle' && (
+              <button
+                onClick={handleSubmit}
+                disabled={!leftCol || !rightCol}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
+              >
+                Execute Join
+              </button>
+            )}
+            {feedback === 'wrong' && (
+              <div className="flex flex-col gap-4">
+                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
+                  Incorrect link. Find the column they share!
+                </div>
+                <button
+                  onClick={() => setFeedback('idle')}
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+            {feedback === 'correct' && (
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
+                Link Established! Notice the empty values showing up as NULL.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2152,12 +2529,6 @@ const InteractiveJoinExample = ({
   );
 };
 
-// ==========================================
-// 3. THE MAIN LESSON COMPONENT
-// ==========================================
-// ==========================================
-// 3. THE MAIN LESSON COMPONENT
-// ==========================================
 const LeftJoinLesson: React.FC<LessonModuleProps> = ({
   firstQuestId,
   onComplete,
@@ -2178,22 +2549,27 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
     <div className="w-full flex flex-col gap-12 pb-32">
       {/* HEADER SECTION */}
       <div className="max-w-3xl">
-        <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
           Interactive Lesson
         </span>
         <h1 className="text-4xl font-black text-white mt-2 mb-6">
-          Combining Tables: LEFT JOIN
+          Combining Tables:{' '}
+          <span className="text-indigo-400 font-bold">LEFT JOIN</span>
         </h1>
       </div>
 
       {/* DESCRIPTION WITH INLINE VISUAL TABLES */}
-      <div className="max-w-5xl bg-[#141620] border border-slate-800 rounded-xl p-8 shadow-lg">
-        <div className="text-slate-300 leading-relaxed space-y-4">
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
           <p>
             Welcome to the real world of databases! So far, all your data has
             lived in one single table. But to keep things organized, real
             databases split data up into many different tables. To combine them
-            back together, we use a <strong>JOIN</strong>.
+            back together, we use a{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
+              JOIN
+            </code>
+            .
           </p>
 
           <p>
@@ -2203,102 +2579,112 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
           </p>
 
           {/* 🌟 THE VISUAL TABLES 🌟 */}
-          <div className="flex flex-col sm:flex-row gap-6 my-8 items-center justify-center bg-[#0f111a] p-6 rounded-xl border border-slate-800/80 shadow-inner">
+          <div className="flex flex-col sm:flex-row gap-6 my-10 items-center justify-center bg-zinc-950/50 p-6 rounded-xl border border-zinc-800/50 shadow-inner">
             {/* Table A: Customers */}
-            <div className="bg-slate-900/80 border border-slate-700/50 rounded-lg overflow-hidden w-full sm:w-1/2 shadow-md">
-              <div className="bg-slate-800 text-slate-300 text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-slate-700/50">
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md w-full sm:w-1/2">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
                 Table A: Customers
               </div>
-              <table className="w-full text-sm text-left">
-                <thead className="border-b border-slate-700/50 bg-slate-800/30">
-                  <tr>
-                    <th className="px-4 py-2 text-amber-400 font-mono">
-                      customer_id
-                    </th>
-                    <th className="px-4 py-2 text-purple-300 font-mono">
-                      name
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50">
-                  <tr>
-                    <td className="px-4 py-2 text-amber-300 font-mono bg-amber-500/10">
-                      1
-                    </td>
-                    <td className="px-4 py-2 text-slate-300 font-bold">
-                      Alice
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2 text-amber-300 font-mono bg-amber-500/10">
-                      2
-                    </td>
-                    <td className="px-4 py-2 text-slate-300 font-bold">Bob</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2 text-amber-300 font-mono bg-amber-500/10">
-                      3
-                    </td>
-                    <td className="px-4 py-2 text-slate-300 font-bold">
-                      Charlie
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        customer_id
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        name
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/50">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        1
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Alice
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        2
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Bob
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        3
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Charlie
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Connection Indicator */}
-            <div className="hidden sm:flex text-slate-600 font-black text-2xl">
+            <div className="hidden sm:flex text-zinc-600 font-black text-2xl">
               ➕
             </div>
 
             {/* Table B: Orders */}
-            <div className="bg-slate-900/80 border border-slate-700/50 rounded-lg overflow-hidden w-full sm:w-1/2 shadow-md">
-              <div className="bg-slate-800 text-slate-300 text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-slate-700/50">
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md w-full sm:w-1/2">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
                 Table B: Orders
               </div>
-              <table className="w-full text-sm text-left">
-                <thead className="border-b border-slate-700/50 bg-slate-800/30">
-                  <tr>
-                    <th className="px-4 py-2 text-purple-300 font-mono">
-                      order_id
-                    </th>
-                    <th className="px-4 py-2 text-amber-400 font-mono">
-                      customer_id
-                    </th>
-                    <th className="px-4 py-2 text-purple-300 font-mono">
-                      food
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/50">
-                  <tr>
-                    <td className="px-4 py-2 text-slate-400 font-mono">101</td>
-                    <td className="px-4 py-2 text-amber-300 font-mono bg-amber-500/10">
-                      1
-                    </td>
-                    <td className="px-4 py-2 text-slate-300 font-bold">
-                      Pizza
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2 text-slate-400 font-mono">102</td>
-                    <td className="px-4 py-2 text-amber-300 font-mono bg-amber-500/10">
-                      3
-                    </td>
-                    <td className="px-4 py-2 text-slate-300 font-bold">
-                      Burger
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        order_id
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        customer_id
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                        food
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/50">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-400">
+                        101
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        1
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Pizza
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-400">
+                        102
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">
+                        3
+                      </td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                        Burger
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
           <p>
             If we want a master list of <em>all</em> our customers, alongside
-            what they ordered, we use a{' '}
-            <code className="text-blue-400 bg-slate-900 px-2 py-1 rounded font-mono text-sm">
+            what they ordered (even if they didn't order anything), we use a{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
               LEFT JOIN
             </code>
             .
@@ -2306,7 +2692,7 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
 
           <p>
             After using a{' '}
-            <code className="text-blue-400 bg-slate-900 px-2 py-1 rounded font-mono text-sm">
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
               LEFT JOIN
             </code>
             , all the columns of Table A get shown no matter what. If a customer
@@ -2316,8 +2702,9 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
             order columns completely blank or empty.
           </p>
 
-          <h3 className="text-xl font-bold text-white mt-8 mb-2">
-            The ON Clause (Finding the Connection)
+          <h3 className="text-2xl font-bold text-white mt-12 mb-4">
+            The <span className="text-indigo-400 font-mono">ON</span> Clause
+            (Finding the Connection)
           </h3>
 
           <p>
@@ -2329,7 +2716,7 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
             To connect two tables, you have to find the column name they have
             the same. Looking at the tables above, you can see that both tables
             share a{' '}
-            <code className="text-amber-400 bg-amber-500/10 px-2 py-1 rounded font-mono text-sm border border-amber-500/20">
+            <code className="bg-zinc-950 border border-zinc-800 text-amber-400 px-2 py-0.5 rounded font-mono text-base">
               customer_id
             </code>{' '}
             column.
@@ -2337,44 +2724,288 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
 
           <p>
             The{' '}
-            <code className="text-amber-400 bg-slate-900 px-2 py-1 rounded font-mono text-sm">
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">
               ON
             </code>{' '}
             clause is your bridge. You are essentially telling the database:
           </p>
 
-          <p className="bg-slate-900/50 p-4 border-l-4 border-amber-500 italic text-slate-400 rounded-r-lg shadow-md">
-            "Attach the food order to the customer <strong>ON</strong> the
+          <p className="bg-zinc-950/50 border border-zinc-800/50 p-6 border-l-4 border-l-indigo-500 italic text-zinc-400 rounded-r-xl shadow-inner my-6">
+            "Attach the food order to the customer{' '}
+            <strong className="text-indigo-400 font-bold">ON</strong> the
             condition that the{' '}
-            <code className="text-amber-300">customer_id</code> in Table A
-            perfectly matches the{' '}
-            <code className="text-amber-300">customer_id</code> in Table B."
+            <code className="bg-zinc-900 border border-zinc-800 text-amber-400 px-1 py-0.5 rounded font-mono text-base">
+              customer_id
+            </code>{' '}
+            in Table A perfectly matches the{' '}
+            <code className="bg-zinc-900 border border-zinc-800 text-amber-400 px-1 py-0.5 rounded font-mono text-base">
+              customer_id
+            </code>{' '}
+            in Table B."
           </p>
+
+          {/* --- NEW SECTION STARTS HERE --- */}
+          <h3 className="text-2xl font-bold text-white mt-12 mb-4">
+            Putting It All Together
+          </h3>
+
+          <p>
+            So, if we want to get a master list of all customers, showing what
+            they ordered while <em>still including</em> those who haven't
+            ordered anything at all, we put all the pieces together like this:
+          </p>
+
+          {/* SQL Code Block 1 (Unified Styling) */}
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 my-8 font-mono text-base shadow-inner">
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM <span className="text-white font-normal">customers</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              LEFT JOIN <span className="text-white font-normal">orders</span>
+            </div>
+            <div className="text-indigo-400 font-bold mt-2">
+              ON{' '}
+              <span className="text-white font-normal">
+                customers.customer_id{' '}
+                <span className="text-pink-400 font-bold">=</span>{' '}
+                orders.customer_id
+              </span>
+            </div>
+          </div>
+
+          <p>
+            <strong>Notice how we write the ON clause!</strong> Both tables have
+            a column called{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-amber-400 px-2 py-0.5 rounded font-mono text-base">
+              customer_id
+            </code>{' '}
+            so we join the tables on this column. Because both tables happen to
+            have a column called{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-amber-400 px-2 py-0.5 rounded font-mono text-base">
+              customer_id
+            </code>
+            , SQL might get confused about which one we mean. To be safe, we
+            write{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-amber-400 px-2 py-0.5 rounded font-mono text-base">
+              TableName.column_name
+            </code>{' '}
+            so the database knows exactly which column belongs to which table.
+          </p>
+
+          <h4 className="text-xl font-bold text-white mt-12 mb-4">
+            The Final Result of the Above Query:
+          </h4>
+
+          {/* Result Table */}
+          <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-xl mb-6">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-800/50 flex justify-between items-center">
+              <span>Query Result</span>
+              <span className="bg-indigo-500/20 px-2 py-1 rounded text-indigo-300">
+                3 Rows Returned
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead>
+                  {/* 🌟 TOP HEADER: Perfectly Matches Original Table Styling 🌟 */}
+                  <tr>
+                    <th
+                      colSpan={2}
+                      className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-r border-zinc-800/50"
+                    >
+                      Table A: Customers
+                    </th>
+                    <th
+                      colSpan={3}
+                      className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-zinc-800/50"
+                    >
+                      Table B: Orders
+                    </th>
+                  </tr>
+
+                  {/* 🌟 BOTTOM HEADER: Matches Original Colors Exactly 🌟 */}
+                  <tr className="border-b border-zinc-800/50 bg-zinc-900/30">
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      customer_id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap border-r border-zinc-800/50">
+                      name
+                    </th>
+
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      order_id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      customer_id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                      food
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  {/* Row 1 */}
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      1
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      101
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      1
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      Pizza
+                    </td>
+                  </tr>
+
+                  {/* Row 2: The important LEFT JOIN row (Bob) */}
+                  <tr className="bg-zinc-900/30 hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      2
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-600 italic">
+                      NULL
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-600 italic">
+                      NULL
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-600 italic">
+                      NULL
+                    </td>
+                  </tr>
+
+                  {/* Row 3 */}
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      3
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      102
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      3
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-white">
+                      Burger
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            <p className="text-base text-zinc-400 text-left">
+              Notice how all the columns of the customers table gets shown
+              because that's Table A in our example. For the customers who
+              haven't ordered anything, it shows NULL for the Table B portion.
+              Let's take a look at Bob! Because he didn't have any orders, SQL
+              filled the missing order information with empty
+              <code className="text-zinc-500 italic bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono mx-1">
+                NULL
+              </code>{' '}
+              values.
+            </p>
+
+            <p className="text-base text-zinc-400 text-left pt-2">
+              Also after left joining the customers and orders tables, we see
+              that Alice ordered Pizza and Charlie ordered Burger!
+            </p>
+          </div>
+          {/* --- NEW SECTION ENDS HERE --- */}
         </div>
       </div>
 
       {/* SYNTAX BLOCK */}
-      <div className="max-w-4xl">
-        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+      <div className="max-w-4xl mt-4">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
           Syntax Example
         </h3>
-        <div className="bg-[#0f111a] border border-slate-700/50 py-4 px-6 rounded-lg shadow-inner">
-          <code className="text-blue-300 font-mono text-sm block leading-loose">
-            <span className="text-purple-400">SELECT</span> *<br />
-            <span className="text-purple-400">FROM</span> table_A
-            <br />
-            <span className="text-blue-400 font-bold">
-              LEFT JOIN
-            </span> table_B <br />
-            <span className="text-amber-400 font-bold">ON</span>{' '}
-            table_A.column_name = table_B.column_name;
-          </code>
+        {/* SQL Code Block 2 (Unified Styling) */}
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-6">
+          {/* Example 1: Select All */}
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Select all columns
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM <span className="text-amber-400 font-normal">table_A</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              LEFT JOIN{' '}
+              <span className="text-amber-400 font-normal">table_B</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ON{' '}
+              <span className="text-amber-400 font-normal">
+                table_A.column_name
+              </span>{' '}
+              <span className="text-pink-400 font-bold">=</span>{' '}
+              <span className="text-amber-400 font-normal">
+                table_B.column_name
+              </span>
+              ;
+            </div>
+          </div>
+
+          {/* Example 2: Select Specific Columns */}
+          <div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Select specific columns
+            </div>
+            <div className="text-indigo-400 font-bold">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">
+                table_A.column1
+              </span>
+              <span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">
+                table_B.column2
+              </span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM <span className="text-amber-400 font-normal">table_A</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              LEFT JOIN{' '}
+              <span className="text-amber-400 font-normal">table_B</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ON{' '}
+              <span className="text-amber-400 font-normal">
+                table_A.column_name
+              </span>{' '}
+              <span className="text-pink-400 font-bold">=</span>{' '}
+              <span className="text-amber-400 font-normal">
+                table_B.column_name
+              </span>
+              ;
+            </div>
+          </div>
         </div>
       </div>
 
       {/* INTERACTIVE EXAMPLES */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-black text-white mb-6">Examples</h2>
+      <div className="mt-12">
+        <h2 className="text-3xl font-black text-white mb-8">Examples</h2>
         {JOIN_EXAMPLES.map((step, idx) => (
           <InteractiveJoinExample
             key={idx}
@@ -2387,7 +3018,7 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
       </div>
 
       <div className="mt-12 flex flex-col items-center gap-6">
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-800 to-transparent"></div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
         <h3 className="text-xl font-bold text-white">
           Ready to connect the dots?
         </h3>
@@ -2397,7 +3028,7 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
               ? navigate(`/quest/${firstQuestId}`)
               : navigate('/home')
           }
-          className="bg-blue-600 hover:bg-blue-500 text-white font-black py-5 px-16 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_30px_rgba(37,99,235,0.25)]"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
           Start LEFT JOIN Quests ➔
         </button>
@@ -2405,6 +3036,1297 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
     </div>
   );
 };
+
+
+
+
+// ==========================================
+// MODULE 6: THE "INNER JOIN" LESSON
+// ==========================================
+const INNER_JOIN_EXAMPLES = [
+  {
+    title: "Customers and Food Orders",
+    prompt: "Let's connect our customers to their food orders. This time, use an INNER JOIN. Notice what happens to customers who haven't ordered anything!",
+    selectText: "*",
+    leftTable: {
+      name: "customers",
+      columns: ["customer_id", "name"],
+      data: [
+        { customer_id: 1, name: 'Alice' },
+        { customer_id: 2, name: 'Bob' },
+        { customer_id: 3, name: 'Charlie' }
+      ]
+    },
+    rightTable: {
+      name: "orders",
+      columns: ["order_id", "customer_id", "food"],
+      data: [
+        { order_id: 101, customer_id: 1, food: 'Pizza' },
+        { order_id: 102, customer_id: 3, food: 'Burger' }
+      ]
+    },
+    expectedLeft: "customer_id",
+    expectedRight: "customer_id",
+    outputData: [
+      { customer_id: 1, name: 'Alice', order_id: 101, food: 'Pizza' },
+      { customer_id: 3, name: 'Charlie', order_id: 102, food: 'Burger' }
+    ]
+  },
+  {
+    title: "Employees and Departments",
+    prompt: "Connect the employees to their departments. With an INNER JOIN, only new hires with a department will be shown.",
+    selectText: "*",
+    leftTable: {
+      name: "employees",
+      columns: ["emp_id", "name"],
+      data: [
+        { emp_id: 1, name: 'Sarah' },
+        { emp_id: 2, name: 'John' },
+        { emp_id: 3, name: 'David' }
+      ]
+    },
+    rightTable: {
+      name: "departments",
+      columns: ["dept_id", "emp_id", "dept_name"],
+      data: [
+        { dept_id: 80, emp_id: 1, dept_name: 'Sales' },
+        { dept_id: 81, emp_id: 3, dept_name: 'Engineering' }
+      ]
+    },
+    expectedLeft: "emp_id",
+    expectedRight: "emp_id",
+    outputData: [
+      { emp_id: 1, name: 'Sarah', dept_id: 80, dept_name: 'Sales' },
+      { emp_id: 3, name: 'David', dept_id: 81, dept_name: 'Engineering' }
+    ]
+  },
+  {
+    title: "Products and Reviews",
+    prompt: "Link the products to their reviews. Products with no reviews will be destroyed from the output.",
+    selectText: "*",
+    leftTable: {
+      name: "products",
+      columns: ["product_id", "product_name"],
+      data: [
+        { product_id: 1, product_name: 'Laptop' },
+        { product_id: 2, product_name: 'Monitor' },
+        { product_id: 3, product_name: 'Keyboard' }
+      ]
+    },
+    rightTable: {
+      name: "reviews",
+      columns: ["review_id", "product_id", "rating"],
+      data: [
+        { review_id: 901, product_id: 1, rating: 5 },
+        { review_id: 902, product_id: 3, rating: 4 }
+      ]
+    },
+    expectedLeft: "product_id",
+    expectedRight: "product_id",
+    outputData: [
+      { product_id: 1, product_name: 'Laptop', review_id: 901, rating: 5 },
+      { product_id: 3, product_name: 'Keyboard', review_id: 902, rating: 4 }
+    ]
+  },
+  {
+    title: "Library Books (Specific Columns)",
+    prompt: "Instead of SELECT *, let's just get the book title and its due date using an INNER JOIN. Books that don't have a checkout disappear!",
+    selectText: "books.title, checkouts.due_date",
+    leftTable: {
+      name: "books",
+      columns: ["book_id", "title"],
+      data: [
+        { book_id: 1, title: 'Dune' },
+        { book_id: 2, title: '1984' },
+        { book_id: 3, title: 'Foundation' }
+      ]
+    },
+    rightTable: {
+      name: "checkouts",
+      columns: ["checkout_id", "book_id", "due_date"],
+      data: [
+        { checkout_id: 55, book_id: 1, due_date: 'Oct 12' },
+        { checkout_id: 56, book_id: 3, due_date: 'Oct 15' }
+      ]
+    },
+    expectedLeft: "book_id",
+    expectedRight: "book_id",
+    outputData: [
+      { title: 'Dune', due_date: 'Oct 12' },
+      { title: 'Foundation', due_date: 'Oct 15' }
+    ]
+  },
+  {
+    title: "Clinic Schedule (Specific Columns)",
+    prompt: "We just want the doctor's name and the patient they are seeing. Doctors with empty schedules should not be on this report.",
+    selectText: "doctors.doc_name, appointments.patient",
+    leftTable: {
+      name: "doctors",
+      columns: ["doc_id", "doc_name"],
+      data: [
+        { doc_id: 1, doc_name: 'Dr. House' },
+        { doc_id: 2, doc_name: 'Dr. Grey' },
+        { doc_id: 3, doc_name: 'Dr. Carter' }
+      ]
+    },
+    rightTable: {
+      name: "appointments",
+      columns: ["appt_id", "doc_id", "patient"],
+      data: [
+        { appt_id: 88, doc_id: 2, patient: "O'Malley" },
+        { appt_id: 89, doc_id: 3, patient: 'Benton' }
+      ]
+    },
+    expectedLeft: "doc_id",
+    expectedRight: "doc_id",
+    outputData: [
+      { doc_name: 'Dr. Grey', patient: "O'Malley" },
+      { doc_name: 'Dr. Carter', patient: 'Benton' }
+    ]
+  },
+  {
+    title: "IT Helpdesk (Specific Columns)",
+    prompt: "We need a list of IT support staff and their active issues. Use an INNER JOIN so agents without tickets don't clutter the active work report.",
+    selectText: "agents.name, tickets.issue",
+    leftTable: {
+      name: "agents",
+      columns: ["agent_id", "name"],
+      data: [
+        { agent_id: 1, name: 'Roy' },
+        { agent_id: 2, name: 'Moss' },
+        { agent_id: 3, name: 'Jen' }
+      ]
+    },
+    rightTable: {
+      name: "tickets",
+      columns: ["ticket_id", "agent_id", "issue"],
+      data: [
+        { ticket_id: 404, agent_id: 1, issue: 'Server down' },
+        { ticket_id: 405, agent_id: 3, issue: 'Locked out' }
+      ]
+    },
+    expectedLeft: "agent_id",
+    expectedRight: "agent_id",
+    outputData: [
+      { name: 'Roy', issue: 'Server down' },
+      { name: 'Jen', issue: 'Locked out' }
+    ]
+  }
+];
+
+const InteractiveInnerJoinExample = ({
+  step,
+  index,
+  onPass,
+  isCompleted,
+}: {
+  step: (typeof INNER_JOIN_EXAMPLES)[0];
+  index: number;
+  onPass: () => void;
+  isCompleted: boolean;
+}) => {
+  const [leftCol, setLeftCol] = useState('');
+  const [rightCol, setRightCol] = useState('');
+  const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>('idle');
+
+  const handleSubmit = () => {
+    if (leftCol === step.expectedLeft && rightCol === step.expectedRight) {
+      setFeedback('correct');
+      onPass();
+    } else {
+      setFeedback('wrong');
+    }
+  };
+
+  return (
+    <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
+      <div className="w-full xl:w-1/3 flex flex-col gap-6">
+        <div className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl transition-all`}>
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
+            <span className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}>
+              {isCompleted ? '✓' : index + 1}
+            </span> 
+            {step.title}
+          </h2>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">{step.prompt}</p>
+
+          <div className="flex flex-col gap-5">
+            {/* RAW LEFT TABLE */}
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Left: {step.leftTable.name}</div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      {step.leftTable.columns.map(c => (
+                        <th key={c} className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                          {c}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}>
+                    {step.leftTable.data.map((row, i) => (
+                      <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                        {step.leftTable.columns.map(c => (
+                          <td key={c} className="px-4 py-3 font-mono text-base text-zinc-300">
+                            {String(row[c as keyof typeof row])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="flex justify-center -my-2 z-10">
+              <div className="bg-zinc-800 border border-zinc-700 text-indigo-400 rounded-full w-8 h-8 flex items-center justify-center font-black shadow-xl">↓</div>
+            </div>
+
+            {/* RAW RIGHT TABLE */}
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Right: {step.rightTable.name}</div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      {step.rightTable.columns.map(c => (
+                        <th key={c} className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">
+                          {c}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}>
+                    {step.rightTable.data.map((row, i) => (
+                      <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                        {step.rightTable.columns.map(c => (
+                          <td key={c} className="px-4 py-3 font-mono text-base text-zinc-300">
+                            {String(row[c as keyof typeof row])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* DYNAMIC OUTPUT */}
+        {feedback === 'correct' && (
+          <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">SQL Output Result</h3>
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-black/60 border-b border-emerald-500/20">
+                    <tr>
+                      {Object.keys(step.outputData[0]).map(col => (
+                        <th key={col} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">
+                          {col}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-emerald-500/10">
+                    {step.outputData.map((row, i) => (
+                      <tr key={i}>
+                        {Object.values(row).map((val, j) => (
+                          <td key={j} className={`px-4 py-3 font-mono text-base font-bold whitespace-nowrap ${val === 'NULL' ? 'text-zinc-600 italic' : 'text-zinc-200'}`}>
+                            {String(val)}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 🌟 RIGHT COLUMN: Expanded Editor 🌟 */}
+      <div className="w-full xl:w-2/3 flex flex-col">
+        <div className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}>
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Query Builder</span>
+          </div>
+          
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
+            
+            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">{step.selectText}</span></div>
+            
+            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">{step.leftTable.name}</span></div>
+            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">{step.rightTable.name}</span></div>
+            
+            <div className="flex flex-wrap items-center gap-3 mt-2 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+              <span className="text-indigo-400 font-bold">ON</span>
+              <span className="text-amber-400 font-mono">{step.leftTable.name}.</span>
+              <select value={leftCol} onChange={(e) => {setLeftCol(e.target.value); setFeedback('idle');}} className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                <option value="" disabled>column</option>
+                {step.leftTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <span className="text-pink-400 font-black">=</span>
+              <span className="text-amber-400 font-mono">{step.rightTable.name}.</span>
+              <select value={rightCol} onChange={(e) => {setRightCol(e.target.value); setFeedback('idle');}} className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                <option value="" disabled>column</option>
+                {step.rightTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+          </div>
+
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
+            {feedback === 'idle' && <button onClick={handleSubmit} disabled={!leftCol || !rightCol} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Execute Join</button>}
+            {feedback === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Incorrect link. Find the column they share!</div><button onClick={() => setFeedback('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
+            {feedback === 'correct' && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">Link Established! Notice how unmatched rows are deleted.</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const InnerJoinLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
+  onComplete,
+  navigate,
+}) => {
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+
+  const handleStepComplete = (index: number) => {
+    setCompletedSteps((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(index);
+      if (newSet.size === INNER_JOIN_EXAMPLES.length) onComplete();
+      return newSet;
+    });
+  };
+
+  return (
+    <div className="w-full flex flex-col gap-12 pb-32">
+      {/* HEADER SECTION */}
+      <div className="max-w-3xl">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+          Interactive Lesson
+        </span>
+        <h1 className="text-4xl font-black text-white mt-2 mb-6">
+          Combining Tables: <span className="text-indigo-400 font-bold">INNER JOIN</span>
+        </h1>
+      </div>
+
+      {/* DESCRIPTION WITH INLINE VISUAL TABLES */}
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
+          <p>
+            In the last lesson, we used a <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">LEFT JOIN</code> to combine our customers and orders tables. It kept <em>everyone</em> on the list. Even Bob, who had never ordered food, stayed on the list with blank <code className="bg-zinc-950 border border-zinc-800 text-zinc-500 italic px-2 py-0.5 rounded font-mono text-base">NULL</code> values.
+          </p>
+
+          <p>
+            But what if Finance ONLY wants a list of customers who <em>actually bought something?</em> They don't care about window shoppers. They just want the real buyers.
+          </p>
+          
+          <p>
+            That is where <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">INNER JOIN</code> comes in. We only want customers who have an order. It is brutally honest and strict. If a row in Table A does not have a matching order in Table B, it is <strong>completely deleted</strong> from the final result.
+          </p>
+
+          {/* 🌟 THE VISUAL TABLES 🌟 */}
+          <div className="flex flex-col sm:flex-row gap-6 my-10 items-center justify-center bg-zinc-950/50 p-6 rounded-xl border border-zinc-800/50 shadow-inner">
+            {/* Table A: Customers */}
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md w-full sm:w-1/2">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                Table A: Customers
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">name</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/50">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">1</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Alice</td>
+                    </tr>
+                    <tr className="hover:bg-red-900/30 bg-red-950/20 transition-colors opacity-50">
+                      <td className="px-4 py-3 font-mono text-base text-red-400">2</td>
+                      <td className="px-4 py-3 font-mono text-base text-red-400">Bob</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">3</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Charlie</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Connection Indicator */}
+            <div className="hidden sm:flex text-zinc-600 font-black text-2xl">➕</div>
+
+            {/* Table B: Orders */}
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md w-full sm:w-1/2">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+                Table B: Orders
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">order_id</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">food</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/50">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-400">101</td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">1</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Pizza</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-400">102</td>
+                      <td className="px-4 py-3 font-mono text-base text-amber-400 bg-amber-500/5">3</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Burger</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <h3 className="text-2xl font-bold text-white mt-12 mb-4">
+            Putting It All Together
+          </h3>
+
+          <p>
+            When we use <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">INNER JOIN</code>, the database looks for a perfect match on the <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-2 py-0.5 rounded font-mono text-base">ON</code> clause.
+          </p>
+
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 my-8 font-mono text-base shadow-inner flex flex-col gap-1">
+            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+            <div className="text-indigo-400 font-bold">FROM <span className="text-white font-normal">customers</span></div>
+            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-white font-normal">orders</span></div>
+            <div className="text-indigo-400 font-bold">
+              ON <span className="text-white font-normal">customers.customer_id <span className="text-pink-400 font-bold">=</span> orders.customer_id</span>;
+            </div>
+          </div>
+
+          <h4 className="text-xl font-bold text-white mt-12 mb-4">
+            The Final Result:
+          </h4>
+
+          {/* Result Table */}
+          <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-xl mb-6">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-800/50 flex justify-between items-center">
+              <span>Query Result</span>
+              <span className="bg-indigo-500/20 px-2 py-1 rounded text-indigo-300">2 Rows Returned</span>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead>
+                  <tr>
+                    <th colSpan={2} className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-r border-zinc-800/50">
+                      Table A: Customers
+                    </th>
+                    <th colSpan={3} className="bg-zinc-950/80 text-zinc-300 text-center text-xs font-bold px-4 py-2 uppercase tracking-widest border-b border-zinc-800/50">
+                      Table B: Orders
+                    </th>
+                  </tr>
+                  <tr className="border-b border-zinc-800/50 bg-zinc-900/30">
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap border-r border-zinc-800/50">name</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">order_id</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">customer_id</th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">food</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-white">1</td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">Alice</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">101</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">1</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">Pizza</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-white">3</td>
+                    <td className="px-4 py-3 font-mono text-base text-white border-r border-zinc-800/50">Charlie</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">102</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">3</td>
+                    <td className="px-4 py-3 font-mono text-base text-white">Burger</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div className="mt-4 space-y-4">
+            <p className="text-base text-zinc-400 text-left">
+              Because Bob had no matching orders in Table B, he was <strong>completely dropped</strong> from the result. Alice and Charlie are the only ones left!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* SYNTAX BLOCK */}
+      <div className="max-w-4xl mt-4">
+        <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
+          Syntax Examples
+        </h3>
+        <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-6">
+          {/* Example 1: Select All */}
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Select all columns</div>
+            <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">table_A</span></div>
+            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">table_B</span></div>
+            <div className="text-indigo-400 font-bold">
+              ON <span className="text-amber-400 font-normal">table_A.column_name</span> <span className="text-pink-400 font-bold">=</span> <span className="text-amber-400 font-normal">table_B.column_name</span>;
+            </div>
+          </div>
+
+          {/* Example 2: Select Specific Columns */}
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Select specific columns</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">table_A.column1</span>
+              <span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">table_B.column2</span>
+            </div>
+            <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">table_A</span></div>
+            <div className="text-indigo-400 font-bold">INNER JOIN <span className="text-amber-400 font-normal">table_B</span></div>
+            <div className="text-indigo-400 font-bold">
+              ON <span className="text-amber-400 font-normal">table_A.column_name</span> <span className="text-pink-400 font-bold">=</span> <span className="text-amber-400 font-normal">table_B.column_name</span>;
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* INTERACTIVE EXAMPLES */}
+      <div className="mt-12">
+        <h2 className="text-3xl font-black text-white mb-8">Examples</h2>
+        {INNER_JOIN_EXAMPLES.map((step, idx) => (
+          <InteractiveInnerJoinExample
+            key={idx}
+            step={step}
+            index={idx}
+            onPass={() => handleStepComplete(idx)}
+            isCompleted={completedSteps.has(idx)}
+          />
+        ))}
+      </div>
+
+      <div className="mt-12 flex flex-col items-center gap-6">
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
+        <h3 className="text-xl font-bold text-white">
+          Ready to connect the dots?
+        </h3>
+        <button
+          onClick={() =>
+            firstQuestId
+              ? navigate(`/quest/${firstQuestId}`)
+              : navigate('/home')
+          }
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
+        >
+          Start INNER JOIN Quests ➔
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+// ==========================================
+// MODULE 7: THE "CTE" LESSON
+// ==========================================
+// ==========================================
+// MODULE 7: THE "CTE" LESSON
+// ==========================================
+interface CteStepData {
+  title: string;
+  prompt1: string;
+  prompt2: string;
+  rawTable: { name: string; columns: string[]; data: Record<string, string | number>[] };
+  cteExpected: { agg: string; col: string; group: string };
+  mainExpected: { filterCol: string; filterOp: string; filterVal: string };
+  cteOutput: { name: string; columns: string[]; data: Record<string, string | number>[] };
+  finalOutput: Record<string, string | number>[];
+}
+
+const CTE_EXAMPLES: CteStepData[] = [
+  {
+    title: "High Performing Baristas",
+    prompt1: "Step 1: Let's build our 'Mini-Table'. We need to know how many total drinks each barista made. Create a CTE named 'barista_totals' that counts the drinks grouped by the barista.",
+    prompt2: "Step 2: Now that our Mini-Table exists in memory, let's query it! Write the main query to select baristas from 'barista_totals' who made strictly MORE than 2 drinks.",
+    rawTable: {
+      name: "coffee_sales",
+      columns: ["transaction_id", "drink", "barista"],
+      data: [
+        { transaction_id: 101, drink: 'Latte', barista: 'Alice' },
+        { transaction_id: 102, drink: 'Cold Brew', barista: 'Bob' },
+        { transaction_id: 103, drink: 'Green Tea', barista: 'Alice' },
+        { transaction_id: 104, drink: 'Mocha', barista: 'Charlie' },
+        { transaction_id: 105, drink: 'Drip', barista: 'Alice' },
+        { transaction_id: 106, drink: 'Espresso', barista: 'Charlie' },
+      ]
+    },
+    cteExpected: { agg: "COUNT", col: "drink", group: "barista" },
+    mainExpected: { filterCol: "total_drinks", filterOp: ">", filterVal: "2" },
+    cteOutput: {
+      name: "barista_totals",
+      columns: ["barista", "total_drinks"],
+      data: [
+        { barista: 'Alice', total_drinks: 3 },
+        { barista: 'Bob', total_drinks: 1 },
+        { barista: 'Charlie', total_drinks: 2 }
+      ]
+    },
+    finalOutput: [
+      { barista: 'Alice', total_drinks: 3 }
+    ]
+  },
+  {
+    title: "Expensive Apartment Types",
+    prompt1: "Step 1: What is the average rent for each bedroom count? Create a CTE named 'avg_rents' that calculates the average rent grouped by bedrooms.",
+    prompt2: "Step 2: Let's filter that mini-table! Select the bedroom types from 'avg_rents' where the average rent is 3000 or greater.",
+    rawTable: {
+      name: "apartments",
+      columns: ["unit", "rent", "bedrooms"],
+      data: [
+        { unit: '1A', rent: 2500, bedrooms: 1 },
+        { unit: '2B', rent: 3200, bedrooms: 2 },
+        { unit: '3C', rent: 2800, bedrooms: 2 },
+        { unit: '4D', rent: 4500, bedrooms: 3 },
+        { unit: '5E', rent: 3000, bedrooms: 1 },
+      ]
+    },
+    cteExpected: { agg: "AVG", col: "rent", group: "bedrooms" },
+    mainExpected: { filterCol: "avg_rent", filterOp: ">=", filterVal: "3000" },
+    cteOutput: {
+      name: "avg_rents",
+      columns: ["bedrooms", "avg_rent"],
+      data: [
+        { bedrooms: 1, avg_rent: 2750 },
+        { bedrooms: 2, avg_rent: 3000 },
+        { bedrooms: 3, avg_rent: 4500 }
+      ]
+    },
+    finalOutput: [
+      { bedrooms: 2, avg_rent: 3000 },
+      { bedrooms: 3, avg_rent: 4500 }
+    ]
+  },
+  {
+    title: "Overworked IT Agents",
+    prompt1: "Step 1: We need to see who is handling the most tickets. Build a CTE named 'agent_workload' that counts the ticket_id grouped by agent_id.",
+    prompt2: "Step 2: Let's find the overworked staff. Query the 'agent_workload' CTE to find agents who have exactly 2 tickets.",
+    rawTable: {
+      name: "tickets",
+      columns: ["ticket_id", "agent_id", "issue"],
+      data: [
+        { ticket_id: 404, agent_id: 1, issue: 'Server down' },
+        { ticket_id: 405, agent_id: 3, issue: 'Locked out' },
+        { ticket_id: 406, agent_id: 1, issue: 'Email broken' },
+        { ticket_id: 407, agent_id: 2, issue: 'Mouse broken' },
+      ]
+    },
+    cteExpected: { agg: "COUNT", col: "ticket_id", group: "agent_id" },
+    mainExpected: { filterCol: "total_tickets", filterOp: "=", filterVal: "2" },
+    cteOutput: {
+      name: "agent_workload",
+      columns: ["agent_id", "total_tickets"],
+      data: [
+        { agent_id: 1, total_tickets: 2 },
+        { agent_id: 2, total_tickets: 1 },
+        { agent_id: 3, total_tickets: 1 }
+      ]
+    },
+    finalOutput: [
+      { agent_id: 1, total_tickets: 2 }
+    ]
+  },
+  {
+    title: "Top Spending Customers",
+    prompt1: "Step 1: Create a CTE named 'customer_totals' that calculates the SUM of the amount column grouped by cust_id.",
+    prompt2: "Step 2: Reward our best clients! Query the 'customer_totals' CTE to find customers whose total_spent is greater than 4000.",
+    rawTable: {
+      name: "invoices",
+      columns: ["inv_id", "cust_id", "amount"],
+      data: [
+        { inv_id: 101, cust_id: 1, amount: 3000 },
+        { inv_id: 102, cust_id: 1, amount: 2500 },
+        { inv_id: 103, cust_id: 2, amount: 1000 },
+        { inv_id: 104, cust_id: 3, amount: 6000 },
+      ]
+    },
+    cteExpected: { agg: "SUM", col: "amount", group: "cust_id" },
+    mainExpected: { filterCol: "total_spent", filterOp: ">", filterVal: "4000" },
+    cteOutput: {
+      name: "customer_totals",
+      columns: ["cust_id", "total_spent"],
+      data: [
+        { cust_id: 1, total_spent: 5500 },
+        { cust_id: 2, total_spent: 1000 },
+        { cust_id: 3, total_spent: 6000 }
+      ]
+    },
+    finalOutput: [
+      { cust_id: 1, total_spent: 5500 },
+      { cust_id: 3, total_spent: 6000 }
+    ]
+  },
+  {
+    title: "Flagging Bad Products",
+    prompt1: "Step 1: We need the average rating for every product. Build a CTE named 'product_ratings' that finds the AVG rating grouped by product_id.",
+    prompt2: "Step 2: Flag products that need review. Query the 'product_ratings' CTE to find products with an avg_rating less than 4.",
+    rawTable: {
+      name: "reviews",
+      columns: ["rev_id", "product_id", "rating"],
+      data: [
+        { rev_id: 101, product_id: 1, rating: 5 },
+        { rev_id: 102, product_id: 1, rating: 5 },
+        { rev_id: 103, product_id: 2, rating: 2 },
+        { rev_id: 104, product_id: 3, rating: 4 },
+      ]
+    },
+    cteExpected: { agg: "AVG", col: "rating", group: "product_id" },
+    mainExpected: { filterCol: "avg_rating", filterOp: "<", filterVal: "4" },
+    cteOutput: {
+      name: "product_ratings",
+      columns: ["product_id", "avg_rating"],
+      data: [
+        { product_id: 1, avg_rating: 5 },
+        { product_id: 2, avg_rating: 2 },
+        { product_id: 3, avg_rating: 4 }
+      ]
+    },
+    finalOutput: [
+      { product_id: 2, avg_rating: 2 }
+    ]
+  },
+  {
+    title: "Large Animal Rescues",
+    prompt1: "Step 1: Create a CTE named 'max_teams' that finds the MAX team_size grouped by the type of animal.",
+    prompt2: "Step 2: Query the 'max_teams' CTE to find animal types that required a max_size of 5.",
+    rawTable: {
+      name: "rescues",
+      columns: ["id", "type", "team_size"],
+      data: [
+        { id: 'R01', type: 'Raccoon', team_size: 2 },
+        { id: 'R02', type: 'Hawk', team_size: 3 },
+        { id: 'R03', type: 'Deer', team_size: 5 },
+        { id: 'R04', type: 'Deer', team_size: 4 },
+      ]
+    },
+    cteExpected: { agg: "MAX", col: "team_size", group: "type" },
+    mainExpected: { filterCol: "max_size", filterOp: "=", filterVal: "5" },
+    cteOutput: {
+      name: "max_teams",
+      columns: ["type", "max_size"],
+      data: [
+        { type: 'Raccoon', max_size: 2 },
+        { type: 'Hawk', max_size: 3 },
+        { type: 'Deer', max_size: 5 }
+      ]
+    },
+    finalOutput: [
+      { type: 'Deer', max_size: 5 }
+    ]
+  }
+];
+
+const InteractiveCteExample = ({
+  step,
+  index,
+  onPass,
+  isCompleted,
+}: {
+  step: CteStepData;
+  index: number;
+  onPass: () => void;
+  isCompleted: boolean;
+}) => {
+  // Step 1 State (CTE)
+  const [agg, setAgg] = useState('');
+  const [col, setCol] = useState('');
+  const [group, setGroup] = useState('');
+  const [step1Status, setStep1Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
+
+  // Step 2 State (Main Query)
+  const [filterCol, setFilterCol] = useState('');
+  const [filterOp, setFilterOp] = useState('');
+  const [filterVal, setFilterVal] = useState('');
+  const [step2Status, setStep2Status] = useState<'idle' | 'wrong' | 'correct'>('idle');
+
+  const handleStep1Submit = () => {
+    if (agg === step.cteExpected.agg && col === step.cteExpected.col && group === step.cteExpected.group) {
+      setStep1Status('correct');
+    } else {
+      setStep1Status('wrong');
+    }
+  };
+
+  const handleStep2Submit = () => {
+    if (filterCol === step.mainExpected.filterCol && filterOp === step.mainExpected.filterOp && filterVal === step.mainExpected.filterVal) {
+      setStep2Status('correct');
+      onPass();
+    } else {
+      setStep2Status('wrong');
+    }
+  };
+
+  return (
+    <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
+      {/* 🌟 LEFT COLUMN: Tables and Explanations 🌟 */}
+      <div className="w-full xl:w-1/3 flex flex-col gap-6">
+        <div className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl transition-all`}>
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+            <span className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}>
+              {isCompleted ? '✓' : index + 1}
+            </span> 
+            {step.title}
+          </h2>
+          
+          <div className="space-y-6">
+            <div>
+              <p className={`text-lg leading-relaxed ${step1Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
+                {step.prompt1}
+              </p>
+            </div>
+
+            {/* RAW TABLE (Hidden once CTE is built to save space) */}
+            {step1Status !== 'correct' && (
+              <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+                <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">Raw Table: {step.rawTable.name}</div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-base">
+                    <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                      <tr>
+                        {step.rawTable.columns.map(c => <th key={c} className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap">{c}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/50">
+                      {step.rawTable.data.map((row, i) => (
+                        <tr key={i} className="hover:bg-zinc-800/30 transition-colors">
+                          {step.rawTable.columns.map(c => <td key={c} className="px-4 py-3 font-mono text-base text-zinc-300 whitespace-nowrap">{String(row[c])}</td>)}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            {/* STEP 1 OUTPUT: THE MINI-TABLE */}
+            {step1Status === 'correct' && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <p className="text-lg leading-relaxed text-emerald-400 font-bold mb-4">
+                  Mini-Table Created! 👇
+                </p>
+                <div className="border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md">
+                  <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">CTE: {step.cteOutput.name}</div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-base">
+                      <thead className="bg-black/40 border-b border-emerald-500/20">
+                        <tr>
+                          {step.cteOutput.columns.map(c => <th key={c} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">{c}</th>)}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-emerald-500/10">
+                        {step.cteOutput.data.map((row, i) => (
+                          <tr key={i}>
+                            {step.cteOutput.columns.map(c => <td key={c} className="px-4 py-3 font-mono text-base font-bold text-zinc-200 whitespace-nowrap">{String(row[c])}</td>)}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {step1Status === 'correct' && (
+               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                 <hr className="border-zinc-800/50 my-6" />
+                 <p className={`text-lg leading-relaxed ${step2Status === 'correct' ? 'text-zinc-500' : 'text-zinc-300'}`}>
+                  {step.prompt2}
+                 </p>
+               </motion.div>
+            )}
+          </div>
+        </div>
+
+        {/* FINAL OUTPUT */}
+        {step2Status === 'correct' && (
+          <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">Final SQL Output</h3>
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-black/60 border-b border-emerald-500/20">
+                    <tr>
+                      {Object.keys(step.finalOutput[0]).map(col => (
+                        <th key={col} className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-emerald-500/10">
+                    {step.finalOutput.map((row, i) => (
+                      <tr key={i}>
+                        {Object.values(row).map((val, j) => (
+                          <td key={j} className="px-4 py-3 font-mono text-base font-bold text-white whitespace-nowrap">{String(val)}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 🌟 RIGHT COLUMN: Two-Step Query Builder 🌟 */}
+      <div className="w-full xl:w-2/3 flex flex-col">
+        <div className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col h-full shadow-2xl transition-colors duration-300 ${step2Status === 'correct' ? 'border-emerald-500' : 'border-zinc-800/50'}`}>
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Query Builder</span>
+          </div>
+          
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col gap-6">
+            
+            {/* STEP 1: CTE DEFINITION */}
+            <div className={`transition-opacity duration-500 ${step1Status === 'correct' ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+              <div className="text-zinc-500 italic mb-2">-- Step 1: Create the Mini-Table</div>
+              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">{step.cteOutput.name}</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+              
+              <div className="pl-4 md:pl-8 mt-3 flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-indigo-400 font-bold">SELECT</span>
+                  <span className="text-amber-400">{group || 'column'}</span>
+                  <span className="text-zinc-500 font-bold">,</span>
+                  
+                  <select value={agg} onChange={(e) => {setAgg(e.target.value); setStep1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>AGG</option>
+                    <option value="COUNT">COUNT</option>
+                    <option value="SUM">SUM</option>
+                    <option value="AVG">AVG</option>
+                    <option value="MAX">MAX</option>
+                    <option value="MIN">MIN</option>
+                  </select>
+                  <span className="text-zinc-500 font-bold">(</span>
+                  <select value={col} onChange={(e) => {setCol(e.target.value); setStep1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>column</option>
+                    {step.rawTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <span className="text-zinc-500 font-bold">)</span>
+                  <span className="text-indigo-400 font-bold">AS</span>
+                  <span className="text-amber-400">{step.cteOutput.columns[1]}</span>
+                </div>
+                
+                <div>
+                  <span className="text-indigo-400 font-bold">FROM</span> <span className="text-amber-400 font-normal">{step.rawTable.name}</span>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-indigo-400 font-bold">GROUP BY</span>
+                  <select value={group} onChange={(e) => {setGroup(e.target.value); setStep1Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>column</option>
+                    {step.rawTable.columns.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="text-zinc-500 font-bold mt-3">)</div>
+            </div>
+
+            {/* STEP 2: MAIN QUERY */}
+            {step1Status === 'correct' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 pt-6 border-t border-zinc-800/50">
+                <div className="text-zinc-500 italic mb-2">-- Step 2: Query the Mini-Table</div>
+                <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+                <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">{step.cteOutput.name}</span></div>
+                
+                <div className="flex flex-wrap items-center gap-3 mt-4 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+                  <span className="text-indigo-400 font-bold">WHERE</span>
+                  <select value={filterCol} onChange={(e) => {setFilterCol(e.target.value); setStep2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-amber-400 rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>column</option>
+                    {step.cteOutput.columns.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                  <select value={filterOp} onChange={(e) => {setFilterOp(e.target.value); setStep2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-pink-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>op</option>
+                    <option value="=">=</option>
+                    <option value=">">&gt;</option>
+                    <option value="<">&lt;</option>
+                    <option value=">=">&gt;=</option>
+                  </select>
+                  <select value={filterVal} onChange={(e) => {setFilterVal(e.target.value); setStep2Status('idle');}} className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold rounded-md px-3 py-1.5 outline-none cursor-pointer focus:border-indigo-500 transition-colors text-base">
+                    <option value="" disabled>value</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="3000">3000</option>
+                    <option value="4000">4000</option>
+                  </select>
+                  <span className="text-white font-bold">;</span>
+                </div>
+              </motion.div>
+            )}
+
+          </div>
+
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
+            {step1Status !== 'correct' ? (
+              <>
+                {step1Status === 'idle' && <button onClick={handleStep1Submit} disabled={!agg || !col || !group} className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Build Mini-Table</button>}
+                {step1Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Incorrect CTE definition. Try again!</div><button onClick={() => setStep1Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
+              </>
+            ) : (
+              <>
+                {step2Status === 'idle' && <button onClick={handleStep2Submit} disabled={!filterCol || !filterOp || !filterVal} className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg">Execute Main Query</button>}
+                {step2Status === 'wrong' && <div className="flex flex-col gap-4"><div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">Filter logic incorrect. Check the mini-table!</div><button onClick={() => setStep2Status('idle')} className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg">Try Again</button></div>}
+                {step2Status === 'correct' && <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">CTE Executed Successfully!</div>}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CteLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
+  onComplete,
+  navigate,
+}) => {
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+
+  const handleStepComplete = (index: number) => {
+    setCompletedSteps((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(index);
+      if (newSet.size === CTE_EXAMPLES.length) onComplete();
+      return newSet;
+    });
+  };
+
+  return (
+    <div className="w-full flex flex-col gap-12 pb-32">
+      <div className="max-w-3xl">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+          Interactive Lesson
+        </span>
+        <h1 className="text-4xl font-black text-white mt-2 mb-6">
+          Common Table Expressions: <span className="text-indigo-400 font-bold">CTE</span>
+        </h1>
+      </div>
+
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
+          <p>
+            So far we have been exploring writing queries using SELECT, WHERE, FROM, ORDER BY, GROUP BY, LEFT JOIN, and INNER JOIN. And all of these instances involved you writing a query in one 'code block', we didn't 
+            really divide our logic. But in the real world this will be an issue. As an analyst you will be dealing with queries that expand hundreds of lines sometimes and if you write all that logic within a single 'code block'
+            it's going to get messy real quick!
+          </p>
+          <p>
+            A <strong>Common Table Expression (CTE)</strong> solves this problem really easily by allowing your code to be readable and reusable (and also allows you to break down logic and structure really efficiently).
+          </p>
+          
+          <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-6 mt-6 shadow-md">
+            <h3 className="text-white font-bold mb-4">Why professionals use CTEs:</h3>
+            <ul className="space-y-4 text-base">
+              <li className="flex items-start gap-4">
+                <span className="text-indigo-400 text-xl font-black">1</span>
+                <div>
+                  <strong className="text-white block mb-1">Readability (Top-Down Logic)</strong>
+                  Because CTEs sit at the top of your script, another analyst reading your code can read it naturally from top to bottom and immediately understand your logic steps.
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-indigo-400 text-xl font-black">2</span>
+                <div>
+                  <strong className="text-white block mb-1">Breaking Down Complexity</strong>
+                  Instead of writing one massive, terrifying query, you can break a huge problem down into 3 or 4 small, easily testable mini-tables.
+                </div>
+              </li>
+              <li className="flex items-start gap-4">
+                <span className="text-indigo-400 text-xl font-black">3</span>
+                <div>
+                  <strong className="text-white block mb-1">Reusability</strong>
+                  Once you define a CTE at the top of your page, you can reference it as many times as you want in your main query!
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <p className="pt-4">You can think of a CTE as allowing you to create <strong>'mini tables'</strong>.</p>
+        </div>
+        <div className="max-w-5xl mt-4 space-y-8">
+        <h4 className="text-3xl font-black text-white mb-6">Let's work through an example:</h4>
+        
+        <p className="text-lg text-zinc-300">
+          Imagine your boss gives you the raw <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">coffee_sales</code> table below and says: <em>"Find me all the Espresso drinks we sell!"</em> 
+        </p>
+
+        <div className="bg-zinc-950/50 border-l-4 border-indigo-500 p-6 md:p-8 rounded-r-2xl shadow-lg">
+          <h5 className="text-indigo-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 1: Build the Mini-Table</h5>
+          <p className="text-lg text-zinc-300 mb-6">
+            First, we use the <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">WITH</code> keyword to name our mini-table, and then we wrap our logic inside parentheses to just grab the specific columns we want. Let's name our mini-table <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">drink_list</code>.
+          </p>
+          
+          <div className="flex flex-col xl:flex-row gap-8 items-start">
+            {/* Step 1 Code */}
+            <div className="w-full xl:w-1/2 bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+              <div className="text-zinc-500 italic mb-1">-- Step 1: Declare the CTE</div>
+              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+              <div className="pl-8 text-indigo-400 font-bold">SELECT <span className="text-amber-400 font-normal">drink</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">category</span><span className="text-zinc-500 font-bold">,</span> <span className="text-amber-400 font-normal">price</span></div>
+              <div className="pl-8 text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">coffee_sales</span></div>
+              <div className="text-zinc-500 font-bold">)</div>
+              
+              <div className="text-zinc-500 italic mt-6 mb-1">-- Let's run a quick SELECT to see our Mini-Table:</div>
+              <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+              <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">drink_list</span>;</div>
+            </div>
+
+            {/* Step 1 Output Table */}
+            <div className="w-full xl:w-1/2 border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md">
+              <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">CTE OUTPUT: drink_list</div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">drink</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">category</th>
+                      <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">price</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-indigo-500/10">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Latte</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">5</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Cold Brew</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Coffee</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Mocha</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">Espresso</td>
+                      <td className="px-4 py-3 font-mono text-base text-zinc-300">6</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+          </div>
+          <p>Notice how the drink_list cte is only returning the drink, category, and price columns from the larger coffee_sales table. Then we have a SELECT 
+            statement outside the paranthesis that returns all the columns from the drink_list cte. So you get drink, category, and price columns outputted.
+          </p>
+        </div>
+
+        <div className="bg-zinc-950/50 border-l-4 border-emerald-500 p-6 md:p-8 rounded-r-2xl shadow-lg mt-8">
+          <h5 className="text-emerald-400 font-bold mb-4 uppercase tracking-widest text-sm">Step 2: Filter the Mini-Table</h5>
+          <p className="text-lg text-zinc-300 mb-6">
+            Now that our <code className="text-amber-400 font-mono bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded text-base">drink_list</code> mini-table exists in memory, we can treat it just like a real database table! We write our main query right underneath it and apply our <code className="text-indigo-400 font-bold bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded font-mono text-base">WHERE</code> clause to find the Espresso.
+          </p>
+          
+          <div className="flex flex-col xl:flex-row gap-8 items-start">
+            {/* Step 2 Code */}
+            <div className="w-full xl:w-1/2 bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+              <div className="text-zinc-500 italic mb-2">-- Our CTE from Step 1 is still up here...</div>
+              <div className="text-indigo-400 font-bold">WITH <span className="text-amber-400 font-normal">drink_list</span> AS <span className="text-zinc-500 font-bold">(</span></div>
+              <div className="pl-8 text-zinc-500 italic">...</div>
+              <div className="text-zinc-500 font-bold mb-6">)</div>
+              
+              <div className="text-zinc-500 italic mb-1">-- Step 2: The Main Query</div>
+              <div className="text-indigo-400 font-bold">SELECT <span className="text-white font-normal">*</span></div>
+              <div className="text-indigo-400 font-bold">FROM <span className="text-amber-400 font-normal">drink_list</span></div>
+              <div className="text-indigo-400 font-bold">WHERE <span className="text-amber-400 font-normal">category</span> <span className="text-pink-400 font-bold">=</span> <span className="text-emerald-400 font-normal">'Espresso'</span>;</div>
+            </div>
+
+            {/* Step 2 Output Table */}
+            <div className="w-full xl:w-1/2 border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md">
+              <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">Final Output Result</div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-black/40 border-b border-emerald-500/20">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">drink</th>
+                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">category</th>
+                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight">price</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-emerald-500/10">
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Latte</td>
+                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Espresso</td>
+                      <td className="px-4 py-3 font-mono text-base font-bold text-white">5</td>
+                    </tr>
+                    <tr className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Mocha</td>
+                      <td className="px-4 py-3 font-mono text-base font-bold text-white">Espresso</td>
+                      <td className="px-4 py-3 font-mono text-base font-bold text-white">6</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      {/* --- NEW STEP-BY-STEP EXAMPLE --- */}
+      
+      {/* --- END STEP-BY-STEP EXAMPLE --- */}
+
+      <div className="mt-12">
+        <h2 className="text-3xl font-black text-white mb-8">Examples</h2>
+        {CTE_EXAMPLES.map((step, idx) => (
+          <InteractiveCteExample
+            key={idx}
+            step={step}
+            index={idx}
+            onPass={() => handleStepComplete(idx)}
+            isCompleted={completedSteps.has(idx)}
+          />
+        ))}
+      </div>
+
+      <div className="mt-12 flex flex-col items-center gap-6">
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
+        <h3 className="text-xl font-bold text-white">
+          Ready to break down complex logic?
+        </h3>
+        <button
+          onClick={() =>
+            firstQuestId
+              ? navigate(`/quest/${firstQuestId}`)
+              : navigate('/home')
+          }
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
+        >
+          Start CTE Quests ➔
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ==========================================
 // 3. THE REGISTRY & HOST
 // ==========================================
@@ -2414,6 +4336,8 @@ const LESSON_REGISTRY: Record<string, React.FC<LessonModuleProps>> = {
   'order by': OrderByLesson,
   'group by': GroupByLesson,
   'left join': LeftJoinLesson,
+  'inner join':InnerJoinLesson,
+  'cte': CteLesson,
 };
 
 export default function Lesson() {
@@ -2453,16 +4377,17 @@ export default function Lesson() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#0f111a] text-slate-100 p-6 flex flex-col gap-6 overflow-y-auto">
-      <div className="w-full max-w-6xl mx-auto">
+    /* Top level container - matches the Charcoal Deep Black #111111 */
+    <div className="min-h-screen bg-[#111111] text-zinc-300 p-6 md:p-10 flex flex-col gap-8 overflow-y-auto selection:bg-indigo-500/30">
+      <div className="w-full max-w-[1200px] mx-auto">
         <button
           onClick={() => navigate('/home')}
-          className="text-slate-500 text-sm font-bold hover:text-white flex items-center gap-2 transition-colors"
+          className="text-zinc-500 text-sm font-bold hover:text-white flex items-center gap-2 transition-colors bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-lg w-fit"
         >
           ← Back to Curriculum
         </button>
       </div>
-      <div className="max-w-6xl mx-auto w-full flex-1 flex">
+      <div className="max-w-[1200px] mx-auto w-full flex-1 flex">
         {ActiveLessonComponent ? (
           <ActiveLessonComponent
             firstQuestId={firstQuestId}
@@ -2470,7 +4395,7 @@ export default function Lesson() {
             navigate={navigate}
           />
         ) : (
-          <div className="w-full text-center py-20 border-2 border-dashed border-slate-800 rounded-xl">
+          <div className="w-full text-center py-32 border-2 border-dashed border-zinc-800 rounded-2xl bg-zinc-900/20 text-zinc-500 text-lg font-mono">
             Module Coming Soon
           </div>
         )}
