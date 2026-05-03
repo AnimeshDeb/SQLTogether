@@ -7,6 +7,7 @@ import {
 import { supabase } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 // ==========================================
 // 1. STRICT TYPESCRIPT INTERFACES
 // ==========================================
@@ -43,10 +44,11 @@ interface AggStepData {
 // MODULE 1: THE "SELECT" LESSON
 // ==========================================
 const SelectLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
+  
   onComplete,
   navigate,
 }) => {
+  const [firstQuestId, setFirstQuestId]=useState("")
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>(
     'idle',
@@ -71,6 +73,29 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
       setFeedback('wrong');
     }
   };
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', 'The First Query') // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
 
   return (
     <div className="w-full flex flex-col gap-12 pb-32">
@@ -245,6 +270,10 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
 // ==========================================
 // MODULE 2: THE "WHERE" LESSON
 // ==========================================
+
+
+// Make sure LessonModuleProps and WhereStepData are imported/defined in your file!
+
 const InteractiveWhereExample = ({
   step,
   index,
@@ -324,18 +353,24 @@ const InteractiveWhereExample = ({
                     const rowValue = row[step.expected.col];
                     const expectedValue = step.expected.val.replace(/'/g, '');
                     let shouldFade = false;
+                    
                     if (feedback === 'correct') {
                       if (step.expected.op === '=')
                         shouldFade = String(rowValue) !== expectedValue;
-                      if (step.expected.op === '>')
+                      else if (step.expected.op === '>')
                         shouldFade = Number(rowValue) <= Number(expectedValue);
-                      if (step.expected.op === '<')
+                      else if (step.expected.op === '<')
                         shouldFade = Number(rowValue) >= Number(expectedValue);
-                      if (step.expected.op === '>=')
+                      else if (step.expected.op === '>=')
                         shouldFade = Number(rowValue) < Number(expectedValue);
-                      if (step.expected.op === '<=')
+                      else if (step.expected.op === '<=')
                         shouldFade = Number(rowValue) > Number(expectedValue);
+                      else if (step.expected.op === 'IS')
+                        shouldFade = String(rowValue) !== 'NULL';
+                      else if (step.expected.op === 'IS NOT')
+                        shouldFade = String(rowValue) === 'NULL';
                     }
+                    
                     return (
                       <tr
                         key={i}
@@ -346,7 +381,11 @@ const InteractiveWhereExample = ({
                             key={j}
                             className="px-4 py-3 font-mono text-base text-zinc-300 whitespace-nowrap"
                           >
-                            {val}
+                            {val === 'NULL' ? (
+                              <span className="text-zinc-600 italic">NULL</span>
+                            ) : (
+                              val as React.ReactNode
+                            )}
                           </td>
                         ))}
                       </tr>
@@ -375,7 +414,9 @@ const InteractiveWhereExample = ({
               <span className="text-indigo-400 font-bold">FROM</span>{' '}
               <span className="text-amber-400">{step.table}</span>
             </div>
-            <div className="flex flex-wrap items-center gap-3 bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
+            
+            {/* 🌟 UPDATED WHERE LINE: Forced to single row with horizontal scroll 🌟 */}
+            <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap overflow-x-auto pb-2 hide-scrollbar bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
               <span className="text-indigo-400 font-bold">WHERE</span>
               <select
                 value={selectedCol}
@@ -429,6 +470,8 @@ const InteractiveWhereExample = ({
                 ))}
               </select>
             </div>
+            {/* 🌟 END UPDATED WHERE LINE 🌟 */}
+            
           </div>
           <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
             {feedback === 'idle' && (
@@ -466,11 +509,11 @@ const InteractiveWhereExample = ({
 };
 
 const WhereLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  
   const LESSON_STEPS: WhereStepData[] = [
     {
       title: '1. Exact Matching (=)',
@@ -559,7 +602,68 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
       },
       expected: { col: 'team_size', op: '<=', val: '3' },
     },
+    {
+      title: '6. Is Null (Missing Values)',
+      prompt:
+        "Check our customer database to find null values, or in other words, rows that have missing information for the email column.",
+      table: 'customers',
+      data: [
+        { id: 'C-1', name: 'Alice', email: 'alice@mail.com' },
+        { id: 'C-2', name: 'Bob', email: 'NULL' },
+        { id: 'C-3', name: 'Charlie', email: 'NULL' },
+        { id: 'C-4', name: 'Diana', email: 'diana@mail.com' },
+      ],
+      options: {
+        cols: ['id', 'name', 'email'],
+        ops: ['=', 'IS', 'IS NOT'],
+        vals: ["'alice@mail.com'", 'NULL'],
+      },
+      expected: { col: 'email', op: 'IS', val: 'NULL' },
+    },
+    {
+      title: '7. Is Not Null (Existing Values)',
+      prompt:
+        "Check our shipping logs to find non-null values, or in other words, rows that don't have any missing information for the delivery_date column.",
+      table: 'shipments',
+      data: [
+        { pkg: 'P-101', item: 'Laptop', delivery_date: '2023-10-01' },
+        { pkg: 'P-102', item: 'Mouse', delivery_date: 'NULL' },
+        { pkg: 'P-103', item: 'Keyboard', delivery_date: '2023-10-05' },
+        { pkg: 'P-104', item: 'Monitor', delivery_date: 'NULL' },
+      ],
+      options: {
+        cols: ['pkg', 'item', 'delivery_date'],
+        ops: ['=', 'IS', 'IS NOT'],
+        vals: ["'2023-10-01'", 'NULL'],
+      },
+      expected: { col: 'delivery_date', op: 'IS NOT', val: 'NULL' },
+    },
   ];
+
+  const [firstQuestId, setFirstQuestId]=useState("")
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', 'Coffee Shop Menu') // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
 
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
@@ -713,6 +817,40 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
               <span className="text-emerald-400 font-normal">value</span>;
             </div>
           </div>
+          
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Is Null (Missing Values)</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">IS</span>{' '}
+              <span className="text-emerald-400 font-normal">NULL</span>;
+            </div>
+          </div>
+          
+          <div>
+            <div className="text-zinc-500 italic mb-1">-- Is Not Null (Existing Values)</div>
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-white font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">table_name</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              WHERE{' '}
+              <span className="text-amber-400 font-normal">column_name</span>{' '}
+              <span className="text-pink-400 font-bold">IS NOT</span>{' '}
+              <span className="text-emerald-400 font-normal">NULL</span>;
+            </div>
+          </div>
         </div>
       </div>
 
@@ -745,6 +883,7 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
     </div>
   );
 };
+
 
 // ==========================================
 // MODULE 3: THE "ORDER BY" LESSON
@@ -1013,7 +1152,6 @@ const InteractiveOrderByExample = ({
 };
 
 const OrderByLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
   onComplete,
   navigate,
 }) => {
@@ -1041,6 +1179,30 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
       expected: { col1: 'rent', dir1: 'ASC', col2: 'bedrooms', dir2: 'DESC' },
     },
   ];
+  const [firstQuestId, setFirstQuestId]=useState("")
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', "Data Analyst Salaries") // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
 
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
@@ -1221,9 +1383,12 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
 // ==========================================
 // MODULE 4: THE "GROUP BY" & AGGREGATE LESSON
 // ==========================================
+
+// Make sure LessonModuleProps and AggStepData are imported/defined in your file!
+
 const COFFEE_SALES_DATA: Record<string, string | number>[] = [
   {
-    transaction_id: 101,
+    sale_id: 101,
     drink: 'Latte',
     category: 'Espresso',
     price: 5,
@@ -1231,7 +1396,7 @@ const COFFEE_SALES_DATA: Record<string, string | number>[] = [
     barista: 'Alice',
   },
   {
-    transaction_id: 102,
+    sale_id: 102,
     drink: 'Cold Brew',
     category: 'Coffee',
     price: 6,
@@ -1239,7 +1404,7 @@ const COFFEE_SALES_DATA: Record<string, string | number>[] = [
     barista: 'Bob',
   },
   {
-    transaction_id: 103,
+    sale_id: 103,
     drink: 'Latte',
     category: 'Espresso',
     price: 5,
@@ -1247,7 +1412,7 @@ const COFFEE_SALES_DATA: Record<string, string | number>[] = [
     barista: 'Charlie',
   },
   {
-    transaction_id: 104,
+    sale_id: 104,
     drink: 'Green Tea',
     category: 'Tea',
     price: 4,
@@ -1255,7 +1420,7 @@ const COFFEE_SALES_DATA: Record<string, string | number>[] = [
     barista: 'Alice',
   },
   {
-    transaction_id: 105,
+    sale_id: 105,
     drink: 'Drip',
     category: 'Coffee',
     price: 3,
@@ -1263,7 +1428,7 @@ const COFFEE_SALES_DATA: Record<string, string | number>[] = [
     barista: 'Bob',
   },
   {
-    transaction_id: 106,
+    sale_id: 106,
     drink: 'Mocha',
     category: 'Espresso',
     price: 6,
@@ -1285,6 +1450,8 @@ const InteractiveAggExample = ({
 }) => {
   const [selectedAgg, setSelectedAgg] = useState('');
   const [selectedCol, setSelectedCol] = useState('');
+  // Decoupled states: One for SELECT, one for GROUP BY
+  const [selectedCategoryCol, setSelectedCategoryCol] = useState('');
   const [selectedGroupCol, setSelectedGroupCol] = useState('');
   const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>(
     'idle',
@@ -1297,9 +1464,15 @@ const InteractiveAggExample = ({
     let isCorrect =
       selectedAgg === step.expected.aggFunc &&
       selectedCol === step.expected.col;
+      
     if (step.type === 'groupby') {
-      isCorrect = isCorrect && selectedGroupCol === step.expected.groupByCol;
+      // Must correctly select the column in BOTH dropdowns
+      isCorrect = 
+        isCorrect && 
+        selectedCategoryCol === step.expected.groupByCol &&
+        selectedGroupCol === step.expected.groupByCol;
     }
+    
     if (isCorrect) {
       setFeedback('correct');
       onPass();
@@ -1477,13 +1650,29 @@ const InteractiveAggExample = ({
             </span>
           </div>
           <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-4">
+            
+            <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap overflow-x-auto pb-2 hide-scrollbar">
               <span className="text-indigo-400 font-bold">SELECT</span>
+              
               {step.type === 'groupby' && (
                 <>
-                  <span className="text-amber-400">
-                    {selectedGroupCol || 'group_col'}
-                  </span>
+                  <select
+                    value={selectedCategoryCol}
+                    onChange={(e) => {
+                      setSelectedCategoryCol(e.target.value);
+                      setFeedback('idle');
+                    }}
+                    className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
+                  >
+                    <option value="" disabled>
+                      category_col
+                    </option>
+                    {columns.map((c) => (
+                      <option key={`select-cat-${c}`} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                   <span className="text-zinc-500 font-bold">,</span>
                 </>
               )}
@@ -1544,10 +1733,10 @@ const InteractiveAggExample = ({
                   className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-3 py-2 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
                 >
                   <option value="" disabled>
-                    column
+                    category_col
                   </option>
                   {columns.map((c) => (
-                    <option key={c} value={c}>
+                    <option key={`group-cat-${c}`} value={c}>
                       {c}
                     </option>
                   ))}
@@ -1563,7 +1752,7 @@ const InteractiveAggExample = ({
                 disabled={
                   !selectedAgg ||
                   !selectedCol ||
-                  (step.type === 'groupby' && !selectedGroupCol)
+                  (step.type === 'groupby' && (!selectedCategoryCol || !selectedGroupCol))
                 }
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
               >
@@ -1573,7 +1762,7 @@ const InteractiveAggExample = ({
             {feedback === 'wrong' && (
               <div className="flex flex-col gap-4">
                 <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
-                  Incorrect syntax. Check your logic.
+                  Incorrect syntax. Make sure your SELECT category matches your GROUP BY category!
                 </div>
                 <button
                   onClick={() => setFeedback('idle')}
@@ -1596,7 +1785,6 @@ const InteractiveAggExample = ({
 };
 
 const GroupByLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
   onComplete,
   navigate,
 }) => {
@@ -1758,7 +1946,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         {
           title: 'Transactions per Category',
           prompt:
-            'How many sales happened in each category? COUNT the transaction_ids, and GROUP BY category.',
+            'How many sales happened in each category? COUNT the sale_ids, and GROUP BY category.',
           type: 'groupby' as const,
           expected: {
             aggFunc: 'COUNT',
@@ -1766,12 +1954,13 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
             groupByCol: 'category',
           },
         },
+        // --- 🌟 HERE IS THE UPDATED QUESTION 🌟 ---
         {
-          title: 'Drinks Made by Barista',
+          title: 'Unique Drinks per Category',
           prompt:
-            'How many drinks did each barista make? COUNT the drink column, and GROUP BY barista.',
+            'How many different types of drinks belong to each category? COUNT the drink column, and GROUP BY category.',
           type: 'groupby' as const,
-          expected: { aggFunc: 'COUNT', col: 'drink', groupByCol: 'barista' },
+          expected: { aggFunc: 'COUNT', col: 'drink', groupByCol: 'category' },
         },
       ],
     },
@@ -1859,7 +2048,30 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
       ],
     },
   ];
+  const [firstQuestId, setFirstQuestId]=useState("")
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', "Total Bounty Pool") // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
 
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
   const totalSteps =
     AGG_SECTIONS.reduce((acc, curr) => acc + curr.steps.length, 0) +
     GROUP_BY_SECTIONS.reduce((acc, curr) => acc + curr.steps.length, 0);
@@ -1948,6 +2160,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         </div>
       ))}
 
+      {/* --- NEW GROUP BY INTRODUCTION --- */}
       <div className="max-w-3xl mt-16 mb-6">
         <h1 className="text-4xl font-black text-white mb-6">
           Enter: The <span className="text-indigo-400">GROUP BY</span> Clause
@@ -1955,28 +2168,270 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
       </div>
 
       <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl mb-8">
-        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
+        <div className="text-zinc-300 leading-relaxed space-y-6 text-lg">
           <p>
             You just learned how to crush an entire table into a single number.
-            But what if you own a Coffee Shop and want to know the total revenue{' '}
-            <strong>per Barista</strong>? You don't want one giant number; you
-            want separate numbers for Alice, Bob, and Charlie.
+            But what if you own a Coffee Shop and want to know the total drinks
+            made <strong>per Barista</strong>? You don't want one giant number;
+            you want separate numbers for our Baristas, Alice and Bob.
           </p>
+
           <p>
-            By adding{' '}
-            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-1.5 py-0.5 rounded font-mono text-base">
-              GROUP BY
-            </code>{' '}
-            to your query, SQL will sort your data into groups first, and{' '}
-            <em>then</em> run the aggregate math on each group independently!
+            Let's look at a raw, un-grouped <code>coffee_sales</code> table:
           </p>
-          <p className="bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-lg text-indigo-300">
+
+          {/* Raw Table */}
+          <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: coffee_sales
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      id
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      barista
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      drink
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      price
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-500">
+                      1
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Latte
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      5
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-500">
+                      2
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Mocha
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      6
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-500">
+                      3
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Espresso
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      3
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-500">
+                      4
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Latte
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      5
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="h-px bg-zinc-800/50 my-6"></div>
+
+          {/* STEP 1 */}
+          <h4 className="text-indigo-400 font-bold uppercase tracking-widest text-sm">
+            Step 1: Divide into Groups
+          </h4>
+          <p>
+            Because we want to find the number of drinks per barista, we know the end result must list the Baristas as well as the number of drinks per Barista. So the first
+            step is to identify each of the different Baristas that we have
+            using the 'Barista' column. We can see that we only have 'Alice' and
+            'Bob' as our Baristas, but to do this in SQL we have to first do{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-1.5 py-0.5 rounded font-mono text-base">
+              SELECT Barista FROM Coffee_sales
+            </code>{' '}
+            and add at the end{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-1.5 py-0.5 rounded font-mono text-base">
+              GROUP BY Barista
+            </code>
+            . The{' '}
+            <span className="text-indigo-400 font-bold font-mono">SELECT</span>{' '}
+            and{' '}
+            <span className="text-indigo-400 font-bold font-mono">FROM</span>{' '}
+            tell SQL that we want to return the 'Barista' column, and the{' '}
+            <span className="text-indigo-400 font-bold font-mono">
+              GROUP BY
+            </span>{' '}
+            tells SQL that we want to form groups based on the 'Barista' column.
+            This way we can use SQL to easily identify each of the different
+            Baristas we have. Here is the code and the associated result:
+          </p>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-amber-400 font-normal">Barista</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">Coffee_sales</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              GROUP BY{' '}
+              <span className="text-amber-400 font-normal">Barista</span>;
+            </div>
+          </div>
+
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-1/2">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Step 1 Result
+            </div>
+            <table className="w-full text-left text-base">
+              <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                <tr>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    Barista
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-indigo-500/10">
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Alice</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Notice that we returned the 'Barista' column, but it is grouped into
+            categories, named 'Alice' and 'Bob,' which we wanted! Now that we
+            have identified each Barista that we have, lets find the number of
+            drinks they each sold.
+          </p>
+
+          <div className="h-px bg-zinc-800/50 my-6"></div>
+
+          {/* STEP 2 */}
+          <h4 className="text-emerald-400 font-bold uppercase tracking-widest text-sm">
+            Step 2: Apply Math to the Groups
+          </h4>
+          <p>
+            When asked to find the number of or how many of something exists, we
+            know we can use the{' '}
+            <span className="text-indigo-400 font-bold font-mono">COUNT</span>{' '}
+            keyword. So we simply add this aggregate function to the code from
+            step 1:{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-emerald-400 font-bold px-1.5 py-0.5 rounded font-mono text-base">
+              COUNT(Drink)
+            </code>
+            . SQL will automatically count the number of drinks for 'Alice' (2
+            drinks) and 'Bob' (2 drinks) independently.
+          </p>
+
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1">
+            <div className="text-indigo-400 font-bold">
+              SELECT <span className="text-amber-400 font-normal">Barista</span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-emerald-400 font-bold">COUNT</span>(
+              <span className="text-amber-400 font-normal">Drink</span>)
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">Coffee_sales</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              GROUP BY{' '}
+              <span className="text-amber-400 font-normal">Barista</span>;
+            </div>
+            <div className="text-zinc-500 italic mt-2">
+              -- Note: You can apply other aggregations as well like SUM(),
+              AVG(), etc!
+            </div>
+          </div>
+
+          <div className="border border-emerald-500/30 rounded-lg overflow-hidden bg-emerald-500/5 shadow-md w-3/4">
+            <div className="bg-black/60 px-4 py-3 text-xs font-bold text-emerald-500 uppercase tracking-widest border-b border-emerald-500/20">
+              Final Output Result
+            </div>
+            <table className="w-full text-left text-base">
+              <thead className="bg-black/40 border-b border-emerald-500/20">
+                <tr>
+                  <th className="px-4 py-3 font-mono font-bold text-emerald-400">
+                    Barista
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-emerald-400">
+                    COUNT(Drink)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-emerald-500/10">
+                <tr>
+                  <td className="px-4 py-3 font-mono font-bold text-white">
+                    Alice
+                  </td>
+                  <td className="px-4 py-3 font-mono font-bold text-emerald-400">
+                    2
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono font-bold text-white">
+                    Bob
+                  </td>
+                  <td className="px-4 py-3 font-mono font-bold text-emerald-400">
+                    2
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            And there we have it. Using the{' '}
+            <span className="text-indigo-400 font-bold font-mono">
+              GROUP BY
+            </span>{' '}
+            keyword in conjunction with{' '}
+            <span className="text-indigo-400 font-bold font-mono">COUNT</span>,
+            we were able to find the number of drinks each Barista sold!{' '}
+          </p>
+
+          {/* TIP SECTION */}
+          <p className="bg-indigo-500/10 border border-indigo-500/30 p-4 rounded-lg text-indigo-300 mt-8">
             <strong>Tip:</strong> Whenever you see the words{' '}
             <strong>'per', 'each', 'for each', or 'by'</strong> in a SQL
             problem, it means you have to use GROUP BY!
           </p>
         </div>
       </div>
+      {/* --- END NEW GROUP BY INTRODUCTION --- */}
 
       {/* RENDER PART 2: GROUP BY */}
       {GROUP_BY_SECTIONS.map((section, sIdx) => (
@@ -2531,12 +2986,35 @@ const InteractiveJoinExample = ({
 };
 
 const LeftJoinLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
+  
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [firstQuestId, setFirstQuestId]=useState("")
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', 'Active Subscriptions') // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
 
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -3509,12 +3987,35 @@ const InteractiveInnerJoinExample = ({
 };
 
 const InnerJoinLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
+  
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [firstQuestId, setFirstQuestId]=useState("")
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', 'Premium Users Only') // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
 
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -4725,12 +5226,35 @@ const InteractiveCteExample = ({
 };
 
 const CteLesson: React.FC<LessonModuleProps> = ({
-  firstQuestId,
+  
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [firstQuestId, setFirstQuestId]=useState("")
+  useEffect(() => {
+  const fetchFirstQuest = async () => {
+    // 1. Ask Supabase for the ID of the first quest in this category
+    const { data, error } = await supabase
+      .from('quests')
+      .select('id')
+      .ilike('title', "Clean Staff List") // Use ilike for case-insensitive matching
+      .limit(1)
+      .single();
 
+    if (error) {
+      console.error('Could not find first quest:', error);
+      return;
+    }
+
+    // 2. Save that ID to state!
+    if (data) {
+      setFirstQuestId(data.id);
+    }
+  };
+
+  fetchFirstQuest();
+}, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -5303,7 +5827,7 @@ const STUDY_TOPICS = [
     description:
       'Both stack the results of two queries on top of each other. The difference though is in the performance and duplicates.',
     details:
-      'When you are using the UNION keyword, you are telling SQL first to consider the result of two different queries and then you are telling SQL to remove any duplicate rows. So lets say you are looking at a coffee sales table and you run a query that returns a row: (\'John\', \'Espresso\'). Then you also consider a snack sales table which returns a row: (\'John\', \'Cupcake\'). When you take the two queries and UNION them, SQL is going to remove any duplicates, so for the mentioned rows, you would get (\'John\',\'Espresso\',\'Cupcake\'). NOTICE how we did not get \'John\' twice even though it was present in both queries!! UNION ALL however does not take into account the possibility of duplicates existing and just returns the results of both queries as they are. Now lets say you are in an interview and get asked what to use, UNION or UNION ALL, if there is a gurantee of no duplicates being present in both queries/tables. In this case, you might think it does not matter which one you utilize, but the correct response is UNION ALL. This is because if you use UNION, it will still require time and resources to check if there are duplicates present, whereas UNION ALL does not need to. It is more efficient in this case.',
+      "When you are using the UNION keyword, you are telling SQL first to consider the result of two different queries and then you are telling SQL to remove any duplicate rows. So lets say you are looking at a coffee sales table and you run a query that returns a row: ('John', 'Espresso'). Then you also consider a snack sales table which returns a row: ('John', 'Cupcake'). When you take the two queries and UNION them, SQL is going to remove any duplicates, so for the mentioned rows, you would get ('John','Espresso','Cupcake'). NOTICE how we did not get 'John' twice even though it was present in both queries!! UNION ALL however does not take into account the possibility of duplicates existing and just returns the results of both queries as they are. Now lets say you are in an interview and get asked what to use, UNION or UNION ALL, if there is a gurantee of no duplicates being present in both queries/tables. In this case, you might think it does not matter which one you utilize, but the correct response is UNION ALL. This is because if you use UNION, it will still require time and resources to check if there are duplicates present, whereas UNION ALL does not need to. It is more efficient in this case.",
     syntax:
       '-- UNION ALL (Faster)\nSELECT name FROM nyc_rentals\nUNION ALL\nSELECT name FROM nj_rentals;\n\n-- UNION (Slower, removes duplicates)\nSELECT category FROM coffee_sales\nUNION\nSELECT category FROM snack_sales;',
   },
@@ -5312,7 +5836,7 @@ const STUDY_TOPICS = [
     concept: 'Table Relationships',
     description: "The 'Strict Bouncer' vs the 'Safe Keeper'.",
     details:
-      "An INNER JOIN cares only about whatever is matching in two tables and returns a corresponding result. On the other hand, a LEFT JOIN returns all the columns of the left table and whatever is matching with the right table. For the columns of the right table that are not matching with the left table, the values are placed as NULL. ",
+      'An INNER JOIN cares only about whatever is matching in two tables and returns a corresponding result. On the other hand, a LEFT JOIN returns all the columns of the left table and whatever is matching with the right table. For the columns of the right table that are not matching with the left table, the values are placed as NULL. ',
     syntax:
       '-- Only customers with orders\nSELECT * FROM customers\nINNER JOIN orders ON c.id = o.cust_id;\n\n-- All customers, even window shoppers\nSELECT * FROM customers\nLEFT JOIN orders ON c.id = o.cust_id;',
   },
@@ -5338,7 +5862,8 @@ const STUDY_TOPICS = [
   {
     title: 'SELECT DISTINCT vs GROUP BY',
     concept: 'Deduplication',
-    description: 'When to use each for unique lists (lists which are guaranteed to have no duplicates).',
+    description:
+      'When to use each for unique lists (lists which are guaranteed to have no duplicates).',
     details:
       'It is important to understand that when we have a unique list/table, both SELECT DISTINCT and GROUP BY in their simplistic forms will return the same result. Why? Well as you know SELECT DISTINCT will remove any duplicates and if there are no duplicates to begin with, the list will be returned as it was in the beginning. Now for GROUP BY. If everything in the list is unique, this means that no more than 1 item or row will be in a particular group or category. This is why if you do use GROUP BY on a particular column, where everything in the column is unique, you would get returned the list as it was in the beginning! BUT when you are considering what to use for lists or tables that have no duplicates: use SELECT DISTINCT for simple deduplication and use GROUP BY when you also have to consider an aggregation (SUM, AVERAGE, MAX, etc...).',
     syntax:
@@ -5358,8 +5883,10 @@ const STUDY_TOPICS = [
     concept: 'Advanced Ranking',
     description: 'Numbering rows uniquely.',
     details:
-      'The ROW_NUMBER() window function allows you to number or rank each row in a particular table. It is very useful for ranking items based on a condition. One key thing to note is that ROW_NUMBER() ensures that the numbering of rows occurs in an increasing and sequential manner. You can see in the example below that we gave each row a corresponding rank using ROW_NUMBER() and this is denoted by the \'rank\' column. NOTICE how the numbering increases in a sequential and increasing manner (it goes from 1 to 2).\n\nWhen we do the rankings, we also tell SQL two things using the PARTITION and the ORDER BY keywords: we tell SQL to reset the rankings when we consider a different barista AND we tell SQL to give the rankings based on the price of drinks a particular barista sold, so that the highest priced drink gets a rank of 1!! ',
-syntax: "-- The Query:\nSELECT barista, drink, price, \nROW_NUMBER() OVER(PARTITION BY barista ORDER BY price DESC) as rank\nFROM coffee_sales;\n\n-- The Output:\n-- barista | drink     | price | rank\n-- ----------------------------------\n-- Alice   | Mocha     | 6.00  | 1\n-- Alice   | Latte     | 5.00  | 2\n-- Bob     | Frappe    | 7.00  | 1\n-- Bob     | Drip      | 3.00  | 2",  },
+      "The ROW_NUMBER() window function allows you to number or rank each row in a particular table. It is very useful for ranking items based on a condition. One key thing to note is that ROW_NUMBER() ensures that the numbering of rows occurs in an increasing and sequential manner. You can see in the example below that we gave each row a corresponding rank using ROW_NUMBER() and this is denoted by the 'rank' column. NOTICE how the numbering increases in a sequential and increasing manner (it goes from 1 to 2).\n\nWhen we do the rankings, we also tell SQL two things using the PARTITION and the ORDER BY keywords: we tell SQL to reset the rankings when we consider a different barista AND we tell SQL to give the rankings based on the price of drinks a particular barista sold, so that the highest priced drink gets a rank of 1!! ",
+    syntax:
+      '-- The Query:\nSELECT barista, drink, price, \nROW_NUMBER() OVER(PARTITION BY barista ORDER BY price DESC) as rank\nFROM coffee_sales;\n\n-- The Output:\n-- barista | drink     | price | rank\n-- ----------------------------------\n-- Alice   | Mocha     | 6.00  | 1\n-- Alice   | Latte     | 5.00  | 2\n-- Bob     | Frappe    | 7.00  | 1\n-- Bob     | Drip      | 3.00  | 2',
+  },
   {
     title: 'Handling NULL Values',
     concept: 'Data Integrity',
@@ -5586,7 +6113,7 @@ const LESSON_REGISTRY: Record<string, React.FC<LessonModuleProps>> = {
   'group-by': GroupByLesson, // <-- Added hyphen
   'left-join': LeftJoinLesson, // <-- Added hyphen
   'inner-join': InnerJoinLesson, // <-- Added hyphen
-  'cte': CteLesson,
+  cte: CteLesson,
   'core-concepts': CoreConceptsLesson, // <-- Added hyphen
 };
 

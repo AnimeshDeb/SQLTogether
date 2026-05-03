@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 
@@ -22,6 +22,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('');
 
+  // 🌟 NEW: Refs to prevent the observer from fighting the click
+  const isScrollingRef = useRef(false);
+const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     const fetchMapData = async () => {
       const {
@@ -116,12 +119,16 @@ export default function Home() {
 
     const observer = new IntersectionObserver(
       (entries) => {
+        // 🌟 NEW: Ignore observer updates if we are currently clicking/smooth scrolling
+        if (isScrollingRef.current) return;
+
         const visibleEntries = entries.filter((entry) => entry.isIntersecting);
         if (visibleEntries.length > 0) {
           setActiveCategory(visibleEntries[0].target.id);
         }
       },
-      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+      // Slightly expanded the detection zone to be more forgiving
+      { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
     );
 
     const sections = document.querySelectorAll('.module-section');
@@ -138,10 +145,23 @@ export default function Home() {
   };
 
   const scrollToCategory = (category: string) => {
+    // 1. Lock the observer
+    isScrollingRef.current = true;
+    
+    // 2. Instantly update the UI
+    setActiveCategory(category);
+    
+    // 3. Perform the scroll
     const element = document.getElementById(category);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+
+    // 4. Unlock the observer after the scroll finishes (approx 800ms)
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 800);
   };
 
   if (isLoading) {
