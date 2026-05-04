@@ -1789,6 +1789,29 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [firstQuestId, setFirstQuestId] = useState("");
+
+  useEffect(() => {
+    const fetchFirstQuest = async () => {
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', "Total Bounty Pool") 
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
+
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
+
+    fetchFirstQuest();
+  }, []);
 
   const AGG_SECTIONS = [
     {
@@ -1799,9 +1822,9 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         {
           title: 'Count Total Transactions',
           prompt:
-            'Use COUNT on the transaction_id to see how many total sales occurred.',
+            'Use COUNT on the sale_id to see how many total sales occurred.',
           type: 'agg' as const,
-          expected: { aggFunc: 'COUNT', col: 'transaction_id' },
+          expected: { aggFunc: 'COUNT', col: 'sale_id' }, // 👈 Fixed
         },
         {
           title: 'Count Drinks Made',
@@ -1842,9 +1865,9 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         {
           title: 'Sum of IDs (Math Practice)',
           prompt:
-            "You wouldn't normally do this in real life, but use SUM on transaction_id just to prove it adds the numbers together!",
+            "You wouldn't normally do this in real life, but use SUM on sale_id just to prove it adds the numbers together!",
           type: 'agg' as const,
-          expected: { aggFunc: 'SUM', col: 'transaction_id' },
+          expected: { aggFunc: 'SUM', col: 'sale_id' }, // 👈 Fixed
         },
       ],
     },
@@ -1870,9 +1893,9 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         {
           title: 'Average ID (More Math)',
           prompt:
-            'Again, silly in the real world, but test your logic by finding the AVG of the transaction_id.',
+            'Again, silly in the real world, but test your logic by finding the AVG of the sale_id.',
           type: 'agg' as const,
-          expected: { aggFunc: 'AVG', col: 'transaction_id' },
+          expected: { aggFunc: 'AVG', col: 'sale_id' }, // 👈 Fixed
         },
       ],
     },
@@ -1899,9 +1922,9 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         {
           title: 'Latest Transaction',
           prompt:
-            'Find the most recent transaction by running MAX on the transaction_id.',
+            'Find the most recent transaction by running MAX on the sale_id.',
           type: 'agg' as const,
-          expected: { aggFunc: 'MAX', col: 'transaction_id' },
+          expected: { aggFunc: 'MAX', col: 'sale_id' }, // 👈 Fixed
         },
       ],
     },
@@ -1928,9 +1951,9 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
         {
           title: 'First Transaction',
           prompt:
-            'Find the very first transaction recorded by running MIN on the transaction_id.',
+            'Find the very first transaction recorded by running MIN on the sale_id.',
           type: 'agg' as const,
-          expected: { aggFunc: 'MIN', col: 'transaction_id' },
+          expected: { aggFunc: 'MIN', col: 'sale_id' }, // 👈 Fixed
         },
       ],
     },
@@ -1950,11 +1973,10 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
           type: 'groupby' as const,
           expected: {
             aggFunc: 'COUNT',
-            col: 'transaction_id',
+            col: 'sale_id', // 👈 Fixed
             groupByCol: 'category',
           },
         },
-        // --- 🌟 HERE IS THE UPDATED QUESTION 🌟 ---
         {
           title: 'Unique Drinks per Category',
           prompt:
@@ -2048,30 +2070,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
       ],
     },
   ];
-  const [firstQuestId, setFirstQuestId]=useState("")
-  useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', "Total Bounty Pool") // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
-
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
-
-  fetchFirstQuest();
-}, []);
   const totalSteps =
     AGG_SECTIONS.reduce((acc, curr) => acc + curr.steps.length, 0) +
     GROUP_BY_SECTIONS.reduce((acc, curr) => acc + curr.steps.length, 0);
@@ -2190,7 +2189,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
                 <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
                   <tr>
                     <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
-                      id
+                      sale_id
                     </th>
                     <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
                       barista
@@ -2206,7 +2205,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
                 <tbody className="divide-y divide-zinc-800/50">
                   <tr className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-base text-zinc-500">
-                      1
+                      101
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
                       Alice
@@ -2218,9 +2217,9 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
                       5
                     </td>
                   </tr>
-                  <tr className="hover:bg-bg-zinc-800/30 transition-colors">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-base text-zinc-500">
-                      2
+                      102
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
                       Bob
@@ -2234,7 +2233,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-base text-zinc-500">
-                      3
+                      103
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
                       Alice
@@ -2248,7 +2247,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-base text-zinc-500">
-                      4
+                      104
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
                       Bob
