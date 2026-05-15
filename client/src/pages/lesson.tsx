@@ -7,7 +7,6 @@ import {
 import { supabase } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
-
 // ==========================================
 // 1. STRICT TYPESCRIPT INTERFACES
 // ==========================================
@@ -40,15 +39,21 @@ interface AggStepData {
   expected: { aggFunc: string; col: string; groupByCol?: string };
 }
 
+interface WindowStepData {
+  title: string;
+  prompt: string;
+  type: 'window';
+  expected: { func: string; orderByCol: string; direction: string };
+}
+
 // ==========================================
 // MODULE 1: THE "SELECT" LESSON
 // ==========================================
 const SelectLesson: React.FC<LessonModuleProps> = ({
-  
   onComplete,
   navigate,
 }) => {
-  const [firstQuestId, setFirstQuestId]=useState("")
+  const [firstQuestId, setFirstQuestId] = useState('');
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>(
     'idle',
@@ -74,28 +79,28 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
     }
   };
   useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', 'The First Query') // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
+    const fetchFirstQuest = async () => {
+      // 1. Ask Supabase for the ID of the first quest in this category
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', 'The First Query') // Use ilike for case-insensitive matching
+        .limit(1)
+        .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
 
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
+      // 2. Save that ID to state!
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
 
-  fetchFirstQuest();
-}, []);
+    fetchFirstQuest();
+  }, []);
 
   return (
     <div className="w-full flex flex-col gap-12 pb-32">
@@ -271,7 +276,6 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
 // MODULE 2: THE "WHERE" LESSON
 // ==========================================
 
-
 // Make sure LessonModuleProps and WhereStepData are imported/defined in your file!
 
 const InteractiveWhereExample = ({
@@ -353,7 +357,7 @@ const InteractiveWhereExample = ({
                     const rowValue = row[step.expected.col];
                     const expectedValue = step.expected.val.replace(/'/g, '');
                     let shouldFade = false;
-                    
+
                     if (feedback === 'correct') {
                       if (step.expected.op === '=')
                         shouldFade = String(rowValue) !== expectedValue;
@@ -370,7 +374,7 @@ const InteractiveWhereExample = ({
                       else if (step.expected.op === 'IS NOT')
                         shouldFade = String(rowValue) === 'NULL';
                     }
-                    
+
                     return (
                       <tr
                         key={i}
@@ -384,7 +388,7 @@ const InteractiveWhereExample = ({
                             {val === 'NULL' ? (
                               <span className="text-zinc-600 italic">NULL</span>
                             ) : (
-                              val as React.ReactNode
+                              (val as React.ReactNode)
                             )}
                           </td>
                         ))}
@@ -414,7 +418,7 @@ const InteractiveWhereExample = ({
               <span className="text-indigo-400 font-bold">FROM</span>{' '}
               <span className="text-amber-400">{step.table}</span>
             </div>
-            
+
             {/* 🌟 UPDATED WHERE LINE: Forced to single row with horizontal scroll 🌟 */}
             <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap overflow-x-auto pb-2 hide-scrollbar bg-zinc-900 border border-zinc-800/50 p-6 rounded-xl shadow-inner">
               <span className="text-indigo-400 font-bold">WHERE</span>
@@ -471,7 +475,6 @@ const InteractiveWhereExample = ({
               </select>
             </div>
             {/* 🌟 END UPDATED WHERE LINE 🌟 */}
-            
           </div>
           <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
             {feedback === 'idle' && (
@@ -508,12 +511,9 @@ const InteractiveWhereExample = ({
   );
 };
 
-const WhereLesson: React.FC<LessonModuleProps> = ({
-  onComplete,
-  navigate,
-}) => {
+const WhereLesson: React.FC<LessonModuleProps> = ({ onComplete, navigate }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  
+
   const LESSON_STEPS: WhereStepData[] = [
     {
       title: '1. Exact Matching (=)',
@@ -605,7 +605,7 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
     {
       title: '6. Is Null (Missing Values)',
       prompt:
-        "Check our customer database to find null values, or in other words, rows that have missing information for the email column.",
+        'Check our customer database to find null values, or in other words, rows that have missing information for the email column.',
       table: 'customers',
       data: [
         { id: 'C-1', name: 'Alice', email: 'alice@mail.com' },
@@ -640,30 +640,30 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
     },
   ];
 
-  const [firstQuestId, setFirstQuestId]=useState("")
+  const [firstQuestId, setFirstQuestId] = useState('');
   useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', 'Coffee Shop Menu') // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
+    const fetchFirstQuest = async () => {
+      // 1. Ask Supabase for the ID of the first quest in this category
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', 'Coffee Shop Menu') // Use ilike for case-insensitive matching
+        .limit(1)
+        .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
 
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
+      // 2. Save that ID to state!
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
 
-  fetchFirstQuest();
-}, []);
+    fetchFirstQuest();
+  }, []);
 
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
@@ -817,9 +817,11 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
               <span className="text-emerald-400 font-normal">value</span>;
             </div>
           </div>
-          
+
           <div>
-            <div className="text-zinc-500 italic mb-1">-- Is Null (Missing Values)</div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Is Null (Missing Values)
+            </div>
             <div className="text-indigo-400 font-bold">
               SELECT <span className="text-white font-normal">*</span>
             </div>
@@ -834,9 +836,11 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
               <span className="text-emerald-400 font-normal">NULL</span>;
             </div>
           </div>
-          
+
           <div>
-            <div className="text-zinc-500 italic mb-1">-- Is Not Null (Existing Values)</div>
+            <div className="text-zinc-500 italic mb-1">
+              -- Is Not Null (Existing Values)
+            </div>
             <div className="text-indigo-400 font-bold">
               SELECT <span className="text-white font-normal">*</span>
             </div>
@@ -883,7 +887,6 @@ const WhereLesson: React.FC<LessonModuleProps> = ({
     </div>
   );
 };
-
 
 // ==========================================
 // MODULE 3: THE "ORDER BY" LESSON
@@ -1179,30 +1182,30 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
       expected: { col1: 'rent', dir1: 'ASC', col2: 'bedrooms', dir2: 'DESC' },
     },
   ];
-  const [firstQuestId, setFirstQuestId]=useState("")
+  const [firstQuestId, setFirstQuestId] = useState('');
   useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', "Data Analyst Salaries") // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
+    const fetchFirstQuest = async () => {
+      // 1. Ask Supabase for the ID of the first quest in this category
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', 'Data Analyst Salaries') // Use ilike for case-insensitive matching
+        .limit(1)
+        .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
 
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
+      // 2. Save that ID to state!
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
 
-  fetchFirstQuest();
-}, []);
+    fetchFirstQuest();
+  }, []);
 
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
@@ -1464,15 +1467,15 @@ const InteractiveAggExample = ({
     let isCorrect =
       selectedAgg === step.expected.aggFunc &&
       selectedCol === step.expected.col;
-      
+
     if (step.type === 'groupby') {
       // Must correctly select the column in BOTH dropdowns
-      isCorrect = 
-        isCorrect && 
+      isCorrect =
+        isCorrect &&
         selectedCategoryCol === step.expected.groupByCol &&
         selectedGroupCol === step.expected.groupByCol;
     }
-    
+
     if (isCorrect) {
       setFeedback('correct');
       onPass();
@@ -1650,10 +1653,9 @@ const InteractiveAggExample = ({
             </span>
           </div>
           <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
-            
             <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap overflow-x-auto pb-2 hide-scrollbar">
               <span className="text-indigo-400 font-bold">SELECT</span>
-              
+
               {step.type === 'groupby' && (
                 <>
                   <select
@@ -1752,7 +1754,8 @@ const InteractiveAggExample = ({
                 disabled={
                   !selectedAgg ||
                   !selectedCol ||
-                  (step.type === 'groupby' && (!selectedCategoryCol || !selectedGroupCol))
+                  (step.type === 'groupby' &&
+                    (!selectedCategoryCol || !selectedGroupCol))
                 }
                 className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
               >
@@ -1762,7 +1765,8 @@ const InteractiveAggExample = ({
             {feedback === 'wrong' && (
               <div className="flex flex-col gap-4">
                 <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
-                  Incorrect syntax. Make sure your SELECT category matches your GROUP BY category!
+                  Incorrect syntax. Make sure your SELECT category matches your
+                  GROUP BY category!
                 </div>
                 <button
                   onClick={() => setFeedback('idle')}
@@ -1789,14 +1793,14 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId] = useState("");
+  const [firstQuestId, setFirstQuestId] = useState('');
 
   useEffect(() => {
     const fetchFirstQuest = async () => {
       const { data, error } = await supabase
         .from('quests')
         .select('id')
-        .ilike('title', "Total Bounty Pool") 
+        .ilike('title', 'Total Bounty Pool')
         .limit(1)
         .single();
 
@@ -2271,10 +2275,12 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
             Step 1: Divide into Groups
           </h4>
           <p>
-            Because we want to find the number of drinks per barista, we know the end result must list the Baristas as well as the number of drinks per Barista. So the first
-            step is to identify each of the different Baristas that we have
-            using the 'Barista' column. We can see that we only have 'Alice' and
-            'Bob' as our Baristas, but to do this in SQL we have to first do{' '}
+            Because we want to find the number of drinks per barista, we know
+            the end result must list the Baristas as well as the number of
+            drinks per Barista. So the first step is to identify each of the
+            different Baristas that we have using the 'Barista' column. We can
+            see that we only have 'Alice' and 'Bob' as our Baristas, but to do
+            this in SQL we have to first do{' '}
             <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold px-1.5 py-0.5 rounded font-mono text-base">
               SELECT Barista FROM Coffee_sales
             </code>{' '}
@@ -2985,35 +2991,34 @@ const InteractiveJoinExample = ({
 };
 
 const LeftJoinLesson: React.FC<LessonModuleProps> = ({
-  
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId]=useState("")
+  const [firstQuestId, setFirstQuestId] = useState('');
   useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', 'Active Subscriptions') // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
+    const fetchFirstQuest = async () => {
+      // 1. Ask Supabase for the ID of the first quest in this category
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', 'Active Subscriptions') // Use ilike for case-insensitive matching
+        .limit(1)
+        .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
 
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
+      // 2. Save that ID to state!
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
 
-  fetchFirstQuest();
-}, []);
+    fetchFirstQuest();
+  }, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -3986,35 +3991,34 @@ const InteractiveInnerJoinExample = ({
 };
 
 const InnerJoinLesson: React.FC<LessonModuleProps> = ({
-  
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId]=useState("")
+  const [firstQuestId, setFirstQuestId] = useState('');
   useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', 'Premium Users Only') // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
+    const fetchFirstQuest = async () => {
+      // 1. Ask Supabase for the ID of the first quest in this category
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', 'Premium Users Only') // Use ilike for case-insensitive matching
+        .limit(1)
+        .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
 
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
+      // 2. Save that ID to state!
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
 
-  fetchFirstQuest();
-}, []);
+    fetchFirstQuest();
+  }, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -4408,6 +4412,1054 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
           Start INNER JOIN Quests ➔
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const TOURNAMENT_DATA: Record<string, string | number>[] = [
+  { player_id: 1, name: 'Alice', points: 850 },
+  { player_id: 2, name: 'Bob', points: 920 },
+  { player_id: 3, name: 'Charlie', points: 780 },
+  { player_id: 4, name: 'Diana', points: 920 },
+  { player_id: 5, name: 'Evan', points: 610 },
+  { player_id: 6, name: 'Fiona', points: 850 },
+];
+
+// --- INTERACTIVE COMPONENT ---
+const InteractiveWindowExample = ({
+  step,
+  index,
+  onPass,
+  isCompleted,
+}: {
+  step: WindowStepData;
+  index: number;
+  onPass: () => void;
+  isCompleted: boolean;
+}) => {
+  const [selectedFunc, setSelectedFunc] = useState('');
+  const [selectedOrderBy, setSelectedOrderBy] = useState('');
+  const [selectedDirection, setSelectedDirection] = useState('');
+  const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>(
+    'idle',
+  );
+
+  const columns = Object.keys(TOURNAMENT_DATA[0]);
+  const windowFunctions = ['ROW_NUMBER()', 'RANK()', 'DENSE_RANK()'];
+  const directions = ['ASC', 'DESC'];
+
+  const handleSubmit = () => {
+    if (
+      selectedFunc === step.expected.func &&
+      selectedOrderBy === step.expected.orderByCol &&
+      selectedDirection === step.expected.direction
+    ) {
+      setFeedback('correct');
+      onPass();
+    } else {
+      setFeedback('wrong');
+    }
+  };
+
+  const calculateOutput = () => {
+    if (feedback !== 'correct') return null;
+
+    // 1. Sort the data based on the chosen column and direction
+    const sortedData = [...TOURNAMENT_DATA].sort((a, b) => {
+      const valA = a[step.expected.orderByCol];
+      const valB = b[step.expected.orderByCol];
+
+      if (step.expected.direction === 'ASC') {
+        return valA > valB ? 1 : valA < valB ? -1 : 0;
+      } else {
+        return valA < valB ? 1 : valA > valB ? -1 : 0;
+      }
+    });
+
+    // 2. Apply the specific Window Function logic to the sorted array
+    let rank = 0;
+    let prevValue: string | number | null = null;
+
+    return sortedData.map((row, i) => {
+      const currentValue = row[step.expected.orderByCol];
+
+      if (step.expected.func === 'ROW_NUMBER()') {
+        rank = i + 1; // Strict counter
+      } else if (step.expected.func === 'RANK()') {
+        if (currentValue !== prevValue) {
+          rank = i + 1; // Updates to current row count if value changes
+        }
+        // If it equals prevValue, rank stays the same
+      } else if (step.expected.func === 'DENSE_RANK()') {
+        if (currentValue !== prevValue) {
+          rank++; // Strictly increments by 1 if value changes
+        }
+      }
+
+      prevValue = currentValue;
+
+      // Only return the columns we care about for the ranking view
+      return {
+        name: row.name,
+        points: row.points,
+        rank: rank,
+      };
+    });
+  };
+
+  const outputData = calculateOutput();
+
+  return (
+    <div className="w-full flex flex-col xl:flex-row gap-8 mb-12">
+      <div className="w-full xl:w-1/2 flex flex-col gap-6">
+        <div
+          className={`bg-zinc-900/40 backdrop-blur-xl border ${isCompleted ? 'border-emerald-500/50' : 'border-zinc-800/50'} rounded-2xl p-6 md:p-8 shadow-2xl h-full transition-all`}
+        >
+          <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
+            <span
+              className={`${isCompleted ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'} w-7 h-7 rounded-lg flex items-center justify-center text-sm font-black transition-colors shadow-lg`}
+            >
+              {isCompleted ? '✓' : index + 1}
+            </span>
+            {step.title}
+          </h2>
+          <p className="text-zinc-400 mb-6 text-lg leading-relaxed">
+            {step.prompt}
+          </p>
+
+          <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-zinc-900/20 shadow-md">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: tournament_scores
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    {columns.map((col) => (
+                      <th
+                        key={col}
+                        className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight italic whitespace-nowrap"
+                      >
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody
+                  className={`divide-y divide-zinc-800/50 transition-opacity duration-700 ${feedback === 'correct' ? 'opacity-20' : 'opacity-100'}`}
+                >
+                  {TOURNAMENT_DATA.map((row, i) => (
+                    <tr
+                      key={i}
+                      className="hover:bg-zinc-800/30 transition-colors"
+                    >
+                      {columns.map((col, j) => (
+                        <td
+                          key={j}
+                          className="px-4 py-3 font-mono text-base text-zinc-300 whitespace-nowrap"
+                        >
+                          {row[col]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {outputData && (
+          <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-xl p-4 animate-in fade-in slide-in-from-top-4">
+            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">
+              SQL Output Result
+            </h3>
+            <div className="border border-zinc-800/50 rounded-lg overflow-hidden bg-black/40 shadow-inner">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base">
+                  <thead className="bg-black/60 border-b border-emerald-500/20">
+                    <tr>
+                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">
+                        name
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap">
+                        points
+                      </th>
+                      <th className="px-4 py-3 font-mono font-bold text-emerald-400 uppercase tracking-tight whitespace-nowrap bg-emerald-500/10">
+                        rank
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-emerald-500/10">
+                    {outputData.map((row, i) => (
+                      <tr key={i}>
+                        <td className="px-4 py-3 font-mono text-base text-zinc-200 whitespace-nowrap">
+                          {row.name}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-base text-zinc-200 whitespace-nowrap">
+                          {row.points}
+                        </td>
+                        <td className="px-4 py-3 font-mono text-base text-emerald-400 font-black whitespace-nowrap bg-emerald-500/5">
+                          {row.rank}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="w-full xl:w-1/2 flex flex-col">
+        <div
+          className={`bg-zinc-900/40 backdrop-blur-xl border-2 rounded-2xl overflow-hidden flex flex-col flex-1 shadow-2xl transition-colors duration-300 ${feedback === 'correct' ? 'border-emerald-500' : feedback === 'wrong' ? 'border-red-500' : 'border-zinc-800/50'}`}
+        >
+          <div className="bg-zinc-950/80 px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+              Query Builder
+            </span>
+          </div>
+          <div className="p-8 flex-1 bg-zinc-950/40 font-mono text-base flex flex-col justify-center gap-6">
+            {/* 🌟 WINDOW FUNCTION SELECT LINE 🌟 */}
+            <div className="flex items-center gap-3 flex-nowrap whitespace-nowrap overflow-x-auto pb-2 hide-scrollbar">
+              <span className="text-indigo-400 font-bold">SELECT</span>
+              <span className="text-amber-400">name</span>
+              <span className="text-zinc-500 font-bold">,</span>
+              <span className="text-amber-400">points</span>
+              <span className="text-zinc-500 font-bold">,</span>
+
+              <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800/50 px-3 py-2 rounded-lg shadow-inner">
+                <select
+                  value={selectedFunc}
+                  onChange={(e) => {
+                    setSelectedFunc(e.target.value);
+                    setFeedback('idle');
+                  }}
+                  className="bg-zinc-950 border border-zinc-800 text-pink-400 font-bold font-mono text-base rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
+                >
+                  <option value="" disabled>
+                    FUNC()
+                  </option>
+                  {windowFunctions.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                </select>
+
+                <span className="text-indigo-400 font-bold ml-1">OVER</span>
+                <span className="text-zinc-500 font-bold">(</span>
+                <span className="text-indigo-400 font-bold">ORDER BY</span>
+
+                <select
+                  value={selectedOrderBy}
+                  onChange={(e) => {
+                    setSelectedOrderBy(e.target.value);
+                    setFeedback('idle');
+                  }}
+                  className="bg-zinc-950 border border-zinc-800 text-amber-400 font-mono text-base rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
+                >
+                  <option value="" disabled>
+                    col
+                  </option>
+                  {columns.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={selectedDirection}
+                  onChange={(e) => {
+                    setSelectedDirection(e.target.value);
+                    setFeedback('idle');
+                  }}
+                  className="bg-zinc-950 border border-zinc-800 text-indigo-400 font-bold font-mono text-base rounded-md px-2 py-1 outline-none cursor-pointer focus:border-indigo-500 transition-colors"
+                >
+                  <option value="" disabled>
+                    DIR
+                  </option>
+                  {directions.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+
+                <span className="text-zinc-500 font-bold">)</span>
+                <span className="text-indigo-400 font-bold ml-1">AS</span>
+                <span className="text-emerald-400">rank</span>
+              </div>
+            </div>
+
+            <div>
+              <span className="text-indigo-400 font-bold">FROM</span>{' '}
+              <span className="text-amber-400">tournament_scores</span>
+            </div>
+          </div>
+
+          <div className="p-6 border-t border-zinc-800 bg-zinc-950/80">
+            {feedback === 'idle' && (
+              <button
+                onClick={handleSubmit}
+                disabled={
+                  !selectedFunc || !selectedOrderBy || !selectedDirection
+                }
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-zinc-800 text-white font-bold py-4 rounded-xl transition-all text-lg"
+              >
+                Run Window Function
+              </button>
+            )}
+            {feedback === 'wrong' && (
+              <div className="flex flex-col gap-4">
+                <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/30 text-center font-bold text-lg">
+                  Incorrect syntax. Check your function, column, and direction!
+                </div>
+                <button
+                  onClick={() => setFeedback('idle')}
+                  className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all text-lg"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+            {feedback === 'correct' && (
+              <div className="bg-emerald-500/10 text-emerald-400 p-4 rounded-lg border border-emerald-500/30 text-center font-bold text-lg">
+                Ranking successful! Check how it handled the ties.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- MAIN LESSON PAGE ---
+const WindowLesson: React.FC<LessonModuleProps> = ({
+  onComplete,
+  navigate,
+}) => {
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [firstQuestId, setFirstQuestId] = useState('');
+
+  useEffect(() => {
+    const fetchFirstQuest = async () => {
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('category', 'WINDOW FUNCTIONS') // Update this to match your DB Category Name
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (!error && data) {
+        setFirstQuestId(data.id);
+      }
+    };
+    fetchFirstQuest();
+  }, []);
+
+  const WINDOW_STEPS: WindowStepData[] = [
+    {
+      title: '1. The Ruthless Counter',
+      prompt:
+        'Assign a strictly sequential number to each player based on their points, ignoring ties. Use ROW_NUMBER().',
+      type: 'window',
+      expected: {
+        func: 'ROW_NUMBER()',
+        orderByCol: 'points',
+        direction: 'DESC',
+      },
+    },
+    {
+      title: '2. The Olympics Method',
+      prompt:
+        'Rank the players fairly, allowing ties to share the same number, but SKIP the next number in the sequence. Use RANK().',
+      type: 'window',
+      expected: { func: 'RANK()', orderByCol: 'points', direction: 'DESC' },
+    },
+    {
+      title: '3. The Unforgiving Ladder',
+      prompt:
+        'Rank the players fairly, but DO NOT skip any numbers in the sequence after a tie. Use DENSE_RANK().',
+      type: 'window',
+      expected: {
+        func: 'DENSE_RANK()',
+        orderByCol: 'points',
+        direction: 'DESC',
+      },
+    },
+    {
+      title: '4. Worst to First (Ascending)',
+      prompt:
+        "Let's flip it. Use DENSE_RANK() to rank the players from lowest score to highest score.",
+      type: 'window',
+      expected: {
+        func: 'DENSE_RANK()',
+        orderByCol: 'points',
+        direction: 'ASC',
+      },
+    },
+  ];
+
+  const handleStepComplete = (index: number) => {
+    setCompletedSteps((prev) => {
+      const newSet = new Set(prev);
+      newSet.add(index);
+      if (newSet.size === WINDOW_STEPS.length) onComplete();
+      return newSet;
+    });
+  };
+
+  return (
+    <div className="w-full flex flex-col gap-12 pb-32">
+      <div className="max-w-3xl">
+        <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+          Interactive Lesson
+        </span>
+        <h1 className="text-4xl font-black text-white mt-2 mb-6">
+          Leveling Up:{' '}
+          <span className="text-indigo-400 font-bold">Window Functions</span>
+        </h1>
+      </div>
+
+      <div className="max-w-5xl bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/50 rounded-2xl p-6 md:p-8 shadow-2xl">
+        <div className="text-zinc-300 leading-relaxed space-y-5 text-lg">
+          <p>So far, you’ve learned a couple of main ways to look at data:</p>
+          <ul className="list-disc list-inside ml-4 space-y-2 text-zinc-400">
+            <li>
+              <strong>Standard SELECT:</strong> Looking at every single column
+              individually.
+            </li>
+            <li>
+              <strong>GROUP BY:</strong> Dividing rows into different categories
+              and performing a particular aggregation on each category.
+            </li>
+            <li>
+              <strong>LEFT JOIN and INNER JOIN:</strong> Considering two
+              different tables and then combining them into a single table based
+              on some common properties and afterwards, performing some further
+              calcualtions.
+            </li>
+          </ul>
+          <p>
+            But what if you just had a table and wanted to order the rows a
+            particular way and then return the result? You are probably
+            immediately thinking of using{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              ORDER BY
+            </code>{' '}
+            or even the{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              LIMIT
+            </code>{' '}
+            clause. Instead let's consider the <strong>window functions</strong>{' '}
+            and how they can be useful in such a scenario!
+          </p>
+          <p>
+            Before we move forward, just keep in mind that Window functions
+            allow you to perform calculations across a specific "window" of
+            related rows while keeping every single original row completely
+            intact. One of their absolute greatest superpowers is allowing us to{' '}
+            <strong>order and rank</strong> data much more effectively than a
+            standard{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              ORDER BY
+            </code>{' '}
+            clause.
+          </p>
+          <p>Ok now let's move to an example:</p>
+
+          <div className="h-px bg-zinc-800/50 my-8"></div>
+          <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: match_results
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      930
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      850
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Brown
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      780
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      710
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Diana
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Prince
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      950
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      910
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      880
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <h3 className="text-2xl font-bold text-white mb-4">
+            Finding the top 3 Players
+          </h3>
+          <p className="mb-6">
+            The goal is to find the top 3 players with respect to their points.
+            To understand the value of window functions, lets consider the
+            limitations of{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              ORDER BY
+            </code>{' '}
+            and the{' '}
+            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              LIMIT
+            </code>{' '}
+            clauses.
+          </p>
+          <h3 className="text-2xl font-bold text-white mb-4">
+            ORDER BY limitation
+          </h3>
+          <p className="mb-6">
+            If we want to find the top 3 players, your first idea might be to
+            use the ORDER BY clause to get the players in descending order with
+            respect to their points. This is the query you might write:
+          </p>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
+            <div className="text-indigo-400 font-bold">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">
+                player_first_name
+              </span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">
+                player_last_name
+              </span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">points</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">match_results</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ORDER BY{' '}
+              <span className="text-amber-400 font-normal">points</span>{' '}
+              <span className="text-pink-400">DESC</span>
+            </div>
+          </div>
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full md:w-3/4 mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: The table ordered according to the query
+            </div>
+            <table className="w-full text-left text-base">
+              <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                <tr>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    player_first_name
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    player_last_name
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    points
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-indigo-500/10">
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Diana</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Prince</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    950
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    930
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Alice</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Smith</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    910
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    880
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Alice</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Smith</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    850
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Charlie</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Brown</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    780
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    710
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mb-8">
+            Ok so now you have everything ordered. Because I said we need to
+            find the top 3 players, you might do LIMIT 4 to select and return
+            the top 4 rows which consists of our top 3 players. This would be
+            the query:
+          </p>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
+            <div className="text-indigo-400 font-bold">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">
+                player_first_name
+              </span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">
+                player_last_name
+              </span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">points</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">match_results</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ORDER BY{' '}
+              <span className="text-amber-400 font-normal">points</span>{' '}
+              <span className="text-pink-400">DESC</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              LIMIT <span className="text-pink-400">4</span>
+            </div>
+          </div>
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full md:w-3/4 mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: The table ordered according to the query
+            </div>
+            <table className="w-full text-left text-base">
+              <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                <tr>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    player_first_name
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    player_last_name
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    points
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-indigo-500/10">
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Diana</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Prince</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    950
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    930
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Alice</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Smith</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    910
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            You might be thinking, yes using ORDER BY and LIMIT works with this
+            problem because we do get our top 3 players. But look at it deeply. The above query only works if we
+            have the same source table. Lets alter the table. In the following table, I added one
+            extra row for Bob:
+          </p>
+          <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: match_results
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      930
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      850
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Brown
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      780
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      710
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Diana
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Prince
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      950
+                    </td>
+                  </tr>
+                  <tr className="bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      915
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      910
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      880
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Let's consider the same query we wrote before:</p>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
+            <div className="text-indigo-400 font-bold">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">
+                player_first_name
+              </span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">
+                player_last_name
+              </span>
+              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">points</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              FROM{' '}
+              <span className="text-amber-400 font-normal">match_results</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              ORDER BY{' '}
+              <span className="text-amber-400 font-normal">points</span>{' '}
+              <span className="text-pink-400">DESC</span>
+            </div>
+            <div className="text-indigo-400 font-bold">
+              LIMIT <span className="text-pink-400">4</span>
+            </div>
+          </div>
+          <p>Here is the result:</p>
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full md:w-3/4 mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: The table ordered according to the query
+            </div>
+            <table className="w-full text-left text-base">
+              <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                <tr>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    player_first_name
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    player_last_name
+                  </th>
+                  <th className="px-4 py-3 font-mono font-bold text-indigo-400">
+                    points
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-indigo-500/10">
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Diana</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Prince</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    950
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    930
+                  </td>
+                </tr>
+
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    915
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            See the problem? The query is working as expected but we are getting the top 2 players this time, not the
+            top 3. The query we wrote previously does not take into account
+            different tables, in other words it is a very static piece of code!
+            To make our code consistent and work across different tables that have different
+            numbers of data, we need to try <strong> Window Functions!</strong>
+
+          </p>
+          <h3 className="text-2xl font-bold text-white mb-4"> Enter Window Functions</h3>
+          <p> There are three main window functions that we will consider for now, that allow us</p>
+          
+        </div>
+      </div>
+
+      {/* RENDER THE INTERACTIVE STEPS */}
+      <div className="mt-8">
+        <div className="mb-8 border-l-4 border-indigo-500 pl-6">
+          <h2 className="text-2xl font-black text-indigo-400 font-mono">
+            Ranking Syntax
+          </h2>
+          <p className="text-zinc-400 mt-2 text-lg">
+            Use the query builder below to explore how the three different
+            ranking functions handle ties differently.
+          </p>
+        </div>
+
+        {WINDOW_STEPS.map((step, index) => (
+          <InteractiveWindowExample
+            key={index}
+            step={step}
+            index={index}
+            onPass={() => handleStepComplete(index)}
+            isCompleted={completedSteps.has(index)}
+          />
+        ))}
+      </div>
+
+      {/* COMPLETION SECTION */}
+      <div className="mt-12 flex flex-col items-center gap-6">
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
+        <h3 className="text-xl font-bold text-white">Mastered the Ranks!</h3>
+        <button
+          onClick={() =>
+            firstQuestId
+              ? navigate(`/quest/${firstQuestId}`)
+              : navigate('/home')
+          }
+          className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
+        >
+          Enter the Arena: Start Window Quests ➔
         </button>
       </div>
     </div>
@@ -5224,36 +6276,32 @@ const InteractiveCteExample = ({
   );
 };
 
-const CteLesson: React.FC<LessonModuleProps> = ({
-  
-  onComplete,
-  navigate,
-}) => {
+const CteLesson: React.FC<LessonModuleProps> = ({ onComplete, navigate }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId]=useState("")
+  const [firstQuestId, setFirstQuestId] = useState('');
   useEffect(() => {
-  const fetchFirstQuest = async () => {
-    // 1. Ask Supabase for the ID of the first quest in this category
-    const { data, error } = await supabase
-      .from('quests')
-      .select('id')
-      .ilike('title', "Clean Staff List") // Use ilike for case-insensitive matching
-      .limit(1)
-      .single();
+    const fetchFirstQuest = async () => {
+      // 1. Ask Supabase for the ID of the first quest in this category
+      const { data, error } = await supabase
+        .from('quests')
+        .select('id')
+        .ilike('title', 'Clean Staff List') // Use ilike for case-insensitive matching
+        .limit(1)
+        .single();
 
-    if (error) {
-      console.error('Could not find first quest:', error);
-      return;
-    }
+      if (error) {
+        console.error('Could not find first quest:', error);
+        return;
+      }
 
-    // 2. Save that ID to state!
-    if (data) {
-      setFirstQuestId(data.id);
-    }
-  };
+      // 2. Save that ID to state!
+      if (data) {
+        setFirstQuestId(data.id);
+      }
+    };
 
-  fetchFirstQuest();
-}, []);
+    fetchFirstQuest();
+  }, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -6114,6 +7162,7 @@ const LESSON_REGISTRY: Record<string, React.FC<LessonModuleProps>> = {
   'inner-join': InnerJoinLesson, // <-- Added hyphen
   cte: CteLesson,
   'core-concepts': CoreConceptsLesson, // <-- Added hyphen
+  'window-functions': WindowLesson,
 };
 
 export default function Lesson() {
