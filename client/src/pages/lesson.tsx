@@ -4852,13 +4852,9 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
             But what if you just had a table and wanted to order the rows a
             particular way and then return the result? You are probably
             immediately thinking of using{' '}
-            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
-              ORDER BY
-            </code>{' '}
+           <span className="text-pink-400">{' '} ORDER BY </span>
             or even the{' '}
-            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
-              LIMIT
-            </code>{' '}
+            <span className="text-pink-400">{' '} LIMIT</span>{' '}
             clause. Instead let's consider the <strong>window functions</strong>{' '}
             and how they can be useful in such a scenario!
           </p>
@@ -4869,9 +4865,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
             intact. One of their absolute greatest superpowers is allowing us to{' '}
             <strong>order and rank</strong> data much more effectively than a
             standard{' '}
-            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
-              ORDER BY
-            </code>{' '}
+            <span className="text-pink-400">{' '} ORDER BY </span>{' '}
             clause.
           </p>
           <p>Ok now let's move to an example:</p>
@@ -4905,15 +4899,15 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      930
+                      920
                     </td>
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
-                      Alice
+                      Sam
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
-                      Smith
+                      Willson
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
                       850
@@ -4950,7 +4944,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      710
+                      920
                     </td>
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
@@ -4983,7 +4977,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      880
+                      920
                     </td>
                   </tr>
                 </tbody>
@@ -4998,13 +4992,9 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
             The goal is to find the top 3 players with respect to their points.
             To understand the value of window functions, lets consider the
             limitations of{' '}
-            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
-              ORDER BY
-            </code>{' '}
+            <span className="text-pink-400">{' '} ORDER BY </span>{' '}
             and the{' '}
-            <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
-              LIMIT
-            </code>{' '}
+            <span className="text-pink-400">{' '} LIMIT</span>{' '}
             clauses.
           </p>
           <h3 className="text-2xl font-bold text-white mb-4">
@@ -5012,30 +5002,21 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
           </h3>
           <p className="mb-6">
             If we want to find the top 3 players, your first idea might be to
-            use the ORDER BY clause to get the players in descending order with
+            use the  <span className="text-pink-400">{' '} ORDER BY </span> clause to get the players in descending order with
             respect to their points. This is the query you might write:
           </p>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
-            <div className="text-indigo-400 font-bold">
+         <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
               SELECT{' '}
-              <span className="text-amber-400 font-normal">
-                player_first_name
-              </span>
-              <span className="text-zinc-500 font-bold">,</span>{' '}
-              <span className="text-amber-400 font-normal">
-                player_last_name
-              </span>
-              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">player_first_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">player_last_name</span><span className="text-zinc-500 font-bold">, </span>
               <span className="text-amber-400 font-normal">points</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              FROM{' '}
-              <span className="text-amber-400 font-normal">match_results</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">match_results</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              ORDER BY{' '}
-              <span className="text-amber-400 font-normal">points</span>{' '}
-              <span className="text-pink-400">DESC</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              ORDER BY <span className="text-amber-400 font-normal">points</span> <span className="text-pink-400">DESC</span><span className="text-zinc-500 font-bold">;</span>
             </div>
           </div>
           <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full md:w-3/4 mb-8">
@@ -5068,10 +5049,24 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                   <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
                   <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
                   <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
-                    930
+                    920
                   </td>
                 </tr>
 
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
                 <tr>
                   <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
                   <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
@@ -5086,16 +5081,11 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                     910
                   </td>
                 </tr>
+               
+               
                 <tr>
-                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
-                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
-                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
-                    880
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 py-3 font-mono text-zinc-300">Alice</td>
-                  <td className="px-4 py-3 font-mono text-zinc-300">Smith</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Sam</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Willson</td>
                   <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
                     850
                   </td>
@@ -5107,46 +5097,31 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                     780
                   </td>
                 </tr>
-                <tr>
-                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
-                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
-                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
-                    710
-                  </td>
-                </tr>
+                
               </tbody>
             </table>
           </div>
           <p className="mb-8">
             Ok so now you have everything ordered. Because I said we need to
-            find the top 3 players, you might do LIMIT 4 to select and return
-            the top 4 rows which consists of our top 3 players. This would be
+            find the top 3 players, you might do  <span className="text-pink-400">{' '} LIMIT </span> to select and return
+            the top 6 rows which consists of our top 3 players. This would be
             the query:
           </p>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
-            <div className="text-indigo-400 font-bold">
+          <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
               SELECT{' '}
-              <span className="text-amber-400 font-normal">
-                player_first_name
-              </span>
-              <span className="text-zinc-500 font-bold">,</span>{' '}
-              <span className="text-amber-400 font-normal">
-                player_last_name
-              </span>
-              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">player_first_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">player_last_name</span><span className="text-zinc-500 font-bold">, </span>
               <span className="text-amber-400 font-normal">points</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              FROM{' '}
-              <span className="text-amber-400 font-normal">match_results</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">match_results</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              ORDER BY{' '}
-              <span className="text-amber-400 font-normal">points</span>{' '}
-              <span className="text-pink-400">DESC</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              ORDER BY <span className="text-amber-400 font-normal">points</span> <span className="text-pink-400">DESC</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              LIMIT <span className="text-pink-400">4</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              LIMIT <span className="text-emerald-400 font-normal">6</span><span className="text-zinc-500 font-bold">;</span>
             </div>
           </div>
           <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full md:w-3/4 mb-8">
@@ -5179,10 +5154,24 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                   <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
                   <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
                   <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
-                    930
+                    920
                   </td>
                 </tr>
 
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
                 <tr>
                   <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
                   <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
@@ -5201,7 +5190,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
             </table>
           </div>
           <p>
-            You might be thinking, yes using ORDER BY and LIMIT works with this
+            You might be thinking, yes using  <span className="text-pink-400">{' '} ORDER BY </span> and  <span className="text-pink-400">{' '} LIMIT </span> works with this
             problem because we do get our top 3 players. But look at it deeply. The above query only works if we
             have the same source table. Lets alter the table. In the following table, I added one
             extra row for Bob:
@@ -5234,15 +5223,15 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      930
+                      920
                     </td>
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
-                      Alice
+                      Sam
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-zinc-300">
-                      Smith
+                      Willson
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
                       850
@@ -5279,7 +5268,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      710
+                      920
                     </td>
                   </tr>
                   <tr className="hover:bg-zinc-800/30 transition-colors">
@@ -5301,7 +5290,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      915
+                      920
                     </td>
                   </tr>
 
@@ -5324,7 +5313,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                       Jones
                     </td>
                     <td className="px-4 py-3 font-mono text-base text-emerald-400">
-                      880
+                      920
                     </td>
                   </tr>
                 </tbody>
@@ -5332,30 +5321,21 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
             </div>
           </div>
           <p>Let's consider the same query we wrote before:</p>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8">
-            <div className="text-indigo-400 font-bold">
+         <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
               SELECT{' '}
-              <span className="text-amber-400 font-normal">
-                player_first_name
-              </span>
-              <span className="text-zinc-500 font-bold">,</span>{' '}
-              <span className="text-amber-400 font-normal">
-                player_last_name
-              </span>
-              <span className="text-zinc-500 font-bold">,</span>{' '}
+              <span className="text-amber-400 font-normal">player_first_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">player_last_name</span><span className="text-zinc-500 font-bold">, </span>
               <span className="text-amber-400 font-normal">points</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              FROM{' '}
-              <span className="text-amber-400 font-normal">match_results</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">match_results</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              ORDER BY{' '}
-              <span className="text-amber-400 font-normal">points</span>{' '}
-              <span className="text-pink-400">DESC</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              ORDER BY <span className="text-amber-400 font-normal">points</span> <span className="text-pink-400">DESC</span>
             </div>
-            <div className="text-indigo-400 font-bold">
-              LIMIT <span className="text-pink-400">4</span>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              LIMIT <span className="text-emerald-400 font-normal">6</span><span className="text-zinc-500 font-bold">;</span>
             </div>
           </div>
           <p>Here is the result:</p>
@@ -5389,7 +5369,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                   <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
                   <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
                   <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
-                    930
+                    920
                   </td>
                 </tr>
 
@@ -5404,7 +5384,21 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
                   <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
                   <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
                   <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
-                    915
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Bob</td>
+                  <td className="px-4 py-3 font-mono text-zinc-300">Jones</td>
+                  <td className="px-4 py-3 font-mono text-emerald-400 font-bold">
+                    920
                   </td>
                 </tr>
               </tbody>
@@ -5413,14 +5407,803 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
           <p>
             See the problem? The query is working as expected but we are getting the top 2 players this time, not the
             top 3. The query we wrote previously does not take into account
-            different tables, in other words it is a very static piece of code!
+            different tables and their date. In other words it is a very static piece of code!
             To make our code consistent and work across different tables that have different
             numbers of data, we need to try <strong> Window Functions!</strong>
 
           </p>
           <h3 className="text-2xl font-bold text-white mb-4"> Enter Window Functions</h3>
-          <p> There are three main window functions that we will consider for now, that allow us</p>
-          
+          <p> There are three main window functions that we will consider for now, that allow us to rank rows easily. They are  <span className="text-pink-400">{' '} DENSE_RANK()</span>,  <span className="text-pink-400">{' '} RANK()</span>, and <span className="text-pink-400">{' '} ROW_NUMBER() </span>. If we consider the same problem as before with us trying to find the top 3 players,  <span className="text-pink-400">{' '} DENSE_RANK()</span> would allow us to get the top 3 players, even when we change the source table!</p>
+          <h3 className="text-2m font-bold text-white mb-4">DENSE_RANK()</h3>
+          <p> The  <span className="text-pink-400">{' '} DENSE_RANK()</span> function gives each row an unique, sequential ranking. But if two rows have the same values, they get the same ranking. Let's work through an example: </p>
+          <p>Here is the table we considered before:</p>
+          <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: match_results
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Sam
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Willson
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      850
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Brown
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      780
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Diana
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Prince
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      950
+                    </td>
+                  </tr>
+                  <tr className="bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      910
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>To find the top 3 players, let's write a query using the  <span className="text-pink-400">{' '} DENSE_RANK() </span> window function and let's also incorporate our knolwedge of CTEs:</p>
+           <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            
+            {/* CTE Definition */}
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              WITH <span className="text-amber-400 font-normal">data_ranked</span> AS <span className="text-zinc-500 font-bold">(</span>
+            </div>
+            
+            {/* Inner CTE Query (Indented) */}
+            <div className="text-indigo-400 font-bold whitespace-nowrap pl-8">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">player_first_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">player_last_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">points</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-pink-400">DENSE_RANK()</span> OVER <span className="text-zinc-500 font-bold">(</span>ORDER BY <span className="text-amber-400 font-normal">points</span> <span className="text-emerald-400">DESC</span><span className="text-zinc-500 font-bold">)</span> AS <span className="text-amber-400 font-normal">rnk</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap pl-8">
+              FROM <span className="text-amber-400 font-normal">match_results</span>
+            </div>
+            
+            {/* CTE Closing */}
+            <div className="text-zinc-500 font-bold whitespace-nowrap">
+              <span className="text-zinc-500 font-bold">)</span>
+            </div>
+
+            {/* Main Query (Add the WHERE clause here if you want to filter!) */}
+            <div className="text-indigo-400 font-bold whitespace-nowrap mt-2">
+              SELECT <span className="text-zinc-300 font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">data_ranked</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+            
+          </div>
+          <p>Here is the result:</p>
+         <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: data_ranked Output
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                    <th className="px-4 py-3 font-mono font-black text-emerald-400 uppercase tracking-tight bg-emerald-500/10">
+                      rnk
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-500/10">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Diana</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Prince</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">950</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">1</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  {/* Highlighted Row */}
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                   <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                   <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Alice</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Smith</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">910</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">3</td>
+                  </tr>
+                 
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Sam</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Willson</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">850</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">4</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Charlie</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Brown</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">780</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">5</td>
+                  </tr>
+                 
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Look at the query and then the result. Do you see what's happening? In the query, we are telling SQL to return  <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              player_first_name
+            </code>,  <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              player_last_name
+            </code>, and the  <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              points
+            </code> column. But we are also telling SQL to return a fourth column, known as  <code className="bg-zinc-950 border border-zinc-800 text-indigo-400 px-1.5 py-0.5 rounded font-mono">
+              rnk
+            </code>. Using  <span className="text-pink-400">{' '} DENSE_RANK() </span> with  <span className="text-pink-400">{' '} OVER</span> and  <span className="text-pink-400">{' '} ORDER BY </span>, we tell SQL to look at the points column only and rank the rows based on the points column. We also tell SQL to give rows the same ranking if rows have the same points. This is why for the rows corresponding to Bob, we have a ranking of 2. Notice also that the rankings are given in a sequential manner as well, going from 1 to 7.  </p>
+          <p>Now that we have our ranking, we can simply add a where clause to our previous query to return the top 3 players, and the query would work across different tables.</p>
+          <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              SELECT <span className="text-zinc-300 font-normal">*</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">data_ranked</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              WHERE <span className="text-amber-400 font-normal">rnk</span> <span className="text-zinc-300 font-bold">{"<="}</span> <span className="text-emerald-400 font-normal">3</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+          </div>
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: Final data_ranked Output
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                    <th className="px-4 py-3 font-mono font-black text-emerald-400 uppercase tracking-tight bg-emerald-500/10">
+                      rnk
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-500/10">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Diana</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Prince</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">950</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">1</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  {/* Highlighted Row */}
+                   <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                   <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                   <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Alice</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Smith</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">910</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">3</td>
+                  </tr>
+                
+                  
+                
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <h3 className="text-2m font-bold text-white mb-4">RANK()</h3>
+        <p>You understood how <span className="text-pink-400">{' '} DENSE_RANK() </span> works, so let's move onto  <span className="text-pink-400">{' '} RANK()</span> through an example and carefully observe how  <span className="text-pink-400">{' '} RANK() </span> behaves differently than  <span className="text-pink-400">{' '} DENSE_RANK() </span>. One thing to keep in mind is that when using  <span className="text-pink-400">{' '} RANK() </span>, the rows are ranked in sequential manner, but there is skipping involved. You'll see what I mean in the example:</p>
+        <p>Let's say we want to just assign ranking to the rows of the following table based on the points column.</p>
+            <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: match_results
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Sam
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Willson
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      850
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Brown
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      780
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Diana
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Prince
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      950
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      910
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Query:</p>
+          <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">player_first_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">player_last_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">points</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-pink-400">RANK()</span> OVER <span className="text-zinc-500 font-bold">(</span>ORDER BY <span className="text-amber-400 font-normal">points</span> <span className="text-emerald-400">DESC</span><span className="text-zinc-500 font-bold">)</span> AS <span className="text-amber-400 font-normal">rnk</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">match_results</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+          </div>
+          <p>Result of the above query: </p>
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: RANK() Output
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                    <th className="px-4 py-3 font-mono font-black text-emerald-400 uppercase tracking-tight bg-emerald-500/10">
+                      rnk
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-500/10">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Diana</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Prince</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">950</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">1</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">2</td>
+                  </tr>
+                  {/* Highlighted Row showing the massive skip */}
+                  <tr className="bg-indigo-500/10 hover:bg-indigo-500/20 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Alice</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Smith</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">910</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/10">7</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Sam</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Willson</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">850</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">8</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Charlie</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Brown</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">780</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">9</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Did you see what happened? We are using basically the same query as before, but just replaced the function we are looking at with  <span className="text-pink-400">{' '} RANK() </span>. We immediately see that while the rows have been ranked sequentially, in an increasing manner, the rank suddenly jumps from '2' to '7' when we consider 'Alice.' This is known as skipping and it's often associated with using  <span className="text-pink-400">{' '} RANK() </span> window function!</p>
+        <h3 className="text-2m font-bold text-white mb-4">ROW_NUMBER()</h3>
+        <p>You have seen how <span className="text-pink-400">{' '} RANK() </span> works, so let's move onto <span className="text-pink-400">{' '} ROW_NUMBER() </span>, which is the simplest of the three to understand. Before we consider the same example, keep in mind that  <span className="text-pink-400">{' '} ROW_NUMBER()</span> gives each row an unique ranking and in a sequential manner:</p>
+        <p>Let's say we want to just assign ranking to the rows of the following table based on the points column.</p>
+            <div className="border border-zinc-800/50 rounded-xl overflow-hidden bg-zinc-900/20 shadow-lg mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50">
+              Raw Table: match_results
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-zinc-800/50">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-800/50">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Sam
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Willson
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      850
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Charlie
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Brown
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      780
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Diana
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Prince
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      950
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Alice
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Smith
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      910
+                    </td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Bob
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">
+                      Jones
+                    </td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">
+                      920
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Query:</p>
+         <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner flex flex-col gap-1 mb-8 overflow-x-auto">
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              SELECT{' '}
+              <span className="text-amber-400 font-normal">player_first_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">player_last_name</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-amber-400 font-normal">points</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-pink-400">ROW_NUMBER()</span> OVER <span className="text-zinc-500 font-bold">(</span>ORDER BY <span className="text-amber-400 font-normal">points</span> <span className="text-emerald-400">DESC</span><span className="text-zinc-500 font-bold">)</span> AS <span className="text-amber-400 font-normal">rnk</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">match_results</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+          </div>
+          <p>Result of the above query: </p>
+          <div className="border border-indigo-500/30 rounded-lg overflow-hidden bg-indigo-500/5 shadow-md w-full mb-8">
+            <div className="bg-zinc-950/80 px-4 py-3 text-xs font-bold text-indigo-400 uppercase tracking-widest border-b border-indigo-500/20">
+              Result: ROW_NUMBER() Output
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-base">
+                <thead className="bg-zinc-950/50 border-b border-indigo-500/20">
+                  <tr>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_first_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      player_last_name
+                    </th>
+                    <th className="px-4 py-3 font-mono font-bold text-indigo-400 uppercase tracking-tight">
+                      points
+                    </th>
+                    <th className="px-4 py-3 font-mono font-black text-emerald-400 uppercase tracking-tight bg-emerald-500/10">
+                      rnk
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-500/10">
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Diana</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Prince</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">950</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">1</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/10">2</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">3</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">4</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">5</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Bob</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Jones</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">920</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">6</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Alice</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Smith</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">910</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">7</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Sam</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Willson</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">850</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">8</td>
+                  </tr>
+                  <tr className="hover:bg-zinc-800/30 transition-colors">
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Charlie</td>
+                    <td className="px-4 py-3 font-mono text-base text-zinc-300">Brown</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400">780</td>
+                    <td className="px-4 py-3 font-mono text-base text-emerald-400 font-bold bg-emerald-500/5">9</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p>Notice that <span className="text-pink-400">{' '} ROW_NUMBER()</span> just gives each row an unique value!</p>
         </div>
       </div>
 
@@ -5430,6 +6213,52 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
           <h2 className="text-2xl font-black text-indigo-400 font-mono">
             Ranking Syntax
           </h2>
+          {/* --- SYNTAX EXAMPLES --- */}
+        <div className="bg-[#0D0D0D] border border-zinc-800 rounded-xl p-6 font-mono text-base shadow-inner mb-8 overflow-x-auto w-full">
+          
+          {/* ROW_NUMBER Block */}
+          <div className="flex flex-col gap-1 mb-8">
+            <div className="text-zinc-500 italic mb-2 text-sm tracking-wide">
+              -- ROW_NUMBER() Syntax (Note: The internal ORDER BY can be ASC or DESC)
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              SELECT <span className="text-zinc-300 font-normal">*</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-pink-400">ROW_NUMBER()</span> OVER <span className="text-zinc-500 font-bold">(</span>ORDER BY <span className="text-amber-400 font-normal">column_name</span> <span className="text-emerald-400">DESC</span><span className="text-zinc-500 font-bold">)</span> <span className="text-indigo-400">AS</span> <span className="text-amber-400 font-normal">row_num</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">table_name</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+          </div>
+
+          {/* RANK Block */}
+          <div className="flex flex-col gap-1 mb-8">
+            <div className="text-zinc-500 italic mb-2 text-sm tracking-wide">
+              -- RANK() Syntax (Using ASC here as an example)
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              SELECT <span className="text-zinc-300 font-normal">*</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-pink-400">RANK()</span> OVER <span className="text-zinc-500 font-bold">(</span>ORDER BY <span className="text-amber-400 font-normal">column_name</span> <span className="text-emerald-400">ASC</span><span className="text-zinc-500 font-bold">)</span> <span className="text-indigo-400">AS</span> <span className="text-amber-400 font-normal">rank_val</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">table_name</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+          </div>
+
+          {/* DENSE_RANK Block */}
+          <div className="flex flex-col gap-1">
+            <div className="text-zinc-500 italic mb-2 text-sm tracking-wide">
+              -- DENSE_RANK() Syntax
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              SELECT <span className="text-zinc-300 font-normal">*</span><span className="text-zinc-500 font-bold">, </span>
+              <span className="text-pink-400">DENSE_RANK()</span> OVER <span className="text-zinc-500 font-bold">(</span>ORDER BY <span className="text-amber-400 font-normal">column_name</span> <span className="text-emerald-400">DESC</span><span className="text-zinc-500 font-bold">)</span> <span className="text-indigo-400">AS</span> <span className="text-amber-400 font-normal">dense_rank_val</span>
+            </div>
+            <div className="text-indigo-400 font-bold whitespace-nowrap">
+              FROM <span className="text-amber-400 font-normal">table_name</span><span className="text-zinc-500 font-bold">;</span>
+            </div>
+          </div>
+
+        </div>
           <p className="text-zinc-400 mt-2 text-lg">
             Use the query builder below to explore how the three different
             ranking functions handle ties differently.
