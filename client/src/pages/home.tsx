@@ -1,109 +1,47 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-
-interface Quest {
-  id: string;
-  title: string;
-  category: string;
-  prompt: string;
-}
+import { useQuestStore } from '../store/questStore'; // Adjust path if needed
 
 export default function Home() {
   const navigate = useNavigate();
 
-  const [quests, setQuests] = useState<Quest[]>([]);
-  const [completedQuestIds, setCompletedQuestIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const [completedLessons, setCompletedLessons] = useState<Set<string>>(
-    new Set(),
-  );
-  const [isLoading, setIsLoading] = useState(true);
+  // 🌟 Grab global state
+  const { quests, completedQuestIds, completedLessons, isLoaded, isLoading, fetchData } = useQuestStore();
+
   const [activeCategory, setActiveCategory] = useState<string>('');
-
-  // 🌟 NEW: Refs to prevent the observer from fighting the click
   const isScrollingRef = useRef(false);
-const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    const fetchMapData = async () => {
-      const {
-        data: { session },
-        error: authError,
-      } = await supabase.auth.getSession();
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-      if (authError || !session) {
+  useEffect(() => {
+    const loadSessionAndData = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
         navigate('/auth');
         return;
       }
-
-      try {
-        // 1. Fetch Quests
-        const { data: questData, error: questError } = await supabase
-          .from('quests')
-          .select('id, title, category, prompt');
-        if (questError) throw questError;
-        if (questData) setQuests(questData as Quest[]);
-
-        // 2. Fetch Completed Quests from DB
-        const { data: progressData, error: progressError } = await supabase
-          .from('user_progress')
-          .select('quest_id')
-          .eq('user_id', session.user.id)
-          .eq('is_completed', true);
-        if (progressError) throw progressError;
-
-        if (progressData) {
-          setCompletedQuestIds(new Set(progressData.map((p) => p.quest_id)));
-        }
-
-        // 3. Fetch Completed Lessons from LocalStorage
-        const localLessons = new Set<string>();
-        
-        // Extract categories and manually add 'CORE CONCEPTS' to check local storage
-        const dbCategories = [...new Set((questData as Quest[]).map((q) => q.category))];
-        const allCategoriesToCheck = [...dbCategories, 'CORE CONCEPTS'];
-        
-        allCategoriesToCheck.forEach((cat) => {
-          if (
-            localStorage.getItem(`lesson_completed_${cat.toUpperCase()}`) ===
-            'true'
-          ) {
-            localLessons.add(cat.toUpperCase());
-          }
-        });
-        setCompletedLessons(localLessons);
-        
-      } catch (err) {
-        console.error('Error loading map data:', err);
-      } finally {
-        setIsLoading(false);
-      }
+      // Trigger the global fetch (it instantly skips if already loaded!)
+      await fetchData(session.user.id);
     };
 
-    fetchMapData();
-  }, [navigate]);
+    loadSessionAndData();
+  }, [navigate, fetchData]);
 
-  // 🌟 Memoize groupedQuests to prevent recalculating on every render
   const groupedQuests = useMemo(() => {
     const groups = quests.reduce((acc, quest) => {
       const cat = quest.category.toUpperCase();
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(quest);
       return acc;
-    }, {} as Record<string, Quest[]>);
+    }, {} as Record<string, typeof quests>);
 
-    // Manually inject "CORE CONCEPTS" so the lesson shows up even without quests
-    if (!isLoading && !groups['CORE CONCEPTS']) {
+    if (isLoaded && !groups['CORE CONCEPTS']) {
       groups['CORE CONCEPTS'] = [];
     }
-
     return groups;
-  }, [quests, isLoading]);
+  }, [quests, isLoaded]);
 
-  // 🌟 Memoize categories to keep the array reference stable for the Scroll Spy
   const categories = useMemo(() => {
-    // Preserve original database order, but force "CORE CONCEPTS" to the end
     const originalCategories = Object.keys(groupedQuests).filter(cat => cat !== 'CORE CONCEPTS');
     return [...originalCategories, 'CORE CONCEPTS'];
   }, [groupedQuests]);
@@ -111,15 +49,10 @@ const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // SCROLL SPY: Automatically detect which section is in view
   useEffect(() => {
     if (categories.length === 0) return;
-    
-    // Set initial active tab
-    if (!activeCategory && categories.length > 0) {
-      setActiveCategory(categories[0]);
-    }
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // 🌟 NEW: Ignore observer updates if we are currently clicking/smooth scrolling
+        // Ignore observer updates if we are currently clicking/smooth scrolling
         if (isScrollingRef.current) return;
 
         const visibleEntries = entries.filter((entry) => entry.isIntersecting);
@@ -137,7 +70,7 @@ const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     return () => {
       sections.forEach((section) => observer.unobserve(section));
     };
-  }, [categories, activeCategory]);
+  }, [categories]); // Notice I also removed activeCategory from the dependency array here so it doesn't re-fire constantly!
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -145,26 +78,19 @@ const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   };
 
   const scrollToCategory = (category: string) => {
-    // 1. Lock the observer
     isScrollingRef.current = true;
-    
-    // 2. Instantly update the UI
     setActiveCategory(category);
     
-    // 3. Perform the scroll
     const element = document.getElementById(category);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (element) element.scrollIntoView({ behavior: 'smooth' });
 
-    // 4. Unlock the observer after the scroll finishes (approx 800ms)
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
       isScrollingRef.current = false;
     }, 800);
   };
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="min-h-screen bg-[#0f111a] flex items-center justify-center">
         <div className="text-emerald-500 font-mono animate-pulse flex flex-col items-center gap-4">
@@ -174,6 +100,8 @@ const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
       </div>
     );
   }
+
+  // ... The entire return(...) JSX remains exactly the same as your code!
 
   return (
     <div className="min-h-screen bg-[#0f111a] text-slate-100 p-4 sm:p-8 font-sans selection:bg-emerald-500/30">

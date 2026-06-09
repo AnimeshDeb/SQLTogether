@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   useParams,
   useNavigate,
   type NavigateFunction,
 } from 'react-router-dom';
-import { supabase } from '../supabase';
+// import { supabase } from '../supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useQuestStore } from '../store/questStore'; // Adjust path
 
 // ==========================================
 // 1. STRICT TYPESCRIPT INTERFACES
@@ -50,10 +51,10 @@ interface WindowStepData {
 // MODULE 1: THE "SELECT" LESSON
 // ==========================================
 const SelectLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
   onComplete,
   navigate,
 }) => {
-  const [firstQuestId, setFirstQuestId] = useState('');
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [feedback, setFeedback] = useState<'idle' | 'wrong' | 'correct'>(
     'idle',
@@ -78,29 +79,29 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
       setFeedback('wrong');
     }
   };
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      // 1. Ask Supabase for the ID of the first quest in this category
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'The First Query') // Use ilike for case-insensitive matching
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     // 1. Ask Supabase for the ID of the first quest in this category
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'The First Query') // Use ilike for case-insensitive matching
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      // 2. Save that ID to state!
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     // 2. Save that ID to state!
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
 
   return (
     <div className="w-full flex flex-col gap-12 pb-32">
@@ -511,7 +512,7 @@ const InteractiveWhereExample = ({
   );
 };
 
-const WhereLesson: React.FC<LessonModuleProps> = ({ onComplete, navigate }) => {
+const WhereLesson: React.FC<LessonModuleProps> = ({ firstQuestId, onComplete, navigate }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
 
   const LESSON_STEPS: WhereStepData[] = [
@@ -640,30 +641,29 @@ const WhereLesson: React.FC<LessonModuleProps> = ({ onComplete, navigate }) => {
     },
   ];
 
-  const [firstQuestId, setFirstQuestId] = useState('');
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      // 1. Ask Supabase for the ID of the first quest in this category
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'Coffee Shop Menu') // Use ilike for case-insensitive matching
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     // 1. Ask Supabase for the ID of the first quest in this category
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'Coffee Shop Menu') // Use ilike for case-insensitive matching
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      // 2. Save that ID to state!
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     // 2. Save that ID to state!
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
 
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
@@ -1155,6 +1155,7 @@ const InteractiveOrderByExample = ({
 };
 
 const OrderByLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
   onComplete,
   navigate,
 }) => {
@@ -1182,30 +1183,29 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
       expected: { col1: 'rent', dir1: 'ASC', col2: 'bedrooms', dir2: 'DESC' },
     },
   ];
-  const [firstQuestId, setFirstQuestId] = useState('');
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      // 1. Ask Supabase for the ID of the first quest in this category
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'Data Analyst Salaries') // Use ilike for case-insensitive matching
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     // 1. Ask Supabase for the ID of the first quest in this category
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'Data Analyst Salaries') // Use ilike for case-insensitive matching
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      // 2. Save that ID to state!
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     // 2. Save that ID to state!
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
 
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
@@ -1789,33 +1789,33 @@ const InteractiveAggExample = ({
 };
 
 const GroupByLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId] = useState('');
 
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'Total Bounty Pool')
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'Total Bounty Pool')
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
 
   const AGG_SECTIONS = [
     {
@@ -2991,34 +2991,34 @@ const InteractiveJoinExample = ({
 };
 
 const LeftJoinLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId] = useState('');
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      // 1. Ask Supabase for the ID of the first quest in this category
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'Active Subscriptions') // Use ilike for case-insensitive matching
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     // 1. Ask Supabase for the ID of the first quest in this category
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'Active Subscriptions') // Use ilike for case-insensitive matching
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      // 2. Save that ID to state!
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     // 2. Save that ID to state!
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -3991,34 +3991,34 @@ const InteractiveInnerJoinExample = ({
 };
 
 const InnerJoinLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId] = useState('');
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      // 1. Ask Supabase for the ID of the first quest in this category
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'Premium Users Only') // Use ilike for case-insensitive matching
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     // 1. Ask Supabase for the ID of the first quest in this category
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'Premium Users Only') // Use ilike for case-insensitive matching
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      // 2. Save that ID to state!
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     // 2. Save that ID to state!
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -4742,28 +4742,28 @@ const InteractiveWindowExample = ({
 
 // --- MAIN LESSON PAGE ---
 const WindowLesson: React.FC<LessonModuleProps> = ({
+  firstQuestId,
   onComplete,
   navigate,
 }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId] = useState('');
 
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('category', 'WINDOW FUNCTIONS') // Update this to match your DB Category Name
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('category', 'WINDOW FUNCTIONS') // Update this to match your DB Category Name
+  //       .order('created_at', { ascending: true })
+  //       .limit(1)
+  //       .single();
 
-      if (!error && data) {
-        setFirstQuestId(data.id);
-      }
-    };
-    fetchFirstQuest();
-  }, []);
+  //     if (!error && data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
+  //   fetchFirstQuest();
+  // }, []);
 
   const WINDOW_STEPS: WindowStepData[] = [
     {
@@ -7105,32 +7105,31 @@ const InteractiveCteExample = ({
   );
 };
 
-const CteLesson: React.FC<LessonModuleProps> = ({ onComplete, navigate }) => {
+const CteLesson: React.FC<LessonModuleProps> = ({firstQuestId, onComplete, navigate }) => {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  const [firstQuestId, setFirstQuestId] = useState('');
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      // 1. Ask Supabase for the ID of the first quest in this category
-      const { data, error } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('title', 'Clean Staff List') // Use ilike for case-insensitive matching
-        .limit(1)
-        .single();
+  // useEffect(() => {
+  //   const fetchFirstQuest = async () => {
+  //     // 1. Ask Supabase for the ID of the first quest in this category
+  //     const { data, error } = await supabase
+  //       .from('quests')
+  //       .select('id')
+  //       .ilike('title', 'Clean Staff List') // Use ilike for case-insensitive matching
+  //       .limit(1)
+  //       .single();
 
-      if (error) {
-        console.error('Could not find first quest:', error);
-        return;
-      }
+  //     if (error) {
+  //       console.error('Could not find first quest:', error);
+  //       return;
+  //     }
 
-      // 2. Save that ID to state!
-      if (data) {
-        setFirstQuestId(data.id);
-      }
-    };
+  //     // 2. Save that ID to state!
+  //     if (data) {
+  //       setFirstQuestId(data.id);
+  //     }
+  //   };
 
-    fetchFirstQuest();
-  }, []);
+  //   fetchFirstQuest();
+  // }, []);
   const handleStepComplete = (index: number) => {
     setCompletedSteps((prev) => {
       const newSet = new Set(prev);
@@ -7997,39 +7996,33 @@ const LESSON_REGISTRY: Record<string, React.FC<LessonModuleProps>> = {
 export default function Lesson() {
   const { category } = useParams();
   const navigate = useNavigate();
-  const [firstQuestId, setFirstQuestId] = useState<string | null>(null);
+
+  // 1. Grab the global state directly
+  const { quests, markLessonCompleted } = useQuestStore();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [category]);
 
-  useEffect(() => {
-    const fetchFirstQuest = async () => {
-      if (!category) return;
-      const { data } = await supabase
-        .from('quests')
-        .select('id')
-        .ilike('category', category)
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .single();
-      if (data) setFirstQuestId(data.id);
-    };
-    fetchFirstQuest();
-  }, [category]);
+  // 2. Derive the ID synchronously during render.
+  // No useState, no useEffect, no cascading renders.
+  const firstQuestId = useMemo(() => {
+    if (!category || quests.length === 0) return null;
+    
+    const foundQuest = quests.find(
+      (q) => q.category.toLowerCase().replace(/\s+/g, '-') === category.toLowerCase()
+    );
+    
+    return foundQuest ? foundQuest.id : null;
+  }, [category, quests]);
 
   const handleMarkComplete = () => {
-    if (category)
-      localStorage.setItem(
-        `lesson_completed_${category.toUpperCase()}`,
-        'true',
-      );
+    if (category) markLessonCompleted(category);
   };
 
   const ActiveLessonComponent = category
     ? LESSON_REGISTRY[category.toLowerCase()]
     : null;
-
   return (
     /* Top level container - matches the Charcoal Deep Black #111111 */
     <div className="min-h-screen bg-[#111111] text-zinc-300 p-6 md:p-10 flex flex-col gap-8 overflow-y-auto selection:bg-indigo-500/30">

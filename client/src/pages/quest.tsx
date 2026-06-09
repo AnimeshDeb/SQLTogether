@@ -1,32 +1,33 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { PGlite } from '@electric-sql/pglite';
 import CodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
+import { useQuestStore } from '../store/questStore';
 
-interface Quest {
-  id: string;
-  category: string;
-  title: string;
-  prompt: string;
-  setup_sql: string;
-  expected_output: string | Record<string, unknown>[]; 
-}
-
-// Break out the allowed values into their own type
 type DBValue = string | number | boolean | null;
-
-// Use that type for your rows
 type DBRow = Record<string, DBValue>;
+
 export default function QuestPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const [quest, setQuest] = useState<Quest | null>(null);
-  const [db, setDb] = useState<PGlite | null>(null);
+  // 1. Grab everything from the global store
+  const { 
+    quests, 
+    completedQuestIds, 
+    dbInstance, 
+    isDbBooting, 
+    markQuestCompleted, 
+    fetchData, 
+    initEngine 
+  } = useQuestStore();
+  
+  const quest = quests.find(q => q.id === id);
+  const alreadySolved = id ? completedQuestIds.has(id) : false;
+
   const [tables, setTables] = useState<Record<string, DBRow[]>>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isSettingUp, setIsSettingUp] = useState(false);
   
   const [userCode, setUserCode] = useState(() => {
     const savedCode = localStorage.getItem(`quest_${id}_code`);
@@ -36,79 +37,77 @@ export default function QuestPage() {
   const [queryResult, setQueryResult] = useState<DBRow[] | null>(null);
   const [queryError, setQueryError] = useState<string | null>(null);
   const [isPassed, setIsPassed] = useState(false);
-  const [alreadySolved, setAlreadySolved] = useState(false);
 
-  const hasInitialized = useRef(false);
-
+  // 🌟 STEP 1: Hydrate store and boot engine if needed
   useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
-    const initLevel = async () => {
-      const { data: questData, error: questError } = await supabase
-        .from('quests')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (questError || !questData) return;
-      setQuest(questData as Quest);
-
-      const { data: authData } = await supabase.auth.getSession();
-      if (authData.session) {
-        const { data: progressData } = await supabase
-          .from('user_progress')
-          .select('*')
-          .eq('user_id', authData.session.user.id)
-          .eq('quest_id', id)
-          .single();
-
-        if (progressData?.is_completed) setAlreadySolved(true);
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Self-hydration: If we refreshed or deep-linked, fetch the data!
+      if (quests.length === 0 && session) {
+        await fetchData(session.user.id);
       }
+      
+      // Ensure the engine is running
+      await initEngine();
+    };
+    init();
+  }, [id, quests.length, fetchData, initEngine]);
 
-      const pg = new PGlite();
-      setDb(pg);
+  // 🌟 STEP 2: Setup DB Schema when engine and quest are ready
+  useEffect(() => {
+    if (!dbInstance || !quest) return;
 
+    const setupDatabase = async () => {
+      setIsSettingUp(true);
       try {
-        await pg.exec(questData.setup_sql);
-        const schemaResult = await pg.query(`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';`);
-        const extractedTables: Record<string, DBRow[]> = {};
+        // 1. Wipe
+        await dbInstance.exec(`DROP SCHEMA public CASCADE; CREATE SCHEMA public;`);
+
+        // 2. Run Setup
+        await dbInstance.exec(quest.setup_sql);
+
+        // 3. Parallel Fetch Tables
+        const schemaResult = await dbInstance.query(`SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';`);
         const schemaRows = schemaResult.rows as { tablename: string }[];
         
-        for (const row of schemaRows) {
+        const tablePromises = schemaRows.map(async (row) => {
           const tableName = row.tablename;
-          const tableData = await pg.query(`SELECT * FROM ${tableName} LIMIT 5`);
-          extractedTables[tableName] = tableData.rows as DBRow[];
-        }
+          const tableData = await dbInstance.query(`SELECT * FROM ${tableName} LIMIT 5`);
+          return { tableName, rows: tableData.rows as DBRow[] };
+        });
+
+        const results = await Promise.all(tablePromises);
+
+        const extractedTables = results.reduce((acc, curr) => {
+          acc[curr.tableName] = curr.rows;
+          return acc;
+        }, {} as Record<string, DBRow[]>);
+
         setTables(extractedTables);
       } catch (err) {
-        console.error(err);
+        console.error("Database setup failed:", err);
       } finally {
-        setIsLoading(false);
+        setIsSettingUp(false);
       }
     };
 
-    initLevel();
-    return () => { if (db) db.close(); };
-  }, [id]);
+    setupDatabase();
+  }, [dbInstance, quest]);
 
   const handleCodeChange = (value: string) => {
     setUserCode(value);
     localStorage.setItem(`quest_${id}_code`, value);
   };
 
-  // 🌟 NEW HELPER: Executes query in array mode and safely renames duplicate columns
-  // 🌟 NEW HELPER: Executes query in array mode and safely renames duplicate columns
   const executeAndDeduplicate = async (query: string): Promise<DBRow[]> => {
-    if (!db) throw new Error("Database not initialized");
+    if (!dbInstance) throw new Error("Database not initialized");
     
-    // Request arrays instead of objects to prevent JS key collisions
-    const result = await db.query(query, [], { rowMode: 'array' });
+    const result = await dbInstance.query(query, [], { rowMode: 'array' });
     
     const safeColumnNames: string[] = [];
     const nameCounts: Record<string, number> = {};
 
-    // Track column names and append _2, _3 to duplicates
     result.fields.forEach(field => {
       let name = field.name;
       if (nameCounts[name]) {
@@ -120,7 +119,6 @@ export default function QuestPage() {
       safeColumnNames.push(name);
     });
 
-    // 🌟 THE FIX: Replaced 'any[][]' with 'DBValue[][]'
     const safeRows = (result.rows as DBValue[][]).map(rowArray => {
       const rowObject: DBRow = {};
       rowArray.forEach((val, index) => {
@@ -132,9 +130,8 @@ export default function QuestPage() {
     return safeRows;
   };
 
-  // ACTION 1: Just run the code to see what it outputs (No grading)
   const handleRunCode = async () => {
-    if (!db || !quest) return;
+    if (!dbInstance || !quest) return;
     setQueryError(null);
     setQueryResult(null);
     setIsPassed(false);
@@ -147,9 +144,8 @@ export default function QuestPage() {
     }
   };
 
-  // ACTION 2: Run the code AND grade it against the expected output
   const handleSubmitAnswer = async () => {
-    if (!db || !quest) return;
+    if (!dbInstance || !quest) return;
     setQueryError(null);
     setQueryResult(null);
     setIsPassed(false);
@@ -158,28 +154,23 @@ export default function QuestPage() {
       const actualRows = await executeAndDeduplicate(userCode);
       setQueryResult(actualRows);
 
-      // Strictly type the expected array as DBRow[]
       const expected = (typeof quest.expected_output === 'string' 
         ? JSON.parse(quest.expected_output) 
         : quest.expected_output) as DBRow[];
 
-      // 1. Instantly fail if row counts don't match
       if (actualRows.length !== expected.length) {
         setQueryError(`Row count mismatch: Expected ${expected.length} rows, but got ${actualRows.length}.`);
         return;
       }
 
-      // 2. Normalize and Clean (Convert numeric strings to numbers for comparison)
       const normalizeAndClean = (arr: DBRow[]) => arr.map(row => 
         Object.keys(row).sort().reduce((obj, key) => {
           const val = row[key];
-          
           if (typeof val === 'string' && !isNaN(Number(val)) && val.trim() !== "") {
             obj[key] = Number(val);
           } else {
             obj[key] = val;
           }
-          
           return obj;
         }, {} as DBRow)
       ).map(row => JSON.stringify(row)).sort();
@@ -187,10 +178,9 @@ export default function QuestPage() {
       const actualNormalized = normalizeAndClean(actualRows);
       const expectedNormalized = normalizeAndClean(expected);
 
-      // 3. Compare the normalized data
       if (JSON.stringify(actualNormalized) === JSON.stringify(expectedNormalized)) {
         setIsPassed(true);
-        setAlreadySolved(true);
+        if (id) markQuestCompleted(id);
         
         const { data: authData } = await supabase.auth.getSession();
         if (authData.session) {
@@ -202,15 +192,19 @@ export default function QuestPage() {
         }
       } else {
         setQueryError("Output does not match the expected result. Look closely at the required columns and rows!");
-        console.log("Expected (Normalized):", expectedNormalized);
-        console.log("Actual (Normalized):", actualNormalized);
       }
     } catch (err: unknown) {
       if (err instanceof Error) setQueryError(err.message);
     }
   };
 
-  if (isLoading) return <div className="min-h-screen bg-[#0f111a] flex items-center justify-center text-emerald-500 font-mono animate-pulse">Booting DB...</div>;
+  if (isDbBooting || isSettingUp || !quest) {
+    return (
+      <div className="min-h-screen bg-[#0f111a] flex items-center justify-center text-emerald-500 font-mono animate-pulse">
+        {isDbBooting ? "Booting PostgreSQL Engine..." : "Generating Tables..."}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f111a] text-slate-100 p-6 flex flex-col gap-6">
@@ -224,9 +218,9 @@ export default function QuestPage() {
         <div className="w-full xl:w-1/2 flex flex-col gap-6">
           <div className="bg-[#141620] border border-slate-800 rounded-xl p-6 shadow-lg relative overflow-hidden">
             {alreadySolved && <div className="absolute top-0 right-0 bg-emerald-500/10 border-b border-l border-emerald-500/30 px-4 py-1 rounded-bl-lg text-xs font-bold text-emerald-400">✓ COMPLETED</div>}
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{quest?.category}</span>
-            <h1 className="text-2xl font-bold text-white mt-1 mb-4">{quest?.title}</h1>
-            <p className="text-slate-400 leading-relaxed text-sm">{quest?.prompt}</p>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{quest.category}</span>
+            <h1 className="text-2xl font-bold text-white mt-1 mb-4">{quest.title}</h1>
+            <p className="text-slate-400 leading-relaxed text-sm">{quest.prompt}</p>
           </div>
 
           <div className="bg-[#141620] border border-slate-800 rounded-xl p-6 flex-1 overflow-auto shadow-lg min-h-[300px]">
