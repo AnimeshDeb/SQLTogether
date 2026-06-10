@@ -79,12 +79,12 @@ export default function AuthPage() {
             </div>
 
             <form className="space-y-5" onSubmit={handleMagicLink}>
-              {isSignUp && (
+              {/* {isSignUp && (
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Player Name</label>
                   <input type="text" placeholder="SQL_Slayer" className="w-full bg-[#0f111a] border border-slate-700 rounded-lg px-4 py-3 text-sm focus:border-emerald-500 text-white transition-colors" />
                 </div>
-              )}
+              )} */}
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
