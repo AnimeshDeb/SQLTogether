@@ -1,20 +1,45 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 export default function LandingPage() {
   const navigate = useNavigate();
 
   const [userEmail, setUserEmail] = useState('');
   const [error, setError] = useState('');
+
   return (
     <div className="min-h-screen bg-[#0f111a] text-slate-100 font-sans selection:bg-emerald-500/30">
       {/* Navigation */}
       <nav className="container mx-auto px-6 py-4 flex justify-between items-center border-b border-slate-800/50">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
-            {'>_'}
+          <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+            {/* Geometric Cat Logo */}
+            <svg
+              className="w-5 h-5 text-slate-900"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              {/* Head Silhouette */}
+              <path
+                d="M12 21c-4.97 0-9-3.134-9-7a6.98 6.98 0 0 1 1.73-4.57L3 4.5 8.07 6.3A10.36 10.36 0 0 1 12 5.5c1.42 0 2.78.21 4 .58L21 4.5l-1.73 4.93A6.98 6.98 0 0 1 21 14c0 3.866-4.03 7-9 7z"
+                fill="currentColor"
+              />
+              {/* Cute closed eyes */}
+              <path
+                d="M8 13.5c.5.5 1.5.5 2 0M14 13.5c.5.5 1.5.5 2 0"
+                stroke="A0A3B1"
+                strokeWidth="2"
+              />
+              {/* Tiny Nose */}
+              <polygon points="12,15 11,14 13,14" fill="A0A3B1" />
+            </svg>
           </div>
           <span className="text-xl font-bold tracking-tight text-white">
-            Query<span className="text-emerald-400">Quest</span>
+            Data<span className="text-emerald-400">Kibble</span>
           </span>
         </div>
       </nav>
@@ -23,15 +48,11 @@ export default function LandingPage() {
       <main className="container mx-auto px-6 pt-16 pb-24 grid lg:grid-cols-2 gap-12 items-center">
         {/* Left Side */}
         <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-amber-500/30 rounded-full text-xs font-bold text-amber-400 bg-amber-500/10 uppercase tracking-wide">
+          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-emerald-500/30 rounded-full text-xs font-bold text-emerald-400 bg-emerald-500/10 uppercase tracking-wide">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-                clipRule="evenodd"
-              />
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
             </svg>
-            Season 1 Campaign Open
+            Data Analyst Training Open
           </div>
 
           <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
@@ -39,14 +60,14 @@ export default function LandingPage() {
               Master the SQL basics.
             </span>
             <span className="block text-emerald-400 lg:whitespace-nowrap">
-              Don't let the party down.
+              Launch your data career.
             </span>
           </h1>
 
           <p className="text-lg text-slate-400 mb-8 leading-relaxed max-w-lg">
-            Master database syntax through daily, bite-sized coding quests. Join
-            a team, keep your streak alive, and unlock the final boss: the
-            technical interview.
+            Stop reading walls of text. Learn database syntax through hands-on,
+            interactive lessons and apply your knowledge instantly by solving
+            real data problems.
           </p>
 
           <div className="flex flex-col gap-2 max-w-lg">
@@ -57,9 +78,9 @@ export default function LandingPage() {
                 onChange={(e) => {
                   e.preventDefault();
                   setUserEmail(e.target.value);
-                  if (error) setError(''); // Clears the error the moment they start fixing it
+                  if (error) setError('');
                 }}
-                placeholder="Enter email to claim your spot..."
+                placeholder="Enter your email to start coding..."
                 className={`flex-1 bg-slate-900 border rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-1 text-white placeholder-slate-500 transition-colors ${
                   error
                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
@@ -71,7 +92,7 @@ export default function LandingPage() {
                 onClick={() => {
                   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                   if (!emailRegex.test(userEmail)) {
-                    setError('Please enter a valid email to join the party.');
+                    setError('Please enter a valid email to sign in.');
                     return;
                   }
                   setError('');
@@ -79,11 +100,9 @@ export default function LandingPage() {
                 }}
                 className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-sm font-bold py-3 px-8 rounded-lg transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)] whitespace-nowrap"
               >
-                Join the Campaign
+                Sign In / Register
               </button>
             </div>
-
-            {/* This is the missing piece that actually shows the error text! */}
             {error && (
               <p className="text-sm text-red-400 font-medium ml-1">{error}</p>
             )}
@@ -92,15 +111,19 @@ export default function LandingPage() {
 
         {/* Right Side: Interactive Editor Mockup */}
         <div className="relative">
+          {/* Replaced Gamified Badge with Tech Status Badge */}
           <div className="absolute -top-6 -right-4 bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-2xl z-10 flex items-center gap-3 transform rotate-3">
-            <div className="bg-amber-500/20 p-2 rounded-lg">
-              <span className="text-2xl">🔥</span>
+            <div className="relative flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
             </div>
             <div>
               <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-                Team Streak
+                Database Status
               </p>
-              <p className="text-lg font-bold text-white">Day 4 / 14</p>
+              <p className="text-sm font-bold text-white">
+                PGlite Engine Online
+              </p>
             </div>
           </div>
 
@@ -112,13 +135,13 @@ export default function LandingPage() {
                 <div className="w-3 h-3 rounded-full bg-slate-600"></div>
               </div>
               <span className="text-xs font-mono text-slate-400">
-                quest_04.sql
+                problem_04.sql
               </span>
             </div>
 
             <div className="p-6 font-mono text-sm leading-relaxed">
               <div className="text-slate-500 mb-4 border-l-2 border-emerald-500 pl-3">
-                -- Daily Quest: <br />
+                -- Daily Problem: <br />
                 -- Retrieve all 'customer_id' and 'amount' <br />
                 -- from the payments table where amount is over $50.
               </div>
@@ -138,13 +161,12 @@ export default function LandingPage() {
 
             <div className="bg-[#181825] px-6 py-4 border-t border-slate-700 flex justify-between items-center">
               <span className="text-xs text-emerald-400 font-mono flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
                 Ready to execute
               </span>
-              <button className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 px-4 rounded transition-colors flex items-center gap-2">
+              <button
+                onClick={() => navigate('/auth')}
+                className="bg-white/10 hover:bg-white/20 text-white text-xs font-bold py-2 px-4 rounded transition-colors flex items-center gap-2"
+              >
                 <svg
                   className="w-4 h-4 text-emerald-400"
                   fill="currentColor"
@@ -163,34 +185,35 @@ export default function LandingPage() {
         </div>
       </main>
 
-      {/* --- NEW SECTION: Features & Roadmap --- */}
+      {/* Features & Roadmap Section */}
       <section className="border-t border-slate-800/50 bg-[#141620] py-24 relative overflow-hidden">
-        {/* Subtle background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none"></div>
 
         <div className="container mx-auto px-6 max-w-5xl relative z-10">
-          {/* Core Philosophy Features */}
+          {/* Updated Feature Cards */}
           <div className="grid md:grid-cols-3 gap-8 mb-24 text-center">
+            <div className="p-6 rounded-2xl bg-slate-800/20 border border-slate-700/50">
+              <div className="text-3xl mb-4">📖</div>
+              <h3 className="text-lg font-bold text-white mb-2">
+                Interactive Lessons
+              </h3>
+              <p className="text-sm text-slate-400">
+                Stop reading walls of text. Learn database concepts through
+                hands-on, interactive segments.
+              </p>
+            </div>
+
             <div className="p-6 rounded-2xl bg-slate-800/20 border border-slate-700/50">
               <div className="text-3xl mb-4">🧩</div>
               <h3 className="text-lg font-bold text-white mb-2">
-                Bite-Sized Syntax
+                Guided Problems
               </h3>
               <p className="text-sm text-slate-400">
-                No massive 10-table joins on Day 1. We focus strictly on the
-                fundamental commands until they become muscle memory.
+                Apply your knowledge immediately by running real SQL code to
+                solve practical data problems.
               </p>
             </div>
-            <div className="p-6 rounded-2xl bg-slate-800/20 border border-slate-700/50">
-              <div className="text-3xl mb-4">🤝</div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Team Accountability
-              </h3>
-              <p className="text-sm text-slate-400">
-                Your daily quest completion drives your party's score. Don't
-                learn in a vacuum—learn with a cohort that relies on you.
-              </p>
-            </div>
+
             <div className="p-6 rounded-2xl bg-slate-800/20 border border-slate-700/50">
               <div className="text-3xl mb-4">⚡</div>
               <h3 className="text-lg font-bold text-white mb-2">
@@ -206,7 +229,7 @@ export default function LandingPage() {
           {/* The Roadmap */}
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
-              The Campaign Roadmap
+              The Learning Roadmap
             </h2>
             <p className="text-lg text-slate-400">
               A clear, step-by-step path from absolute beginner to
@@ -218,13 +241,9 @@ export default function LandingPage() {
           <div className="max-w-3xl mx-auto">
             {/* Level 1: Active */}
             <div className="relative pl-8 sm:pl-32 py-6 group">
-              {/* Timeline Line */}
               <div className="absolute left-4 sm:left-[7.5rem] top-0 bottom-0 w-px bg-emerald-500/30 group-last:bg-transparent"></div>
-
-              {/* Timeline Node */}
               <div className="absolute left-2 sm:left-[7.1rem] top-8 w-4 h-4 rounded-full bg-emerald-500 ring-4 ring-[#141620] shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
 
-              {/* Desktop Level Label */}
               <div className="hidden sm:block absolute left-0 top-7 w-20 text-right font-bold text-emerald-400 text-sm uppercase tracking-wider">
                 Level 1
               </div>
@@ -271,19 +290,6 @@ export default function LandingPage() {
                   <h3 className="text-xl font-bold text-slate-300">
                     Aggregation & Math
                   </h3>
-                  <svg
-                    className="w-5 h-5 text-slate-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
                 </div>
                 <p className="text-slate-500 text-sm mb-4">
                   Unlock the ability to summarize massive datasets into
@@ -320,19 +326,6 @@ export default function LandingPage() {
                   <h3 className="text-xl font-bold text-slate-300">
                     The Relational Realm
                   </h3>
-                  <svg
-                    className="w-5 h-5 text-slate-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                    />
-                  </svg>
                 </div>
                 <p className="text-slate-500 text-sm mb-4">
                   Learn how to weave different tables together to answer complex
