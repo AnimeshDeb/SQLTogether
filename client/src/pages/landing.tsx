@@ -28,14 +28,18 @@ export default function LandingPage() {
                 d="M12 21c-4.97 0-9-3.134-9-7a6.98 6.98 0 0 1 1.73-4.57L3 4.5 8.07 6.3A10.36 10.36 0 0 1 12 5.5c1.42 0 2.78.21 4 .58L21 4.5l-1.73 4.93A6.98 6.98 0 0 1 21 14c0 3.866-4.03 7-9 7z"
                 fill="currentColor"
               />
-              {/* Cute closed eyes */}
-              <path
-                d="M8 13.5c.5.5 1.5.5 2 0M14 13.5c.5.5 1.5.5 2 0"
-                stroke="A0A3B1"
-                strokeWidth="2"
-              />
+
+              {/* The Eyes (Solid Circles) */}
+              {/* Note: stroke="none" prevents the global SVG stroke from outlining the dots in dark gray */}
+              <circle cx="9" cy="12.5" r="1.2" fill="#10b981" stroke="none" />
+              <circle cx="15" cy="12.5" r="1.2" fill="#10b981" stroke="none" />
+
               {/* Tiny Nose */}
-              <polygon points="12,15 11,14 13,14" fill="A0A3B1" />
+              <polygon
+                points="12,15 11,14 13,14"
+                fill="#10b981"
+                stroke="none"
+              />
             </svg>
           </div>
           <span className="text-xl font-bold tracking-tight text-white">
@@ -65,9 +69,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg text-slate-400 mb-8 leading-relaxed max-w-lg">
-            Stop reading walls of text. Learn database syntax through hands-on,
-            interactive lessons and apply your knowledge instantly by solving
-            real data problems.
+            Build query muscles, not reading fatigue. Bridge the gap between theory and practice by writing, running, and debugging code directly in your browser.
           </p>
 
           <div className="flex flex-col gap-2 max-w-lg">
@@ -100,7 +102,7 @@ export default function LandingPage() {
                 }}
                 className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-sm font-bold py-3 px-8 rounded-lg transition-colors shadow-[0_0_20px_rgba(16,185,129,0.3)] whitespace-nowrap"
               >
-                Sign In / Register
+                Sign Up / Log In
               </button>
             </div>
             {error && (

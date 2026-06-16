@@ -266,7 +266,7 @@ const SelectLesson: React.FC<LessonModuleProps> = ({
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Now Try It Yourself ➔
+          Start SQL Problems ➔ SELECT
         </button>
       </div>
     </div>
@@ -881,7 +881,7 @@ const WhereLesson: React.FC<LessonModuleProps> = ({ firstQuestId, onComplete, na
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Enter the Arena ➔
+          Start SQL Problems ➔ WHERE 
         </button>
       </div>
     </div>
@@ -1376,7 +1376,7 @@ const OrderByLesson: React.FC<LessonModuleProps> = ({
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Start ORDER BY Quests ➔
+          Start SQL Problems ➔ ORDER BY
         </button>
       </div>
     </div>
@@ -2501,7 +2501,7 @@ const GroupByLesson: React.FC<LessonModuleProps> = ({
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Enter the Arena: Start GROUP BY Quests ➔
+          Start SQL Problems ➔ GROUP BY 
         </button>
       </div>
     </div>
@@ -3513,7 +3513,7 @@ const LeftJoinLesson: React.FC<LessonModuleProps> = ({
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Start LEFT JOIN Quests ➔
+          Start SQL Problems ➔ LEFT JOIN
         </button>
       </div>
     </div>
@@ -4411,7 +4411,7 @@ const InnerJoinLesson: React.FC<LessonModuleProps> = ({
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Start INNER JOIN Quests ➔
+          Start SQL Problems ➔ INNER JOIN
         </button>
       </div>
     </div>
@@ -6288,7 +6288,7 @@ const WindowLesson: React.FC<LessonModuleProps> = ({
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Enter the Arena: Start Window Quests ➔
+          Start SQL Problems ➔ Window Functions 
         </button>
       </div>
     </div>
@@ -7688,7 +7688,7 @@ const CteLesson: React.FC<LessonModuleProps> = ({firstQuestId, onComplete, navig
           }
           className="bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 px-12 rounded-xl transition-all flex justify-center items-center gap-3 shadow-[0_0_20px_rgba(79,70,229,0.3)] text-lg"
         >
-          Start CTE Quests ➔
+          Start SQL Problems ➔ CTE
         </button>
       </div>
     </div>
