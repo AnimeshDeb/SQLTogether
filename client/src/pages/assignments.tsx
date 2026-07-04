@@ -315,7 +315,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase'; // Adjust path if needed
-import { useHomeworkStore, type Homework } from '../store/assignmentsStore';
+import { type Homework } from '../store/assignmentsStore';
 
 export default function Assignments() {
   const navigate = useNavigate();
