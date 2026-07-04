@@ -698,6 +698,7 @@ import { useHomeworkStore, type Homework } from '../store/assignmentsStore';
 import { PGlite } from '@electric-sql/pglite';
 import CodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
+import { supabase } from '../supabase'; 
 
 // --- Explicit Type Definitions ---
 type CellValue = string | number | boolean | null | Date | undefined;
@@ -740,6 +741,21 @@ export default function HomeworkProblem() {
 
   const isPassed: boolean =
     testResults.hasRun && testResults.passed === testResults.total;
+    useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+      
+      // Redirect to home if no session
+      if (error || !session) {
+        navigate('/');
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   // 1. Fetch data if arriving directly via URL
   useEffect(() => {

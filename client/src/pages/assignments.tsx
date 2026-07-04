@@ -310,8 +310,6 @@
 //   );
 // }
 
-
-
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase'; // Adjust path if needed
@@ -335,8 +333,9 @@ export default function Assignments() {
         error: authError,
       } = await supabase.auth.getSession();
       
+      // Redirect to home if no session
       if (authError || !session) {
-        navigate('/auth');
+        navigate('/');
         return;
       }
 
