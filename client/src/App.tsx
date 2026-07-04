@@ -4,6 +4,8 @@ import AuthPage from "./pages/Authpage";
 import Home from "./pages/home";
 import QuestPage from "./pages/quest";
 import Lesson from "./pages/lesson";
+import Assignments from "./pages/assignments";
+import AssignmentsProblem from './pages/assignmentsProblem'
 function App(){
 
 
@@ -19,6 +21,8 @@ function App(){
       <Route path="/home" element={<Home/>}/>
       <Route path="/quest/:id" element={<QuestPage/>}/>
       <Route path="/lesson/:category" element={<Lesson />} />
+      <Route path="/assignments" element={<Assignments/>}/>
+      <Route path="/homework/:id" element={<AssignmentsProblem />} />
 
     </Routes>
     
