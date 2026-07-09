@@ -201,9 +201,12 @@ export default function QuestPage() {
         return;
       }
 
-      const normalizeAndClean = (arr: DBRow[]) =>
-        arr
+      // 🌟 UPDATED: Added an 'enforceOrder' parameter
+      const normalizeAndClean = (arr: DBRow[], enforceOrder: boolean) => {
+        const processedArray = arr
           .map((row) =>
+            // We still want to sort the keys INSIDE the object to ensure 
+            // {a: 1, b: 2} equals {b: 2, a: 1}
             Object.keys(row)
               .sort()
               .reduce((obj, key) => {
@@ -220,11 +223,18 @@ export default function QuestPage() {
                 return obj;
               }, {} as DBRow),
           )
-          .map((row) => JSON.stringify(row))
-          .sort();
+          .map((row) => JSON.stringify(row));
 
-      const actualNormalized = normalizeAndClean(actualRows);
-      const expectedNormalized = normalizeAndClean(expected);
+        // If order matters, return the exact sequence. 
+        // If order doesn't matter, sort both arrays so they match.
+        return enforceOrder ? processedArray : processedArray.sort();
+      };
+
+      // 🌟 Check if this specific quest requires strict row ordering
+      const requiresOrdering = quest.category === 'ORDER BY';
+
+      const actualNormalized = normalizeAndClean(actualRows, requiresOrdering);
+      const expectedNormalized = normalizeAndClean(expected, requiresOrdering);
 
       if (
         JSON.stringify(actualNormalized) === JSON.stringify(expectedNormalized)
