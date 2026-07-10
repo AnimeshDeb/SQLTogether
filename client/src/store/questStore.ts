@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../supabase';
-import { PGlite } from '@electric-sql/pglite';
+import { PGlite, types } from '@electric-sql/pglite'; // 🌟 ADDED 'types' IMPORT
 
 export interface Quest {
   id: string;
@@ -43,8 +43,15 @@ export const useQuestStore = create<QuestStore>((set, get) => ({
 
     set({ isDbBooting: true });
     try {
-      // Boot a fresh, in-memory PGlite instance
-      const pg = new PGlite();
+      // 🌟 BOOT PGLITE WITH CUSTOM PARSERS
+      // This stops JS from converting SQL Dates into timezone-shifted JS Date objects!
+      const pg = new PGlite({
+        parsers: {
+          [types.DATE]: (value: string) => value,
+          [types.TIMESTAMP]: (value: string) => value,
+        }
+      });
+      
       set({ dbInstance: pg, isDbBooting: false });
     } catch (err) {
       console.error("Failed to boot PGlite:", err);
