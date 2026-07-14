@@ -691,14 +691,13 @@
 //     </div>
 //   );
 // }
-
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHomeworkStore, type Homework } from '../store/assignmentsStore';
 import { PGlite } from '@electric-sql/pglite';
 import CodeMirror from '@uiw/react-codemirror';
 import { sql } from '@codemirror/lang-sql';
-import { supabase } from '../supabase'; 
+import { supabase } from '../supabase';
 
 // --- Explicit Type Definitions ---
 type CellValue = string | number | boolean | null | Date | undefined;
@@ -727,7 +726,7 @@ export default function HomeworkProblem() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sourceTables, setSourceTables] = useState<Record<string, RowData[]>>({});
   const [dbReady, setDbReady] = useState<boolean>(false);
-  
+
   // DYNAMIC TEST STATE: Stores the expected data and source table for the failing test case
   const [activeExpectedRows, setActiveExpectedRows] = useState<RowData[]>([]);
   const [activeSourceTable, setActiveSourceTable] = useState<RowData[]>([]);
@@ -736,18 +735,18 @@ export default function HomeworkProblem() {
     passed: number;
     total: number;
     hasRun: boolean;
-    failedTestDetails: { setup: string, actual: RowData[], expected: RowData[] } | null;
+    failedTestDetails: { setup: string; actual: RowData[]; expected: RowData[] } | null;
   }>({ passed: 0, total: 4, hasRun: false, failedTestDetails: null });
 
-  const isPassed: boolean =
-    testResults.hasRun && testResults.passed === testResults.total;
-    useEffect(() => {
+  const isPassed: boolean = testResults.hasRun && testResults.passed === testResults.total;
+
+  useEffect(() => {
     const checkSession = async () => {
       const {
         data: { session },
         error,
       } = await supabase.auth.getSession();
-      
+
       // Redirect to home if no session
       if (error || !session) {
         navigate('/');
@@ -762,23 +761,38 @@ export default function HomeworkProblem() {
     fetchHomework();
   }, [fetchHomework]);
 
-  // 2. Find the specific problem and navigation context, cast to our strict type
+  // 2. Find the specific problem and navigation context
   const quest = useMemo<DetailedHomework | undefined>(() => {
     return homework.find((hw: Homework) => hw.id === Number(id)) as DetailedHomework | undefined;
   }, [homework, id]);
 
-  // Dynamically derive the correct column order for ANY problem from the Expected Output
+  // 🌟 DYNAMIC GRADING FLAG: Checks if 'ORDER BY' is required
+  const requiresOrder = useMemo(() => {
+    if (!quest?.topics) return false;
+    return quest.topics.some((topic: string) => topic.toLowerCase().includes('order by'));
+  }, [quest]);
+
+  // Dynamically derive the correct column order for EXPECTED tables
   const orderedKeys = useMemo(() => {
-    const rows = activeExpectedRows.length > 0 ? activeExpectedRows : (quest?.expected_output || []);
+    const rows = activeExpectedRows.length > 0 ? activeExpectedRows : quest?.expected_output || [];
     if (rows.length > 0) {
       return Object.keys(rows[0]);
     }
     return [];
   }, [quest, activeExpectedRows]);
 
+  // Dynamically derive actual keys for YOUR RESULT table
+  const actualKeys = useMemo(() => {
+    if (outputRows && outputRows.length > 0) {
+      return Object.keys(outputRows[0]).filter((k) => k !== '_isError');
+    }
+    return orderedKeys;
+  }, [outputRows, orderedKeys]);
+
   const sourceTableKeys = useMemo(() => {
     if (activeSourceTable.length > 0) return Object.keys(activeSourceTable[0]);
-    if (quest?.original_source_table && quest.original_source_table.length > 0) return Object.keys(quest.original_source_table[0]);
+    if (quest?.original_source_table && quest.original_source_table.length > 0)
+      return Object.keys(quest.original_source_table[0]);
     return [];
   }, [quest, activeSourceTable]);
 
@@ -789,17 +803,11 @@ export default function HomeworkProblem() {
       .sort((a: Homework, b: Homework) => a.id - b.id);
   }, [homework, quest]);
 
-  const currentIndex: number = currentWeekAssignments.findIndex(
-    (hw: Homework) => hw.id === Number(id),
-  );
+  const currentIndex: number = currentWeekAssignments.findIndex((hw: Homework) => hw.id === Number(id));
   const hasPrevious: boolean = currentIndex > 0;
   const hasNext: boolean = currentIndex < currentWeekAssignments.length - 1;
-  const prevQuest: Homework | null = hasPrevious
-    ? currentWeekAssignments[currentIndex - 1]
-    : null;
-  const nextQuest: Homework | null = hasNext
-    ? currentWeekAssignments[currentIndex + 1]
-    : null;
+  const prevQuest: Homework | null = hasPrevious ? currentWeekAssignments[currentIndex - 1] : null;
+  const nextQuest: Homework | null = hasNext ? currentWeekAssignments[currentIndex + 1] : null;
 
   // --- INSTANT LOADING OPTIMIZATION ---
   useEffect(() => {
@@ -816,9 +824,7 @@ export default function HomeworkProblem() {
 
   // 3. Reset states and Initialize Persistent DB
   useEffect(() => {
-    const savedCode: string | null = localStorage.getItem(
-      `homework_${id}_code`,
-    );
+    const savedCode: string | null = localStorage.getItem(`homework_${id}_code`);
     setUserCode(savedCode || '-- Write your SQL query here\n');
     setOutputRows(null);
     setErrorMessage(null);
@@ -832,9 +838,9 @@ export default function HomeworkProblem() {
     const seedDb = async (): Promise<void> => {
       try {
         if (!dbRef.current) {
-            dbRef.current = new PGlite();
+          dbRef.current = new PGlite();
         }
-        
+
         await dbRef.current.exec(`DROP SCHEMA public CASCADE; CREATE SCHEMA public;`);
         await dbRef.current.exec(quest.setup_sql);
 
@@ -847,10 +853,10 @@ export default function HomeworkProblem() {
     seedDb();
 
     return () => {
-        if (dbRef.current) {
-            dbRef.current.close();
-            dbRef.current = null;
-        }
+      if (dbRef.current) {
+        dbRef.current.close();
+        dbRef.current = null;
+      }
     };
   }, [id, quest]);
 
@@ -870,44 +876,133 @@ export default function HomeworkProblem() {
   // --- ONE-TO-ONE NORMALIZATION ---
   const normalizeValue = (val: CellValue, colName?: string): string => {
     if (val === null || val === undefined) return 'null';
-    
-    // Check schema type
+
     let isDateType = false;
     if (colName && quest) {
-        Object.values(quest.table_schemas).forEach(schema => {
-            if (schema[colName] === 'date') isDateType = true;
-        });
+      Object.values(quest.table_schemas).forEach((schema) => {
+        if (schema[colName] === 'date') isDateType = true;
+      });
     }
 
     if (val instanceof Date) {
-        const d = val;
-        const pad = (n: number) => n.toString().padStart(2, '0');
+      const d = val;
+      const pad = (n: number) => n.toString().padStart(2, '0');
 
-        if (isDateType) {
-            // DATE columns default to UTC midnight. Local getters shift them back a day in the US.
-            return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
-        } else {
-            // TIMESTAMP columns default to local time. UTC getters shift them forward 4-5 hours.
-            const yyyy = d.getFullYear();
-            const mm = pad(d.getMonth() + 1);
-            const dd = pad(d.getDate());
-            const hh = pad(d.getHours());
-            const min = pad(d.getMinutes());
-            const ss = pad(d.getSeconds());
-            return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-        }
+      if (isDateType) {
+        return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+      } else {
+        const yyyy = d.getFullYear();
+        const mm = pad(d.getMonth() + 1);
+        const dd = pad(d.getDate());
+        const hh = pad(d.getHours());
+        const min = pad(d.getMinutes());
+        const ss = pad(d.getSeconds());
+        return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+      }
     }
 
-    // Otherwise, return string as-is
     return String(val);
   };
 
-  const stringifyRow = (row: RowData): string => {
-    const normalizedRow: Record<string, string> = {};
-    Object.keys(row).forEach((key: string) => {
-        normalizedRow[key] = normalizeValue(row[key], key);
-    });
-    return JSON.stringify(normalizedRow, Object.keys(normalizedRow).sort());
+  // 🌟 DYNAMIC GRADING ENGINE
+ // 🌟 DYNAMIC GRADING ENGINE
+  // strictMode: if true, checks for exact column matches. if false, ignores extra columns.
+  // 🌟 DYNAMIC GRADING ENGINE
+  // strictMode: if true, forces strict column count, exact column order, and no extra columns.
+  const checkAnswer = (
+    actual: RowData[],
+    expected: RowData[],
+    strictMode: boolean = false,
+  ): boolean => {
+    if (!actual || actual.length === 0) return false;
+    if (actual.length !== expected.length) return false;
+
+    // 1. STRICT COLUMN & ORDER CHECK (Only runs on Submit)
+    if (strictMode) {
+      const expKeys = Object.keys(expected[0]);
+      const actKeys = Object.keys(actual[0]);
+
+      // This forces the column names to be identical AND the order to be identical
+      if (JSON.stringify(expKeys) !== JSON.stringify(actKeys)) {
+        return false;
+      }
+    }
+
+    // 2. DATA VALIDATION LOOP
+    let isStrictMatch = true;
+    for (let i = 0; i < expected.length; i++) {
+      const expRow = expected[i];
+      const actRow = actual[i];
+
+      // We only care about the keys that are in the Expected Output
+      for (const key of Object.keys(expRow)) {
+        if (
+          normalizeValue(expRow[key] as CellValue, key) !==
+          normalizeValue(actRow[key] as CellValue, key)
+        ) {
+          isStrictMatch = false;
+          break;
+        }
+      }
+      if (!isStrictMatch) break;
+    }
+
+    // Return strict pass if Order By is in topics, OR if it passed the strict loop
+    if (requiresOrder || isStrictMatch) return isStrictMatch;
+
+    // 3. LOOSE CHECK (If order is NOT required and NOT in strictMode)
+    const expectedKeys = Object.keys(expected[0] || {});
+
+    const stringifyRequired = (row: RowData) => {
+      const subset: Record<string, string> = {};
+      expectedKeys.forEach((key) => {
+        subset[key] = normalizeValue(row[key] as CellValue, key);
+      });
+      return JSON.stringify(subset, Object.keys(subset).sort());
+    };
+
+    const expectedStrings = expected.map(stringifyRequired).sort();
+    const actualStrings = actual.map(stringifyRequired).sort();
+
+    return JSON.stringify(expectedStrings) === JSON.stringify(actualStrings);
+  };
+  // 🌟 DYNAMIC ROW FLAGGING
+  const flagErrorRows = (actual: RowData[], expected: RowData[]): OutputRow[] => {
+    const expectedKeys = expected.length > 0 ? Object.keys(expected[0]) : [];
+
+    if (requiresOrder) {
+      // Strict Index Matching
+      return actual.map((row, i) => {
+        let isError = false;
+        const expRow = expected[i];
+        if (!expRow) {
+          isError = true;
+        } else {
+          for (const key of expectedKeys) {
+            if (normalizeValue(row[key], key) !== normalizeValue(expRow[key] as CellValue, key)) {
+              isError = true;
+              break;
+            }
+          }
+        }
+        return { ...row, _isError: isError };
+      });
+    } else {
+      // Loose Matching (Is this row anywhere in expected?)
+      const stringifyRequired = (row: RowData) => {
+        const subset: Record<string, string> = {};
+        expectedKeys.forEach(key => {
+          subset[key] = normalizeValue(row[key] as CellValue, key);
+        });
+        return JSON.stringify(subset, Object.keys(subset).sort());
+      };
+
+      const expectedStrings = expected.map(stringifyRequired);
+      return actual.map((row) => {
+        const rowStr = stringifyRequired(row);
+        return { ...row, _isError: !expectedStrings.includes(rowStr) };
+      });
+    }
   };
 
   const runCode = async (isSubmit: boolean): Promise<void> => {
@@ -915,8 +1010,8 @@ export default function HomeworkProblem() {
 
     setIsExecuting(true);
     setErrorMessage(null);
-    
-    // Always clear debug panels on any run action
+
+    // Clear debug panels
     setOutputRows(null);
     setTestResults({ passed: 0, total: 4, hasRun: false, failedTestDetails: null });
     setActiveExpectedRows([]);
@@ -928,40 +1023,31 @@ export default function HomeworkProblem() {
       const result = await dbRef.current.query(userCode);
       const actualRows = result.rows as RowData[];
 
-      // If just running, only output rows and return
       if (!isSubmit) {
         setOutputRows(actualRows as OutputRow[]);
         setIsExecuting(false);
         return;
       }
 
-      // If submitting, execute test logic
       const expectedRows = quest.expected_output as RowData[];
-      const expectedStrings: string[] = expectedRows.map(stringifyRow);
-      
       let passedCount: number = 0;
       let failureData = null;
-      
-      const actualStrings: string[] = actualRows.map(stringifyRow);
-      const isVisiblePass: boolean =
-        actualRows.length === expectedRows.length &&
-        actualStrings.every((r: string) => expectedStrings.includes(r)) &&
-        expectedStrings.every((r: string) => actualStrings.includes(r));
 
+const isVisiblePass: boolean = checkAnswer(actualRows, expectedRows, isSubmit);
       if (isVisiblePass) {
         passedCount++;
         setOutputRows(actualRows as OutputRow[]);
       } else {
         const sourceRes = await dbRef.current.query(`SELECT * FROM "${tableName}"`);
-        failureData = { setup: "Primary Problem Data", actual: actualRows, expected: expectedRows };
+        failureData = { setup: 'Primary Problem Data', actual: actualRows, expected: expectedRows };
         setActiveExpectedRows(expectedRows);
         setActiveSourceTable(sourceRes.rows as RowData[]);
-        setOutputRows(actualRows.map(row => ({ ...row, _isError: !expectedStrings.includes(stringifyRow(row)) })));
+        setOutputRows(flagErrorRows(actualRows, expectedRows));
       }
 
       const runHiddenTest = async (
         setup: string,
-        expected: RowData[],
+        expected: RowData[]
       ): Promise<{ success: boolean; actual: RowData[]; sourceTable: RowData[] }> => {
         if (!setup) return { success: false, actual: [], sourceTable: [] };
         try {
@@ -971,19 +1057,13 @@ export default function HomeworkProblem() {
           const res = await testDb.query(userCode);
 
           const actRows = res.rows as RowData[];
-          const expStrs: string[] = expected.map(stringifyRow);
-          const actStrs: string[] = actRows.map(stringifyRow);
           await testDb.close();
 
-          const success = (
-            actRows.length === expected.length &&
-            actStrs.every((r: string) => expStrs.includes(r)) &&
-            expStrs.every((r: string) => actStrs.includes(r))
-          );
-          
+          const success = checkAnswer(actRows, expected);
+
           return { success, actual: actRows, sourceTable: sourceRes.rows as RowData[] };
         } catch (e: unknown) {
-          console.log("Error at assignmentsProblem: ", e);
+          console.log('Error at assignmentsProblem: ', e);
           return { success: false, actual: [], sourceTable: [] };
         }
       };
@@ -991,7 +1071,7 @@ export default function HomeworkProblem() {
       const tests = [
         { setup: quest.test_setup_sql_1, exp: quest.test_expected_output_1 as RowData[] },
         { setup: quest.test_setup_sql_2, exp: quest.test_expected_output_2 as RowData[] },
-        { setup: quest.test_setup_sql_3, exp: quest.test_expected_output_3 as RowData[] }
+        { setup: quest.test_setup_sql_3, exp: quest.test_expected_output_3 as RowData[] },
       ];
 
       for (const test of tests) {
@@ -1002,8 +1082,7 @@ export default function HomeworkProblem() {
           failureData = { setup: test.setup, actual: result.actual, expected: test.exp };
           setActiveExpectedRows(test.exp);
           setActiveSourceTable(result.sourceTable);
-          const expStrs = test.exp.map(stringifyRow);
-          setOutputRows(result.actual.map(row => ({ ...row, _isError: !expStrs.includes(stringifyRow(row)) })));
+          setOutputRows(flagErrorRows(result.actual, test.exp));
         }
       }
 
@@ -1011,11 +1090,10 @@ export default function HomeworkProblem() {
         passed: passedCount,
         total: 4,
         hasRun: true,
-        failedTestDetails: failureData
+        failedTestDetails: failureData,
       });
     } catch (error: unknown) {
-      const msg: string =
-        error instanceof Error ? error.message : 'Syntax Error in SQL Query';
+      const msg: string = error instanceof Error ? error.message : 'Syntax Error in SQL Query';
       setErrorMessage(msg);
       setTestResults({ passed: 0, total: 4, hasRun: true, failedTestDetails: null });
     } finally {
@@ -1055,31 +1133,18 @@ export default function HomeworkProblem() {
         <div className="w-full xl:w-1/2 flex flex-col gap-6">
           <div className="bg-[#141620] border border-slate-800 rounded-xl p-6 shadow-lg relative overflow-hidden">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-1">
-              WEEK {quest.week}{' '}
-              <span className="w-1 h-1 bg-slate-600 rounded-full"></span>{' '}
-              {quest.difficulty}
+              WEEK {quest.week} <span className="w-1 h-1 bg-slate-600 rounded-full"></span> {quest.difficulty}
             </span>
-            <h1 className="text-2xl font-bold text-white mb-4">
-              {quest.title}
-            </h1>
-            <p className="text-slate-400 leading-relaxed text-sm whitespace-pre-wrap mb-6">
-              {quest.prompt}
-            </p>
+            <h1 className="text-2xl font-bold text-white mb-4">{quest.title}</h1>
+            <p className="text-slate-400 leading-relaxed text-sm whitespace-pre-wrap mb-6">{quest.prompt}</p>
           </div>
 
           <div className="bg-[#141620] border border-slate-800 rounded-xl p-6 shadow-lg min-h-[300px]">
-            <h2 className="text-xs font-bold text-emerald-500 uppercase mb-4">
-              Schema Explorer
-            </h2>
+            <h2 className="text-xs font-bold text-emerald-500 uppercase mb-4">Schema Explorer</h2>
 
             {Object.entries(quest.table_schemas).map(([tableName, columns]) => (
-              <div
-                key={tableName}
-                className="mb-6 border border-slate-700/50 rounded-lg overflow-hidden"
-              >
-                <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-emerald-400">
-                  {tableName}
-                </div>
+              <div key={tableName} className="mb-6 border border-slate-700/50 rounded-lg overflow-hidden">
+                <div className="bg-slate-800/80 px-4 py-2 text-xs font-bold text-emerald-400">{tableName}</div>
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-900/80 text-slate-500">
                     <tr>
@@ -1088,21 +1153,12 @@ export default function HomeworkProblem() {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(columns).map(
-                      ([colName, colType]) => (
-                        <tr
-                          key={colName}
-                          className="border-t border-slate-800/50"
-                        >
-                          <td className="px-4 py-2 text-slate-300 font-mono">
-                            {colName}
-                          </td>
-                          <td className="px-4 py-2 text-slate-500 font-mono">
-                            {colType}
-                          </td>
-                        </tr>
-                      ),
-                    )}
+                    {Object.entries(columns).map(([colName, colType]) => (
+                      <tr key={colName} className="border-t border-slate-800/50">
+                        <td className="px-4 py-2 text-slate-300 font-mono">{colName}</td>
+                        <td className="px-4 py-2 text-slate-500 font-mono">{colType}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1110,13 +1166,9 @@ export default function HomeworkProblem() {
           </div>
 
           <div className="bg-[#141620] border border-slate-800 rounded-xl p-6 shadow-lg">
-            <h2 className="text-xs font-bold text-cyan-400 uppercase mb-4">
-              Source Tables Data Snippet
-            </h2>
+            <h2 className="text-xs font-bold text-cyan-400 uppercase mb-4">Source Tables Data Snippet</h2>
             {Object.keys(sourceTables).length === 0 ? (
-              <div className="text-slate-600 font-mono text-xs italic">
-                No matching mock records found.
-              </div>
+              <div className="text-slate-600 font-mono text-xs italic">No matching mock records found.</div>
             ) : (
               Object.entries(sourceTables).map(([tableName, rows]) => (
                 <div
@@ -1132,84 +1184,62 @@ export default function HomeworkProblem() {
                         <tr>
                           {rows.length > 0 &&
                             Object.keys(rows[0]).map((colName: string) => (
-                              <th
-                                key={colName}
-                                className="px-4 py-2 font-medium font-mono"
-                              >
+                              <th key={colName} className="px-4 py-2 font-medium font-mono">
                                 {colName}
                               </th>
                             ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/40">
-                        {rows.map(
-                          (
-                            row: RowData,
-                            rowIndex: number,
-                          ) => (
-                            <tr key={rowIndex}>
-                              {Object.values(row).map(
-                                (val: CellValue, colIndex: number) => {
-                                  const colName = Object.keys(row)[colIndex];
-                                  return (
-                                    <td
-                                      key={colIndex}
-                                      className="px-4 py-2 text-slate-300 font-mono whitespace-nowrap"
-                                    >
-                                      {val !== null ? (
-                                        normalizeValue(val, colName)
-                                      ) : (
-                                        <span className="text-slate-600 italic">
-                                          null
-                                        </span>
-                                      )}
-                                    </td>
-                                  );
-                                },
-                              )}
-                            </tr>
-                          ),
-                        )}
+                        {rows.map((row: RowData, rowIndex: number) => (
+                          <tr key={rowIndex}>
+                            {Object.values(row).map((val: CellValue, colIndex: number) => {
+                              const colName = Object.keys(row)[colIndex];
+                              return (
+                                <td key={colIndex} className="px-4 py-2 text-slate-300 font-mono whitespace-nowrap">
+                                  {val !== null ? (
+                                    normalizeValue(val, colName)
+                                  ) : (
+                                    <span className="text-slate-600 italic">null</span>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
                 </div>
               ))
             )}
-            
-            <h2 className="text-xs font-bold text-amber-500 uppercase mt-8 mb-4">
-              Expected Output Shape
-            </h2>
+
+            <h2 className="text-xs font-bold text-amber-500 uppercase mt-8 mb-4">Expected Output Shape</h2>
             <div className="border border-slate-700/50 rounded-lg overflow-hidden">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-900/80 text-slate-500">
                   <tr>
                     {orderedKeys.map((col: string) => (
-                        <th key={col} className="px-4 py-2 font-medium">
-                          {col}
-                        </th>
+                      <th key={col} className="px-4 py-2 font-medium">
+                        {col}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50 bg-[#0f111a]/50">
-                  {quest.expected_output
-                    .slice(0, 5)
-                    .map((row: Record<string, unknown>, i: number) => (
-                      <tr key={i}>
-                        {orderedKeys.map((col: string, j: number) => (
-                          <td
-                            key={j}
-                            className="px-4 py-2 text-slate-400 font-mono"
-                          >
-                            {row[col] !== null ? (
-                              normalizeValue(row[col] as CellValue, col)
-                            ) : (
-                              <span className="text-slate-600 italic">null</span>
-                            )}
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                  {quest.expected_output.slice(0, 5).map((row: Record<string, unknown>, i: number) => (
+                    <tr key={i}>
+                      {orderedKeys.map((col: string, j: number) => (
+                        <td key={j} className="px-4 py-2 text-slate-400 font-mono">
+                          {row[col] !== null ? (
+                            normalizeValue(row[col] as CellValue, col)
+                          ) : (
+                            <span className="text-slate-600 italic">null</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1219,9 +1249,7 @@ export default function HomeworkProblem() {
         <div className="w-full xl:w-1/2 flex flex-col gap-6">
           <div className="bg-[#141620] border border-slate-800 rounded-xl overflow-hidden h-[400px] flex flex-col shadow-lg flex-none">
             <div className="bg-slate-800/50 px-4 py-3 flex justify-between items-center border-b border-slate-800">
-              <span className="text-xs font-bold text-slate-400 uppercase">
-                Editor
-              </span>
+              <span className="text-xs font-bold text-slate-400 uppercase">Editor</span>
               <div className="flex gap-3">
                 <button
                   onClick={() => runCode(false)}
@@ -1240,7 +1268,7 @@ export default function HomeworkProblem() {
               </div>
             </div>
             <div className="flex-1 overflow-hidden">
-                <CodeMirror
+              <CodeMirror
                 value={userCode}
                 height="100%"
                 minHeight="100%"
@@ -1248,27 +1276,23 @@ export default function HomeworkProblem() {
                 extensions={[sql()]}
                 onChange={handleCodeChange}
                 className="text-sm font-mono h-full"
-                />
+              />
             </div>
           </div>
 
           <div
             className={`bg-[#141620] border ${
-              isPassed
-                ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
-                : 'border-slate-800'
+              isPassed ? 'border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.15)]' : 'border-slate-800'
             } rounded-xl p-6 flex-1 flex flex-col relative overflow-hidden shadow-lg`}
           >
             {isExecuting && (
-                <div className="absolute inset-0 bg-[#0f111a]/90 flex items-center justify-center z-50 text-emerald-500 font-bold animate-pulse">
-                    Validating...
-                </div>
+              <div className="absolute inset-0 bg-[#0f111a]/90 flex items-center justify-center z-50 text-emerald-500 font-bold animate-pulse">
+                Validating...
+              </div>
             )}
-            
+
             <div className="flex justify-between items-start mb-4 flex-none">
-              <h2 className="text-xs font-bold text-slate-500 uppercase">
-                Output
-              </h2>
+              <h2 className="text-xs font-bold text-slate-500 uppercase">Output</h2>
 
               {testResults.hasRun && !isPassed && (
                 <div className="text-rose-400 text-xs font-bold bg-rose-500/10 px-3 py-1.5 rounded border border-rose-500/20">
@@ -1278,18 +1302,14 @@ export default function HomeworkProblem() {
 
               {isPassed && (
                 <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/30 px-4 py-2 rounded-lg z-10">
-                  <span className="text-emerald-400 font-black">
-                    PASSED ALL TESTS
-                  </span>
+                  <span className="text-emerald-400 font-black">PASSED ALL TESTS</span>
                 </div>
               )}
             </div>
 
             <div className="flex-1 overflow-auto">
               {errorMessage && (
-                <div className="text-rose-400 font-mono text-sm mb-4 whitespace-pre-wrap">
-                  ERROR: {errorMessage}
-                </div>
+                <div className="text-rose-400 font-mono text-sm mb-4 whitespace-pre-wrap">ERROR: {errorMessage}</div>
               )}
 
               {/* FAILED HIDDEN TEST HEADER */}
@@ -1297,45 +1317,46 @@ export default function HomeworkProblem() {
                 <div className="mb-4 p-4 bg-rose-900/10 border border-rose-500/30 rounded-lg">
                   <h3 className="text-xs font-bold text-rose-500 uppercase mb-2">Failed Hidden Test Setup</h3>
                   <div className="text-xs text-rose-400">
-                    Your query returned {testResults.failedTestDetails.actual.length} rows, but expected {testResults.failedTestDetails.expected.length}.
+                    Your query returned {testResults.failedTestDetails.actual.length} rows, but expected{' '}
+                    {testResults.failedTestDetails.expected.length}.
                   </div>
                 </div>
               )}
 
               {outputRows && (
                 <div className="mb-8">
-                <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">Your Result</h3>
-                <table className="w-full text-left text-xs border border-slate-700/50">
-                  <thead className="bg-slate-900/80 text-slate-500">
-                    <tr>
-                      {orderedKeys.map((col: string) => (
-                        <th key={col} className="px-4 py-2">
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {outputRows.map((r: OutputRow, i: number) => (
-                      <tr
-                        key={i}
-                        className={`border-t border-slate-800/50 ${
-                          r._isError ? 'bg-rose-500/20 text-rose-300' : ''
-                        }`}
-                      >
-                        {orderedKeys.map((col: string) => (
-                          <td key={col} className="px-4 py-2 font-mono">
-                            {r[col] !== null ? (
-                              normalizeValue(r[col], col)
-                            ) : (
-                              <span className="text-slate-600 italic">null</span>
-                            )}
-                          </td>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase mb-2">Your Result</h3>
+                  <table className="w-full text-left text-xs border border-slate-700/50">
+                    <thead className="bg-slate-900/80 text-slate-500">
+                      <tr>
+                        {actualKeys.map((col: string) => (
+                          <th key={col} className="px-4 py-2">
+                            {col}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {outputRows.map((r: OutputRow, i: number) => (
+                        <tr
+                          key={i}
+                          className={`border-t border-slate-800/50 ${
+                            r._isError ? 'bg-rose-500/20 text-rose-300' : ''
+                          }`}
+                        >
+                          {actualKeys.map((col: string) => (
+                            <td key={col} className="px-4 py-2 font-mono">
+                              {r[col] !== null && r[col] !== undefined ? (
+                                normalizeValue(r[col], col)
+                              ) : (
+                                <span className="text-slate-600 italic">null</span>
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
 
@@ -1345,12 +1366,22 @@ export default function HomeworkProblem() {
                   <h3 className="text-xs font-bold text-cyan-400 uppercase mb-2">Test Case Source Table</h3>
                   <table className="w-full text-left text-xs border border-cyan-700/30">
                     <thead className="bg-cyan-900/20 text-cyan-500">
-                      <tr>{sourceTableKeys.map((col: string) => <th key={col} className="px-4 py-2">{col}</th>)}</tr>
+                      <tr>
+                        {sourceTableKeys.map((col: string) => (
+                          <th key={col} className="px-4 py-2">
+                            {col}
+                          </th>
+                        ))}
+                      </tr>
                     </thead>
                     <tbody className="bg-cyan-900/5">
                       {activeSourceTable.map((r, i) => (
                         <tr key={i} className="text-slate-400">
-                          {sourceTableKeys.map(col => <td key={col} className="px-4 py-2 font-mono">{normalizeValue(r[col], col)}</td>)}
+                          {sourceTableKeys.map((col) => (
+                            <td key={col} className="px-4 py-2 font-mono">
+                              {normalizeValue(r[col], col)}
+                            </td>
+                          ))}
                         </tr>
                       ))}
                     </tbody>
@@ -1361,24 +1392,50 @@ export default function HomeworkProblem() {
               {/* DYNAMIC EXPECTED RESULT TABLE */}
               {testResults.hasRun && !isPassed && (
                 <div className="mt-4">
-                  <h3 className="text-xs font-bold text-emerald-500 uppercase mb-2">Correct Result (Missing Rows Highlighted)</h3>
+                  <h3 className="text-xs font-bold text-emerald-500 uppercase mb-2">
+                    Correct Result (Missing Rows Highlighted)
+                  </h3>
                   <table className="w-full text-left text-xs border border-emerald-700/30">
                     <thead className="bg-emerald-900/20 text-emerald-500">
-                       <tr>
+                      <tr>
                         {orderedKeys.map((col: string) => (
-                          <th key={col} className="px-4 py-2">{col}</th>
+                          <th key={col} className="px-4 py-2">
+                            {col}
+                          </th>
                         ))}
-                       </tr>
+                      </tr>
                     </thead>
                     <tbody className="bg-emerald-900/5">
                       {activeExpectedRows.map((r: Record<string, unknown>, i: number) => {
-                         const rowStr = stringifyRow(r as RowData);
-                         const isPresent = outputRows?.some(or => stringifyRow(or) === rowStr);
-                         return (
-                            <tr key={i} className={`${!isPresent ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400'}`}>
-                               {orderedKeys.map((col: string) => <td key={col} className="px-4 py-2 font-mono">{normalizeValue(r[col] as CellValue, col)}</td>)}
-                            </tr>
-                         )
+                        // 🌟 DYNAMIC HIGHLIGHTING: Strict index if required, else loose existence check
+                        const isPresent = requiresOrder
+                          ? outputRows &&
+                            outputRows[i] &&
+                            Object.keys(r).every(
+                              (key) =>
+                                normalizeValue(outputRows[i][key] as CellValue, key) ===
+                                normalizeValue(r[key] as CellValue, key)
+                            )
+                          : outputRows?.some((or) =>
+                              Object.keys(r).every(
+                                (key) =>
+                                  normalizeValue(or[key] as CellValue, key) ===
+                                  normalizeValue(r[key] as CellValue, key)
+                              )
+                            );
+
+                        return (
+                          <tr
+                            key={i}
+                            className={`${!isPresent ? 'bg-rose-500/20 text-rose-300' : 'text-slate-400'}`}
+                          >
+                            {orderedKeys.map((col: string) => (
+                              <td key={col} className="px-4 py-2 font-mono">
+                                {normalizeValue(r[col] as CellValue, col)}
+                              </td>
+                            ))}
+                          </tr>
+                        );
                       })}
                     </tbody>
                   </table>
